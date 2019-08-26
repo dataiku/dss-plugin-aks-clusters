@@ -10,7 +10,7 @@
     "params": [
         {
             "name": "connectionInfo",
-            "label" : "Credentials",
+            "label" : "Connection",
             "type": "PRESET",
             "parameterSetId" : "connection-info",
             "mandatory" : true
@@ -23,7 +23,7 @@
         },
         {
             "name": "cluster",
-            "label" : "Cluster name",
+            "label" : "AKS Cluster name",
             "description" : "If different from the DSS cluster name",
             "type": "STRING",
             "mandatory" : true

@@ -1,8 +1,8 @@
 {
     "meta" : {
         "label" : "Node pool",
-        "description" : "Configuration for a node pool",
-        "icon" : "icon-magic"
+        "description" : "Configuration for an AKS node pool",
+        "icon" : "icon-tasks"
     },
     
     "overridable" : false,
@@ -13,15 +13,30 @@
 
     "params": [
         {
+            "name": "vmSize",
+            "label": "Machine type",
+            "description": "Azure VM size for the nodes. See Azure documentation for available VM sizes.",
+            "type": "STRING",
+            "mandatory" : true,
+            "defaultValue" : "Standard_B8ms"
+        },
+        {
+            "name": "osDiskSizeGb",
+            "label": "Disk size",
+            "description": "Disk size for the nodes (leave 0 for the default by machine type)",
+            "type": "INT",
+            "mandatory" : false
+        },
+        {
             "name": "numNodes",
-            "label": "Number of nodes",
+            "label": "Default number of nodes",
             "type": "INT",
             "mandatory" : true,
             "defaultValue" : 3
         },
         {
             "name": "autoScaling",
-            "label": "Node auto-scaling",
+            "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",
             "mandatory" : true,
             "defaultValue" : false
@@ -43,12 +58,6 @@
             "visibilityCondition" : "model.autoScaling"
         },
         {
-            "name": "vmSize",
-            "label": "Type of VM",
-            "type": "STRING",
-            "mandatory" : false
-        },
-        {
             "name": "subnet",
             "label" : "VNet Subnet",
             "description" : "Subnet of a VNet to use for the cluster",
@@ -61,13 +70,6 @@
             "description" : "Virtual network of the subnet, if subnet is not a full resource path",
             "type": "STRING",
             "mandatory" : true
-        },
-        {
-            "name": "osDiskSizeGb",
-            "label": "Disk size",
-            "description": "Disk size for the nodes (leave 0 for default)",
-            "type": "INT",
-            "mandatory" : false
         }
     ]
 }
