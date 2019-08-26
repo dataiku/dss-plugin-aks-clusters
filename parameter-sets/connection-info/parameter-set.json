@@ -1,0 +1,40 @@
+{
+    "meta" : {
+        "label" : "Connection info",
+        "description" : "Preset",
+        "icon" : "icon-puzzle-piece"
+    },
+    
+    "overridable" : false,
+    "inlinable" : true,
+
+    "pluginParams": [
+        {
+            "name": "password",
+            "label": "Password",
+            "type": "STRING",
+            "mandatory" : false
+        }
+    ],
+
+    "params": [
+        {
+            "name": "subscriptionId",
+            "label": "Subscription ID",
+            "type": "STRING",
+            "mandatory" : false
+        },
+        {
+            "name": "clientId",
+            "label": "Client ID",
+            "type": "STRING",
+            "mandatory" : false
+        },
+        {
+            "name": "tenantId",
+            "label": "Tenant ID",
+            "type": "STRING",
+            "mandatory" : false
+        }
+    ]
+}

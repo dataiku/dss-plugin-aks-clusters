@@ -1,0 +1,73 @@
+{
+    "meta" : {
+        "label" : "Node pool",
+        "description" : "Configuration for a node pool",
+        "icon" : "icon-magic"
+    },
+    
+    "overridable" : false,
+    "inlinable" : true,
+    
+    "pluginParams": [
+    ],
+
+    "params": [
+        {
+            "name": "numNodes",
+            "label": "Number of nodes",
+            "type": "INT",
+            "mandatory" : true,
+            "defaultValue" : 3
+        },
+        {
+            "name": "autoScaling",
+            "label": "Node auto-scaling",
+            "type": "BOOLEAN",
+            "mandatory" : true,
+            "defaultValue" : false
+        },
+        {
+            "name": "minNumNodes",
+            "label": "Min number of nodes",
+            "type": "INT",
+            "mandatory" : true,
+            "defaultValue" : 2,
+            "visibilityCondition" : "model.autoScaling"
+        },
+        {
+            "name": "maxNumNodes",
+            "label": "Max number of nodes",
+            "type": "INT",
+            "mandatory" : true,
+            "defaultValue" : 5,
+            "visibilityCondition" : "model.autoScaling"
+        },
+        {
+            "name": "vmSize",
+            "label": "Type of VM",
+            "type": "STRING",
+            "mandatory" : false
+        },
+        {
+            "name": "subnet",
+            "label" : "VNet Subnet",
+            "description" : "Subnet of a VNet to use for the cluster",
+            "type": "STRING",
+            "mandatory" : true
+        },
+        {
+            "name": "vnet",
+            "label" : "Virtual network",
+            "description" : "Virtual network of the subnet, if subnet is not a full resource path",
+            "type": "STRING",
+            "mandatory" : true
+        },
+        {
+            "name": "osDiskSizeGb",
+            "label": "Disk size",
+            "description": "Disk size for the nodes (leave 0 for default)",
+            "type": "INT",
+            "mandatory" : false
+        }
+    ]
+}

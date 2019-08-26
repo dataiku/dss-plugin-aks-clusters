@@ -1,0 +1,3 @@
+azure-mgmt-containerservice
+azure-mgmt-authorization
+PyYAML

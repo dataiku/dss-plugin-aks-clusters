@@ -1,0 +1,31 @@
+{
+    "meta": {
+        "label": "Inspect node pools",
+        "description": "Inspect the node pools of the cluster",
+        "icon": "icon-search"
+    },
+
+    "impersonate": false,
+
+    "permissions": [],
+
+    "resultType": "HTML",
+
+    "resultLabel": "pools",
+    "extension": "html",
+    "mimeType": "text/html",
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ],
+
+    "params": [
+        {
+            "name": "clusterId",
+            "label": "Cluster",
+            "type": "CLUSTER",
+            "description": "Cluster (in DSS)",
+            "mandatory": true
+        }
+    ]
+}
