@@ -1,6 +1,7 @@
 {
     "meta" : {
         "label" : "Node pool",
+        "pluralLabel" : "Node pools",
         "description" : "Configuration for an AKS node pool",
         "icon" : "icon-tasks"
     },

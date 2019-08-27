@@ -1,6 +1,7 @@
 {
     "meta" : {
         "label" : "AKS Connection",
+        "pluralLabel" : "AKS Connections",
         "description" : "Settings for a connection to AKS",
         "icon" : "icon-link"
     },
