@@ -21,6 +21,7 @@
             "name": "resourceGroup",
             "label" : "Resource group",
             "type": "STRING",
+            "description": "If left empty, same as current VM",
             "mandatory" : true
         },
         {
@@ -28,6 +29,7 @@
             "label" : "Location",
             "description" : "Region in which to create the cluster",
             "type": "STRING",
+            "description": "If left empty, same as current VM",
             "mandatory" : true
         },
         {

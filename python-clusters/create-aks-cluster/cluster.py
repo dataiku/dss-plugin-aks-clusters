@@ -10,7 +10,7 @@ from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 from dku_utils.access import _is_none_or_blank
 from dku_utils.cluster import make_overrides
 from dku_azure.auth import get_credentials_from_connection_info
-from dku_azure.utils import run_and_process_cloud_error, check_resource_group_exists
+from dku_azure.utils import run_and_process_cloud_error, check_resource_group_exists, grab_vm_infos
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -20,9 +20,14 @@ class MyCluster(Cluster):
         self.plugin_config = plugin_config
         
     def start(self):
+        vm_infos = grab_vm_infos()
+        logging.info("Current VM is in %s" % json.dumps(vm_infos))
+        
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
         subscription_id = connection_info.get('subscriptionId', None)
+        if _is_none_or_blank(subscription_id):
+            subscription_id = vm_infos.get('subscription_id', None)
         if _is_none_or_blank(subscription_id):
             raise Exception('Subscription must be defined')
 
@@ -34,8 +39,12 @@ class MyCluster(Cluster):
         
         resource_group_name = self.config.get('resourceGroup', None)
         if _is_none_or_blank(resource_group_name):
+            resource_group_name = vm_infos.get('resource_group_name', None)
+        if _is_none_or_blank(resource_group_name):
             raise Exception("A resource group to put the cluster in is required")
         location = self.config.get('location', None)
+        if _is_none_or_blank(location):
+            location = vm_infos.get('location', None)
         if _is_none_or_blank(location):
             raise Exception("A location to put the cluster in is required")
             
@@ -114,9 +123,14 @@ class MyCluster(Cluster):
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':create_result.as_dict()}]
 
     def stop(self, data):
+        vm_infos = grab_vm_infos()
+        logging.info("Current VM is in %s" % json.dumps(vm_infos))
+        
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
         subscription_id = connection_info.get('subscriptionId', None)
+        if _is_none_or_blank(subscription_id):
+            subscription_id = vm_infos.get('subscription_id', None)
         if _is_none_or_blank(subscription_id):
             raise Exception('Subscription must be defined')
 
@@ -124,6 +138,8 @@ class MyCluster(Cluster):
         clusters_client = ContainerServiceClient(credentials, subscription_id)
         
         resource_group_name = self.config.get('resourceGroup', None)
+        if _is_none_or_blank(resource_group_name):
+            resource_group_name = vm_infos.get('resource_group_name', None)
         if _is_none_or_blank(resource_group_name):
             raise Exception("A resource group to put the cluster in is required")
 

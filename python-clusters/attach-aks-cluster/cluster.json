@@ -18,6 +18,7 @@
         {
             "name": "resourceGroup",
             "label" : "Resource group",
+            "description": "If left empty, same as current VM",
             "type": "STRING",
             "mandatory" : true
         },
