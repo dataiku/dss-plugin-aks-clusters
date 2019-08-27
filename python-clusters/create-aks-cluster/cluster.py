@@ -10,7 +10,7 @@ from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 from dku_utils.access import _is_none_or_blank
 from dku_utils.cluster import make_overrides
 from dku_azure.auth import get_credentials_from_connection_info
-from dku_azure.utils import run_and_process_cloud_error
+from dku_azure.utils import run_and_process_cloud_error, check_resource_group_exists
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -87,8 +87,17 @@ class MyCluster(Cluster):
         def do_creation():
             cluster_create_op = clusters_client.managed_clusters.create_or_update(resource_group_name, self.cluster_name, cluster_config)
             return cluster_create_op.result()
-        create_result = run_and_process_cloud_error(do_creation)
-        
+        try:
+            create_result = run_and_process_cloud_error(do_creation)
+        except Exception as e:
+            perm_error_needle = "does not have authorization to perform action 'Microsoft.ContainerService/managedClusters/write'"
+            if perm_error_needle in str(e):
+                # check that the resource group exists, because the permission error is misleading
+                logging.info("Check that the resource group %s exists... " % resource_group_name)
+                if not check_resource_group_exists(resource_group_name, credentials, subscription_id):
+                    raise Exception("Resource group %s doesn't exist" % resource_group_name)
+            raise e
+            
         logging.info("Fetching kubeconfig for cluster %s in %s" % (self.cluster_name, resource_group_name))
         def do_fetch():
             return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group_name, self.cluster_name)
