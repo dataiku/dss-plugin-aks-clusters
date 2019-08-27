@@ -86,8 +86,13 @@ class MyCluster(Cluster):
             agent_pool_profile = ManagedClusterAgentPoolProfile(name="nodepool%s" % idx, type=agent_pool_type, vm_size=vm_size, count=num_nodes, os_disk_size_gb=os_disk_size_gb, vnet_subnet_id=vnet_subnet_id, enable_auto_scaling=auto_scaling, min_count=min_num_nodes, max_count=max_num_nodes)
             agent_pool_profiles.append(agent_pool_profile)
             
+        kubernetes_version = self.config.get('kubernetesVersion', None)
+        if _is_none_or_blank(kubernetes_version):
+            kubernetes_version = None # don't pass empty strings
+            
         cluster_config = ManagedCluster(location=location
                                         , dns_prefix='%s-dns' % self.cluster_name
+                                        , kubernetes_version=kubernetes_version
                                         , linux_profile=linux_profile
                                         , network_profile=network_profile
                                         , service_principal_profile=service_principal_profile

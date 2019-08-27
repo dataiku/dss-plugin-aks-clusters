@@ -22,7 +22,7 @@
             "label" : "Resource group",
             "type": "STRING",
             "description": "If left empty, same as current VM",
-            "mandatory" : true
+            "mandatory" : false
         },
         {
             "name": "location",
@@ -30,7 +30,7 @@
             "description" : "Region in which to create the cluster",
             "type": "STRING",
             "description": "If left empty, same as current VM",
-            "mandatory" : true
+            "mandatory" : false
         },
         {
             "name": "clusterServicePrincipal",
@@ -71,6 +71,18 @@
             "type": "PRESETS",
             "parameterSetId" : "node-pool-request",
             "mandatory" : true
+        },
+        {
+            "name": "s-advanced",
+            "type":"SEPARATOR",
+            "label": "Advanced settings"
+        },
+        {
+            "name": "kubernetesVersion",
+            "label" : "Kubernetes version",
+            "description" : "Leave empty for default",
+            "type": "STRING",
+            "mandatory" : false
         }
     ]
 }
