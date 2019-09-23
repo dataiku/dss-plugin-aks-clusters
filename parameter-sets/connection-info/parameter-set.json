@@ -6,8 +6,8 @@
         "icon" : "icon-link"
     },
     
-    "overridable" : false,
-    "inlinable" : true,
+    "defaultDefinableAtProjectLevel" : true,
+    "defaultDefinableInline" : true,
 
     "pluginParams": [
         {
