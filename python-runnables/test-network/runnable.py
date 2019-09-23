@@ -47,13 +47,8 @@ class MyRunnable(Runnable):
                 cmd = ['nslookup', host]
                 out, err = b.exec_cmd(cmd)
                 result = add_to_result(result, 'Resolve host', cmd, out, err)
-                found_host = False
                 for line in out.split('\n'):
-                    if found_host or host in line:
-                        found_host = True
-                    else:
-                        continue # skip until we reach the section of the output that deals with the host to resolve (ie skip the part where nslookup says where the DNS server is)
-                    m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)(\\s.*)?$', line)
+                    m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)\\s.*$', line)
                     if m is not None:
                         ip = m.group(1)
                 if ip is None:
@@ -70,10 +65,8 @@ class MyRunnable(Runnable):
 
                 result = result + '<h5>Connection successful</h5>'
         except KubeCommandException as e:
-            result = result + '<h5>While : %s</h5>' % json.dumps(cmd)
             result = result + '<div class="alert alert-error"><div>%s</div><div>out:</div><pre>%s</pre><div>err:</div><pre>%s</pre></div>' % (str(e), e.out, e.err)
         except Exception as e:
-            result = result + '<h5>While : %s</h5>' % json.dumps(cmd)
             result = result + '<div class="alert alert-error">%s</div>' % str(e)
                 
         return '<div>%s</div>' % result

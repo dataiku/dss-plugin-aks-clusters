@@ -1,4 +1,5 @@
 azure-mgmt-containerservice
 azure-mgmt-authorization
 azure-mgmt-resource
+azure-mgmt-compute
 PyYAML
