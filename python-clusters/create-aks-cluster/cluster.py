@@ -32,11 +32,12 @@ class MyCluster(Cluster):
         subscription_id = connection_info.get('subscriptionId', None)
         resource_group = self.config.get('resourceGroup', None)
 
-        #clusters_client = get_cluster_from_connection_info(connection_info, connection_info_secret)
         clusters_client = ContainerServiceClient(credentials, subscription_id)
+        
+        # Credit the cluster to DATAIKU
+        clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
 
         cluster_builder = ClusterBuilder(clusters_client)
-
         cluster_builder.with_name(self.cluster_name)
         cluster_builder.with_dns_prefix("{}-dns".format(self.cluster_name))
         cluster_builder.with_resource_group(resource_group)
@@ -45,7 +46,10 @@ class MyCluster(Cluster):
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", "10.10.10.0/24"),
                                              dns_service_ip=self.config.get("dnsServiceIP", "10.10.10.10"))
         cluster_builder.with_cluster_sp(cluster_service_principal=self.config.get("clusterServicePrincipal", connection_info),
-                                        cluster_service_principal_secret=self.plugin_config.get("clusterServicePrincipalSecret", connection_info_secret))
+                                        cluster_service_principal_secret=self.plugin_config.get("clusterServicePrincipalSecret",
+                                                                                                 connection_info_secret))
+        cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
+        
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)

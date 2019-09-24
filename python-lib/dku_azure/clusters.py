@@ -20,6 +20,7 @@ class ClusterBuilder(object):
         self.network_profile = None
         self.cluster_sp = None
         self.node_pools = []
+        self.cluster_version = None
 
 
     def with_name(self, name):
@@ -49,13 +50,21 @@ class ClusterBuilder(object):
     def with_cluster_sp(self, cluster_service_principal, cluster_service_principal_secret):
         client_id = cluster_service_principal["clientId"]
         client_secret = cluster_service_principal_secret["clientSecret"]
-        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id, secret=client_secret, key_vault_secret_ref=None)
+        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
+                                                                            secret=client_secret,
+                                                                            key_vault_secret_ref=None)
         self.cluster_sp = service_principal_profile
         return self
 
     def get_node_pool_builder(self):
         nb_node_pools = len(self.node_pools)
         return NodePoolBuilder(self).with_name("node-pool-{}".format(nb_node_pools))
+    
+        
+    def with_cluster_version(self, cluster_version):
+        if cluster_version != "latest":
+            self.cluster_version = cluster_version
+        return self
 
     def with_node_pool(self, node_pool):
         self.node_pools.append(node_pool)
@@ -68,6 +77,7 @@ class ClusterBuilder(object):
         cluster_params["linux_profile"] = self.linux_profile
         cluster_params["network_profile"] = self.network_profile
         cluster_params["service_principal_profile"] = self.cluster_sp
+        cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
 
         self.cluster_config = ManagedCluster(**cluster_params)
@@ -132,6 +142,7 @@ class NodePoolBuilder(object):
         else:
             self.disk_size_gb = disk_size_gb
         return self
+       
 
     def build(self):
         agent_pool_profile_params = {}
