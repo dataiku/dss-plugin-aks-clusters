@@ -37,10 +37,10 @@ def get_vm_resource_id(subscription_id=None,
     return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}".format(subscription_id, resource_group, vm_name)
 
 
-def get_subnet_id(subscription_id=None, resource_group=None, vnet=None, subnet=None):
+def get_subnet_id(connection_info, resource_group, vnet, subnet):
     """
     """
-
+    subscription_id = connection_info.get("subscriptionId", None)
     return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
                                                                                                                   resource_group,
                                                                                                                   vnet,
@@ -51,9 +51,8 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     """
     F****d up way of doing simple things
     """
-
+    
     logging.info("DEBUG Fetching DSS host network params...")
-
     logging.info("Getting instance metadata...")
     vm_name = get_instance_metadata()["compute"]["name"]
     logging.info("DEBUG {}".format(vm_name))
@@ -73,7 +72,8 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     vnet = subnet_id.split("virtualNetworks")[1].split('/')[1]
     logging.info("VNET: {}".format(vnet))
     logging.info("SUBNET ID: {}".format(subnet_id))
-
     return vnet, subnet_id
+        
+
     
 

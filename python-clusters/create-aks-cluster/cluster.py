@@ -20,7 +20,6 @@ class MyCluster(Cluster):
         self.config = config
         self.plugin_config = plugin_config
 
-    # <NEW>
     def start(self):
         """
         Build the create cluster request.
@@ -43,9 +42,10 @@ class MyCluster(Cluster):
         cluster_builder.with_resource_group(resource_group)
         cluster_builder.with_location(self.config.get("location", None))
         cluster_builder.with_linux_profile() # default is None
-        cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", "10.10.10.0/24"),
-                                             dns_service_ip=self.config.get("dnsServiceIP", "10.10.10.10"))
-        cluster_builder.with_cluster_sp(cluster_service_principal=self.config.get("clusterServicePrincipal", connection_info),
+        cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
+                                             dns_service_ip=self.config.get("dnsServiceIP", None))
+        cluster_builder.with_cluster_sp(cluster_service_principal=self.config.get("clusterServicePrincipal",
+                                                                                  connection_info),
                                         cluster_service_principal_secret=self.plugin_config.get("clusterServicePrincipalSecret",
                                                                                                  connection_info_secret))
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
@@ -55,9 +55,11 @@ class MyCluster(Cluster):
             node_pool_builder.with_idx(idx)
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
             vnet = node_pool_conf.get("vnet", None)
-            subnet_id = get_subnet_id(node_pool_conf.get("subnet", None))
-            logging.info("DEBUG INHERIT FROM HOST? {}".format(str(node_pool_conf.get("useSameNetworkAsDSSHost"))))
-            logging.info("DEBUG SUBNET ID: {}".format(subnet_id))
+            subnet = node_pool_conf.get("subnet", None)
+            subnet_id = get_subnet_id(connection_info=connection_info,
+                                      resource_group=resource_group,
+                                      vnet=vnet,
+                                      subnet=subnet)
             node_pool_builder.with_network(inherit_from_host=node_pool_conf.get("useSameNetworkAsDSSHost"),
                                            cluster_vnet=vnet,
                                            cluster_subnet_id=subnet_id,

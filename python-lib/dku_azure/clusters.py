@@ -1,4 +1,4 @@
-from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network
+from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile, ManagedCluster
 from dku_utils.access import _default_if_blank
@@ -102,6 +102,7 @@ class NodePoolBuilder(object):
         self.agent_pool_type = None
         self.idx = None
         self.agent_pool_profile = None
+        self.gpu = None
 
 
     def with_name(self, name):
@@ -116,14 +117,23 @@ class NodePoolBuilder(object):
         self.vm_size = vm_size
         return self
 
+    def with_gpu(self, vm_size):
+        if "Standard_N" in vm_size:
+            self.gpu = True
+        else:
+            self.gpu = False
+        return self
+
     def with_network(self, inherit_from_host, cluster_vnet, cluster_subnet_id, connection_info, credentials, resource_group):
         if inherit_from_host:
+            logging.info("Inheriting VNET/subnet from DSS host")
             self.vnet, self.subnet_id = get_host_network(credentials=credentials,
                                                          resource_group=resource_group,
                                                          connection_info=connection_info)
         else:
+            logging.info("Using custom VNET ({}) and subnet ({} for cluster".format(cluster_vnet, cluster_subnet))
             self.vnet = cluster_vnet
-            self.subnet_id = cluster_subnet_id
+            self.subnet_id = get_subnet_id(resource_group=resource_group, connection_info=connection_info, vnet=cluster_vnet, subnet=cluster_subnet)
         return self
 
     def with_node_count(self, enable_autoscaling, num_nodes, min_num_nodes, max_num_nodes):
@@ -142,7 +152,6 @@ class NodePoolBuilder(object):
         else:
             self.disk_size_gb = disk_size_gb
         return self
-       
 
     def build(self):
         agent_pool_profile_params = {}
