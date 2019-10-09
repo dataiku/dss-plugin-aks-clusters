@@ -6,6 +6,7 @@ from azure.mgmt.containerservice.models import ManagedCluster, ManagedClusterSer
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile, ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
+from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank
 from dku_utils.cluster import make_overrides
@@ -48,6 +49,15 @@ class MyCluster(Cluster):
         if _is_none_or_blank(location):
             raise Exception("A location to put the cluster in is required")
             
+        # check that the cluster doesn't exist yet, otherwise azure will try to update it
+        # and will almost always fail
+        try:
+            existing = clusters_client.managed_clusters.get(resource_group_name, self.cluster_name)
+            if existing is not None:
+                raise Exception("A cluster with name %s in resource group %s already exists", self.cluster_name, resource_group_name)
+        except CloudError as e:
+            logging.info("Cluster doesn't seem to exist yet")
+        
         linux_profile = None # ContainerServiceLinuxProfile()
         network_profile = ContainerServiceNetworkProfile(service_cidr=self.config.get("serviceCIDR", '10.10.10.0/24'), dns_service_ip=self.config.get('dnsServiceIP', '10.10.10.10'))
 
