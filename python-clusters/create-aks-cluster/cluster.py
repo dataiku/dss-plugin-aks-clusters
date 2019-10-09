@@ -54,7 +54,7 @@ class MyCluster(Cluster):
         try:
             existing = clusters_client.managed_clusters.get(resource_group_name, self.cluster_name)
             if existing is not None:
-                raise Exception("A cluster with name %s in resource group %s already exists", self.cluster_name, resource_group_name)
+                raise Exception("A cluster with name %s in resource group %s already exists" % (self.cluster_name, resource_group_name))
         except CloudError as e:
             logging.info("Cluster doesn't seem to exist yet")
         
