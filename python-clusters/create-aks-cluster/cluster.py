@@ -83,8 +83,8 @@ class MyCluster(Cluster):
                     vnet_subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subscription_id, resource_group_name, vnet, subnet)
             num_nodes = conf.get('numNodes', 3)
             auto_scaling = conf.get('autoScaling', False)
-            min_num_nodes = conf.get('minNumNodes', num_nodes)
-            max_num_nodes = conf.get('maxNumNodes', num_nodes)
+            min_num_nodes = conf.get('minNumNodes', num_nodes) if auto_scaling else None 
+            max_num_nodes = conf.get('maxNumNodes', num_nodes) if auto_scaling else None
             
             os_disk_size_gb = conf.get('osDiskSizeGb', 0)
             if _is_none_or_blank(vm_size):
