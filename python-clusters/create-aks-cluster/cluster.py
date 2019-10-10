@@ -66,7 +66,7 @@ class MyCluster(Cluster):
         if not 'clientId' in cluster_service_principal:
             cluster_service_principal = connection_info
             cluster_service_principal_secret = connection_info_secret
-        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=cluster_service_principal["clientId"], secret=cluster_service_principal_secret["password"], key_vault_secret_ref=None)
+        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=cluster_service_principal["clientId"], secret=cluster_service_principal["password"], key_vault_secret_ref=None)
         
         agent_pool_profiles = []
         for conf in self.config.get('nodePools', []):

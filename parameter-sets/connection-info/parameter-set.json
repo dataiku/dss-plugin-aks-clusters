@@ -10,12 +10,6 @@
     "defaultDefinableInline" : true,
 
     "pluginParams": [
-        {
-            "name": "password",
-            "label": "Password",
-            "type": "STRING",
-            "mandatory" : false
-        }
     ],
 
     "params": [
@@ -27,16 +21,22 @@
             "mandatory" : false
         },
         {
-            "name": "clientId",
-            "label": "Client ID",
-            "type": "STRING",
-            "mandatory" : false
-        },
-        {
             "name": "tenantId",
             "label": "Tenant ID",
             "type": "STRING",
-            "mandatory" : false
+            "mandatory" : true
+        },
+        {
+            "name": "clientId",
+            "label": "Client ID",
+            "type": "STRING",
+            "mandatory" : true
+        },
+        {
+            "name": "password",
+            "label": "Password",
+            "type": "PASSWORD",
+            "mandatory" : true
         }
     ]
 }
