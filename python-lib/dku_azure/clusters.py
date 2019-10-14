@@ -137,6 +137,7 @@ class NodePoolBuilder(object):
         return self
 
     def with_node_count(self, enable_autoscaling, num_nodes, min_num_nodes, max_num_nodes):
+        logging.info("Setting node count autoscale=%s num=%s min=%s max=%s" % (enable_autoscaling, num_nodes, min_num_nodes, max_num_nodes))
         if enable_autoscaling:
             self.agent_pool_type = "VirtualMachineScaleSets"
             self.min_num_nodes = min_num_nodes
@@ -166,6 +167,8 @@ class NodePoolBuilder(object):
             agent_pool_profile_params["min_count"] = self.min_num_nodes
         if self.max_num_nodes:
             agent_pool_profile_params["max_count"] = self.max_num_nodes
+
+        logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
         self.agent_pool_profile = ManagedClusterAgentPoolProfile(**agent_pool_profile_params)
         return self
