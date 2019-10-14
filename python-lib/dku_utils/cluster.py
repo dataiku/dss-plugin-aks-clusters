@@ -17,6 +17,10 @@ def make_overrides(config, kube_config, kube_config_path):
     return {'container':container_settings}
 
 def get_cluster_from_connection_info(config, plugin_config):
+    """
+    Return a ContainerServiceClient after authenticating using the connection info.
+    """
+    
     connection_info = config.get("connectionInfo", {})
     connection_info_secret = plugin_config.get("connectionInfo", {})
     subscription_id = connection_info.get('subscriptionId', None)
@@ -27,7 +31,7 @@ def get_cluster_from_connection_info(config, plugin_config):
     clusters_client = ContainerServiceClient(credentials, subscription_id)
             
     # credit this cluster to Dataiku
-    clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
+    # clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
 
     return clusters_client
 
