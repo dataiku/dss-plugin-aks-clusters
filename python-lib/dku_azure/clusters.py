@@ -49,7 +49,7 @@ class ClusterBuilder(object):
 
     def with_cluster_sp(self, cluster_service_principal_connection_info):
         client_id = cluster_service_principal_connection_info["clientId"]
-        client_secret = cluster_service_principal_connection_info["clientSecret"]
+        client_secret = cluster_service_principal_connection_info["password"]
         service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
                                                                             secret=client_secret,
                                                                             key_vault_secret_ref=None)
