@@ -118,10 +118,13 @@ class MyCluster(Cluster):
         cluster_builder.with_linux_profile() # default is None
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                              dns_service_ip=self.config.get("dnsServiceIP", None))
-        cluster_builder.with_cluster_sp(cluster_service_principal=self.config.get("clusterServicePrincipal",
-                                                                                  connection_info),
-                                        cluster_service_principal_secret=self.plugin_config.get("clusterServicePrincipalSecret",
-                                                                                                 connection_info_secret))
+
+        if self.config.get("useDistinctSPForCluster", False):
+            cluster_sp = self.config.get("clusterServicePrincipal")
+        else:
+            cluster_sp = connection_info
+        cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
+
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
         
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):

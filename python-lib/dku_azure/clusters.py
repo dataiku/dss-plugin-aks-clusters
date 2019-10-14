@@ -47,9 +47,9 @@ class ClusterBuilder(object):
         self.network_profile = ContainerServiceNetworkProfile(service_cidr=service_cidr, dns_service_ip=dns_service_ip)
         return self
 
-    def with_cluster_sp(self, cluster_service_principal, cluster_service_principal_secret):
-        client_id = cluster_service_principal["clientId"]
-        client_secret = cluster_service_principal_secret["clientSecret"]
+    def with_cluster_sp(self, cluster_service_principal_connection_info):
+        client_id = cluster_service_principal_connection_info["clientId"]
+        client_secret = cluster_service_principal_connection_info["clientSecret"]
         service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
                                                                             secret=client_secret,
                                                                             key_vault_secret_ref=None)
