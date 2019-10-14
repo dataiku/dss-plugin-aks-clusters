@@ -162,8 +162,10 @@ class NodePoolBuilder(object):
         agent_pool_profile_params["os_disk_size_gb"] = self.disk_size_gb
         agent_pool_profile_params["vnet_subnet_id"] = self.subnet_id
         agent_pool_profile_params["enable_auto_scaling"] = self.enable_autoscaling
-        agent_pool_profile_params["min_count"] = self.min_num_nodes
-        agent_pool_profile_params["max_count"] = self.max_num_nodes
+        if self.min_num_nodes:
+            agent_pool_profile_params["min_count"] = self.min_num_nodes
+        if self.max_num_nodes:
+            agent_pool_profile_params["max_count"] = self.max_num_nodes
 
         self.agent_pool_profile = ManagedClusterAgentPoolProfile(**agent_pool_profile_params)
         return self
