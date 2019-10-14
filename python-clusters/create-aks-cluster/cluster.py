@@ -145,8 +145,8 @@ class MyCluster(Cluster):
                                            resource_group=resource_group)
 
             node_pool_builder.with_node_count(enable_autoscaling=node_pool_conf.get("autoScaling", False),
-                                              num_nodes=node_pool_conf.get("numNodes", None)
-                                              min_num_nodes=node_pool_conf.get("minNumNodes", None)
+                                              num_nodes=node_pool_conf.get("numNodes", None),
+                                              min_num_nodes=node_pool_conf.get("minNumNodes", None),
                                               max_num_nodes=node_pool_conf.get("maxNumNodes", None))
 
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
