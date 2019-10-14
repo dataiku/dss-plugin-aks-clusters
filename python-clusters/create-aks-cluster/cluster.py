@@ -144,12 +144,10 @@ class MyCluster(Cluster):
                                            credentials=credentials,
                                            resource_group=resource_group)
 
-            num_nodes = node_pool_conf.get("numNodes", None)
-            auto_scaling = node_pool_conf.get("autoScaling", False),
-            node_pool_builder.with_node_count(enable_autoscaling=auto_scaling,
-                                              num_nodes=num_nodes,
-                                              min_num_nodes=node_pool_conf.get("minNumNodes", num_nodes) if auto_scaling else None,
-                                              max_num_nodes=node_pool_conf.get("maxNumNodes", num_nodes) if auto_scaling else None)
+            node_pool_builder.with_node_count(enable_autoscaling=node_pool_conf.get("autoScaling", False),
+                                              num_nodes=node_pool_conf.get("numNodes", None)
+                                              min_num_nodes=node_pool_conf.get("minNumNodes", None)
+                                              max_num_nodes=node_pool_conf.get("maxNumNodes", None))
 
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.build()
