@@ -38,12 +38,14 @@ class MyCluster(Cluster):
         clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
         
         resource_group_name = self.config.get('resourceGroup', None)
+        # TODO: Auto detection
         #if _is_none_or_blank(resource_group_name):
         #    resource_group_name = vm_infos.get('resource_group_name', None)
         if _is_none_or_blank(resource_group_name):
             raise Exception("A resource group to put the cluster in is required")
         
         location = self.config.get('location', None)
+        # TODO: Auto detection
         #if _is_none_or_blank(location):
         #    location = vm_infos.get('location', None)
         if _is_none_or_blank(location):
@@ -57,58 +59,6 @@ class MyCluster(Cluster):
                 raise Exception("A cluster with name %s in resource group %s already exists" % (self.cluster_name, resource_group_name))
         except CloudError as e:
             logging.info("Cluster doesn't seem to exist yet")
-        
-        #linux_profile = None # ContainerServiceLinuxProfile()
-        #network_profile = ContainerServiceNetworkProfile(service_cidr=self.config.get("serviceCIDR", '10.10.10.0/24'), dns_service_ip=self.config.get('dnsServiceIP', '10.10.10.10'))
-
-#        cluster_service_principal = self.config.get("clusterServicePrincipal", connection_info)
-#        cluster_service_principal_secret = self.plugin_config.get("clusterServicePrincipal", connection_info_secret)
-#        if not 'clientId' in cluster_service_principal:
-#            cluster_service_principal = connection_info
-#            cluster_service_principal_secret = connection_info_secret
-#        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=cluster_service_principal["clientId"], secret=cluster_service_principal["password"], key_vault_secret_ref=None)
-        
-#         agent_pool_profiles = []
-#         for conf in self.config.get('nodePools', []):
-#             idx = len(agent_pool_profiles)
-#             vm_size = conf.get('vmSize', None)
-            
-#             subnet = conf.get('subnet', None)
-#             vnet = conf.get('vnet', None)
-#             vnet_subnet_id = None
-#             if not _is_none_or_blank(subnet):
-#                 if subnet.startswith('/subscriptions'):
-#                     vnet_subnet_id = subnet
-#                 else:
-#                     vnet_subnet_id = "/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s/subnets/%s" % (subscription_id, resource_group_name, vnet, subnet)
-#             num_nodes = conf.get('numNodes', 3)
-#             auto_scaling = conf.get('autoScaling', False)
-#             min_num_nodes = conf.get('minNumNodes', num_nodes) if auto_scaling else None 
-#             max_num_nodes = conf.get('maxNumNodes', num_nodes) if auto_scaling else None
-            
-#             os_disk_size_gb = conf.get('osDiskSizeGb', 0)
-#             if _is_none_or_blank(vm_size):
-#                 raise Exception("Node pool %s has no vm size" % idx)
-#             if os_disk_size_gb == 0:
-#                 os_disk_size_gb = None
-                
-#             agent_pool_type = "VirtualMachineScaleSets" if auto_scaling else None
-#             agent_pool_profile = ManagedClusterAgentPoolProfile(name="nodepool%s" % idx, type=agent_pool_type, vm_size=vm_size, count=num_nodes, os_disk_size_gb=os_disk_size_gb, vnet_subnet_id=vnet_subnet_id, enable_auto_scaling=auto_scaling, min_count=min_num_nodes, max_count=max_num_nodes)
-#             agent_pool_profiles.append(agent_pool_profile)
-            
-#         kubernetes_version = self.config.get('kubernetesVersion', None)
-#         if _is_none_or_blank(kubernetes_version):
-#             kubernetes_version = None # don't pass empty strings
-            
-#         cluster_config = ManagedCluster(location=location
-#                                         , dns_prefix='%s-dns' % self.cluster_name
-#                                         , kubernetes_version=kubernetes_version
-#                                         , linux_profile=linux_profile
-#                                         , network_profile=network_profile
-#                                         , service_principal_profile=service_principal_profile
-#                                         , agent_pool_profiles=agent_pool_profiles)
-#         logging.info("Creating cluster %s in %s" % (self.cluster_name, resource_group_name))
-# =======
 
         cluster_builder = ClusterBuilder(clusters_client)
         cluster_builder.with_name(self.cluster_name)
