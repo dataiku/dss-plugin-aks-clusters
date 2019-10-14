@@ -1,9 +1,9 @@
 {
-    "meta" : {
-        "label" : "Node pool",
-        "pluralLabel" : "Node pools",
-        "description" : "Configuration for an AKS node pool",
-        "icon" : "icon-tasks"
+    "meta": {
+        "label": "Node pool",
+        "pluralLabel": "Node pools",
+        "description": "Configuration for an AKS node pool",
+        "icon": "icon-tasks"
     },
     
     "defaultDefinableAtProjectLevel" : true,
@@ -18,59 +18,74 @@
             "label": "Machine type",
             "description": "Azure VM size for the nodes. See Azure documentation for available VM sizes.",
             "type": "STRING",
-            "mandatory" : true,
-            "defaultValue" : "Standard_B8ms"
+            "mandatory": true,
+            "defaultValue": "Standard_B8ms"
         },
         {
             "name": "osDiskSizeGb",
             "label": "Disk size",
             "description": "Disk size for the nodes (leave 0 for the default by machine type)",
             "type": "INT",
-            "mandatory" : false
+            "mandatory": false
         },
         {
             "name": "numNodes",
             "label": "Default number of nodes",
             "type": "INT",
-            "mandatory" : true,
-            "defaultValue" : 3
+            "mandatory": true,
+            "defaultValue": 3
         },
         {
             "name": "autoScaling",
             "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",
-            "mandatory" : true,
-            "defaultValue" : false
+            "mandatory": true,
+            "defaultValue": false
         },
         {
             "name": "minNumNodes",
             "label": "Min number of nodes",
             "type": "INT",
-            "mandatory" : true,
-            "defaultValue" : 2,
-            "visibilityCondition" : "model.autoScaling"
+            "mandatory": true,
+            "defaultValue": 2,
+            "visibilityCondition": "model.autoScaling"
         },
         {
             "name": "maxNumNodes",
             "label": "Max number of nodes",
             "type": "INT",
-            "mandatory" : true,
-            "defaultValue" : 5,
-            "visibilityCondition" : "model.autoScaling"
+            "mandatory": true,
+            "defaultValue": 5,
+            "visibilityCondition": "model.autoScaling"
         },
         {
-            "name": "subnet",
-            "label" : "VNet Subnet",
-            "description" : "Subnet of a VNet to use for the cluster",
-            "type": "STRING",
-            "mandatory" : true
+            "type": "SEPARATOR",
+            "label": "Networking"
+        },
+        {
+            "name": "useSameNetworkAsDSSHost",
+            "label": "Inherit DSS host settings",
+            "description": "Create cluster in same VNET/subnet as DSS host",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
+
         },
         {
             "name": "vnet",
-            "label" : "Virtual network",
-            "description" : "Virtual network of the subnet, if subnet is not a full resource path",
+            "label": "Virtual network",
+            "description": "",
             "type": "STRING",
-            "mandatory" : true
+            "mandatory": false,
+            "visibilityCondition": "!model.useSameNetworkAsDSSHost"
+        },
+        {
+            "name": "subnet",
+            "label": "Cluster subnet",
+            "description": "Subnet where nodes and pods will be placed",
+            "type": "STRING",
+            "mandatory": false,
+            "visibilityCondition": "!model.useSameNetworkAsDSSHost"
         }
     ]
 }

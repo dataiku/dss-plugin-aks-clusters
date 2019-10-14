@@ -1,8 +1,8 @@
 {
     "meta" : {
-        "label" : "AKS Connection",
-        "pluralLabel" : "AKS Connections",
-        "description" : "Settings for a connection to AKS",
+        "label" : "AKS connections",
+	"pluralLabel": "AKS connections",
+        "description" : "AKS connection settings",
         "icon" : "icon-link"
     },
     
@@ -15,20 +15,19 @@
     "params": [
         {
             "name": "subscriptionId",
-            "label": "Subscription ID",
-            "description": "If left empty, same as current VM",
+            "label": "Azure subscription ID",
             "type": "STRING",
             "mandatory" : false
         },
         {
             "name": "tenantId",
-            "label": "Tenant ID",
+            "label": "Directory (tenant) ID",
             "type": "STRING",
             "mandatory" : true
         },
         {
             "name": "clientId",
-            "label": "Client ID",
+            "label": "Application (client) ID",
             "type": "STRING",
             "mandatory" : true
         },

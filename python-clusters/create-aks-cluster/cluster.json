@@ -1,67 +1,58 @@
 {
-    "meta" : {
-        "label" : "Create AKS cluster",
-        "description" : "Create AKS clusters",
-        "icon" : "icon-puzzle-piece"
+    "meta": {
+        "label": "Create AKS cluster",
+        "description": "Create AKS clusters",
+        "icon": "icon-puzzle-piece"
     },
-    
-    "longDescription" : "Prerequisites for creating a cluster:\n* a [service principal](https://docs.microsoft.com/en-us/azure/active-directory/develop/app-objects-and-service-principals) capable of creating clusters, for example with rights on the resource group\n* a service principal (can be the same) for the cluster nodes, with the [necessary rights](https://docs.microsoft.com/en-us/azure/aks/kubernetes-service-principal)\n* a subnet of a [virtual net](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-networks-overview) to put the cluster nodes in. The virtual net:\n  * must have access to the machine running DSS (either the same VNet, or using peering)\n  * belong to the resource group used to put the cluster in\n\nFor auto-scaling, activate Virtual Machine Scale Sets as described [in the doc](https://docs.microsoft.com/en-us/azure/aks/cluster-autoscaler)", 
-    
-    "architecture" : "KUBERNETES",
-
+    "architecture": "KUBERNETES",
     "params": [
         {
             "name": "connectionInfo",
-            "label" : "Connection",
+            "label": "Connection",
             "type": "PRESET",
-            "parameterSetId" : "connection-info",
-            "mandatory" : true
+            "parameterSetId": "connection-info",
+            "mandatory": true
+        },
+        
+        {
+            "name": "clusterVersion",
+            "label": "Kubernetes version",
+            "type": "STRING",
+            "defaultValue": "latest"
         },
         {
             "name": "resourceGroup",
-            "label" : "Resource group",
+            "label": "Resource group",
             "type": "STRING",
-            "description": "If left empty, same as current VM",
-            "mandatory" : false
+            "mandatory": true
         },
         {
             "name": "location",
-            "label" : "Location",
-            "description" : "Region in which to create the cluster",
+            "label": "Location",
+            "description": "Region in which to create the cluster, e.g. 'France Central'",
             "type": "STRING",
-            "description": "If left empty, same as current VM",
-            "mandatory" : false
+            "mandatory": true
+        },
+        {
+            "name": "useDistinctSPForCluster",
+            "label": "Use distinct credentials",
+            "description": "Associate cluster nodes with a specific Service Principal",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": true
         },
         {
             "name": "clusterServicePrincipal",
-            "label" : "Identity assumed by nodes",
-            "description" : "Service principal used by the cluster's nodes (if different from the connection)",
+            "label": "Identity assumed by nodes",
+            "description": "Service principal used by the cluster's nodes (if different from the connection)",
             "type": "PRESET",
-            "parameterSetId" : "connection-info",
-            "mandatory" : false
-        },
-        {
-            "name": "s-networks",
-            "type":"SEPARATOR",
-            "label": "Networking"
-        },
-        {
-            "name": "serviceCIDR",
-            "label" : "Service CIDR",
-            "description" : "IP range for services in the cluster (cannot overlap the IP range of the pools' subnets)",
-            "type": "STRING",
-            "mandatory" : true
-        },
-        {
-            "name": "dnsServiceIP",
-            "label" : "DNS IP",
-            "description" : "IP in the service IP range to use for the DNS server",
-            "type": "STRING",
-            "mandatory" : true
+            "parameterSetId": "connection-info",
+            "mandatory": false,
+            "visibilityCondition": "model.useDistinctSPForCluster"
         },
         {
             "name": "s-nodes",
-            "type":"SEPARATOR",
+            "type": "SEPARATOR",
             "label": "Cluster nodes"
         },
         {
@@ -69,20 +60,28 @@
             "label": "Node pools",
             "description": "Node pools to create in the cluster",
             "type": "PRESETS",
-            "parameterSetId" : "node-pool-request",
-            "mandatory" : true
+            "parameterSetId": "node-pool-request",
+            "mandatory": true
         },
         {
-            "name": "s-advanced",
-            "type":"SEPARATOR",
-            "label": "Advanced settings"
+            "name": "advanced-options",
+            "type": "SEPARATOR",
+            "label": "Advanced options"
         },
         {
-            "name": "kubernetesVersion",
-            "label" : "Kubernetes version",
-            "description" : "Leave empty for default",
+            "name": "serviceCIDR",
+            "label": "Service CIDR",
+            "description": "IP range for services in the cluster (cannot overlap the IP range of the pools' subnets)",
             "type": "STRING",
-            "mandatory" : false
+            "mandatory": true
+        },
+        {
+            "name": "dnsServiceIP",
+            "label": "DNS IP",
+            "description": "IP in the service IP range to use for the DNS server",
+            "type": "STRING",
+            "mandatory": true
         }
+
     ]
 }
