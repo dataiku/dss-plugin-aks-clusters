@@ -8,6 +8,6 @@
         "icon": "icon-puzzle-piece",
         "licenseInfo" : "Apache Software License",
         "url": "https://www.dataiku.com/dss/plugins/info/aks.html",
-        "tags": ["Cloud", "Microsoft Azure", "Clusters"]
+        "tags": ["Cloud", "Microsoft Azure"]
     }
 }
