@@ -40,7 +40,13 @@ def get_vm_resource_id(subscription_id=None,
 def get_subnet_id(connection_info, resource_group, vnet, subnet):
     """
     """
+    logging.info("Mapping subnet {} to its full resource ID...".format(subnet))
     subscription_id = connection_info.get("subscriptionId", None)
+    subnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
+                                                                                                                       resource_group,
+                                                                                                                       vnet,
+                                                                                                                       subnet)
+    logging.info("Subnet {} linked to the resource {}".format(subnet, subnet_id))
     return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
                                                                                                                   resource_group,
                                                                                                                   vnet,
@@ -49,13 +55,12 @@ def get_subnet_id(connection_info, resource_group, vnet, subnet):
 
 def get_host_network(credentials=None, resource_group=None, connection_info=None, api_version="2019-07-01"):
     """
-    F****d up way of doing simple things
+    Return the VNET and subnet id of the DSS host.
     """
     
-    logging.info("DEBUG Fetching DSS host network params...")
     logging.info("Getting instance metadata...")
     vm_name = get_instance_metadata()["compute"]["name"]
-    logging.info("DEBUG {}".format(vm_name))
+    logging.info("DSS host is on VNET {}".format(vm_name))
     subscription_id = connection_info.get("subscriptionId", None)
     vm_resource_id = get_vm_resource_id(subscription_id, resource_group, vm_name)
     resource_mgmt_client = ResourceManagementClient(credentials=credentials, subscription_id=subscription_id)

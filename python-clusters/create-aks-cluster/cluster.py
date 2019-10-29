@@ -83,13 +83,9 @@ class MyCluster(Cluster):
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
             vnet = node_pool_conf.get("vnet", None)
             subnet = node_pool_conf.get("subnet", None)
-            subnet_id = get_subnet_id(connection_info=connection_info,
-                                      resource_group=resource_group,
-                                      vnet=vnet,
-                                      subnet=subnet)
             node_pool_builder.with_network(inherit_from_host=node_pool_conf.get("useSameNetworkAsDSSHost"),
                                            cluster_vnet=vnet,
-                                           cluster_subnet_id=subnet_id,
+                                           cluster_subnet=subnet,
                                            connection_info=connection_info,
                                            credentials=credentials,
                                            resource_group=resource_group)
