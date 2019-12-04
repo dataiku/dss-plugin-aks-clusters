@@ -8,7 +8,7 @@ from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 from msrestazure.azure_exceptions import CloudError
 
-from dku_utils.access import _is_none_or_blank
+from dku_utils.access import _is_none_or_blank, _has_not_blank_property
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.clusters import ClusterBuilder
@@ -35,7 +35,9 @@ class MyCluster(Cluster):
         clusters_client = ContainerServiceClient(credentials, subscription_id)
         
         # Credit the cluster to DATAIKU
-        clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
+        if _has_not_blank_property(os.environ, "DISABLE_AZURE_TRACKING") and os.environ["DISABLE_AZURE_TRACKING"] is not true:
+            logging.info("Adding Dataiku GUID")
+            clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
         
         resource_group_name = self.config.get('resourceGroup', None)
         # TODO: Auto detection
