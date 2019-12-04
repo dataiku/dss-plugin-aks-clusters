@@ -35,8 +35,9 @@ class MyCluster(Cluster):
         clusters_client = ContainerServiceClient(credentials, subscription_id)
         
         # Credit the cluster to DATAIKU
-        if _has_not_blank_property(os.environ, "DISABLE_AZURE_TRACKING") and os.environ["DISABLE_AZURE_TRACKING"] is not true:
-            logging.info("Adding Dataiku GUID")
+        if _has_not_blank_property(os.environ, "DISABLE_AZURE_TRACKING") and os.environ["DISABLE_AZURE_TRACKING"] == "1":
+            logging.info("Azure tracking is disabled")
+        else:
             clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
         
         resource_group_name = self.config.get('resourceGroup', None)
