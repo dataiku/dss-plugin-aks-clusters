@@ -35,8 +35,8 @@ class MyCluster(Cluster):
         clusters_client = ContainerServiceClient(credentials, subscription_id)
         
         # Credit the cluster to DATAIKU
-        if _has_not_blank_property(os.environ, "DISABLE_AZURE_TRACKING") and os.environ["DISABLE_AZURE_TRACKING"] == "1":
-            logging.info("Azure tracking is disabled")
+        if os.environ.get("DISABLE_AZURE_USAGE_ATTRIBUTION", "0") == "1":
+            logging.info("Azure usage attribution is disabled")
         else:
             clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
         
