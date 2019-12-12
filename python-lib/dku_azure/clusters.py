@@ -124,14 +124,14 @@ class NodePoolBuilder(object):
             self.gpu = False
         return self
 
-    def with_network(self, inherit_from_host, cluster_vnet, cluster_subnet_id, connection_info, credentials, resource_group):
+    def with_network(self, inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group):
         if inherit_from_host:
             logging.info("Inheriting VNET/subnet from DSS host")
             self.vnet, self.subnet_id = get_host_network(credentials=credentials,
                                                          resource_group=resource_group,
                                                          connection_info=connection_info)
         else:
-            logging.info("Using custom VNET ({}) and subnet ({} for cluster".format(cluster_vnet, cluster_subnet))
+            logging.info("Using custom VNET ({}) and subnet ({}) for cluster".format(cluster_vnet, cluster_subnet))
             self.vnet = cluster_vnet
             self.subnet_id = get_subnet_id(resource_group=resource_group, connection_info=connection_info, vnet=cluster_vnet, subnet=cluster_subnet)
         return self
