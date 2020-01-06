@@ -63,13 +63,13 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("DSS host is on VNET {}".format(vm_name))
     subscription_id = connection_info.get("subscriptionId", None)
     vm_resource_id = get_vm_resource_id(subscription_id, resource_group, vm_name)
-    resource_mgmt_client = ResourceManagementClient(credentials=credentials, subscription_id=subscription_id)
-    vm_properties = resource_mgmt_client.resources.get_by_id(vm_resource_id, api_version).properties
+    resource_mgmt_client = ResourceManagementClient(credentials=credentials, subscription_id=subscription_id, api_version=api_version)
+    vm_properties = resource_mgmt_client.resources.get_by_id(vm_resource_id, api_version=api_version).properties
     vm_network_interfaces = vm_properties["networkProfile"]["networkInterfaces"]
     if len(vm_network_interfaces) > 1:
         print("WARNING: more than 1 network interface detected, will use 1st one on list to retrieve IP configuration info")
     network_interface_id = vm_network_interfaces[0]["id"]
-    network_interface_properties = resource_mgmt_client.resources.get_by_id(network_interface_id, api_version).properties
+    network_interface_properties = resource_mgmt_client.resources.get_by_id(network_interface_id, api_version=api_version).properties
     ip_configs = network_interface_properties["ipConfigurations"]
     if len(ip_configs) > 1:
         print("WARNING: more than 1 IP config detected for this interface, will use 1st one on the list to retrieve VNET/subnet info")
