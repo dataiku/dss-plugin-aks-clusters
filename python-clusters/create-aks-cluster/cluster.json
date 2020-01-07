@@ -81,6 +81,17 @@
             "description": "IP in the service IP range to use for the DNS server",
             "type": "STRING",
             "mandatory": true
+        },
+        {
+            "name": "loadBalancerSku",
+            "label": "Load balancer SKU",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value":"Basic", "label":"Basic"},
+                {"value":"Standard", "label":"Standard"}
+            ],
+            "mandatory": false,
+            "defaultValue": "Basic"
         }
 
     ]

@@ -70,7 +70,8 @@ class MyCluster(Cluster):
         cluster_builder.with_location(self.config.get("location", None))
         cluster_builder.with_linux_profile() # default is None
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
-                                             dns_service_ip=self.config.get("dnsServiceIP", None))
+                                             dns_service_ip=self.config.get("dnsServiceIP", None),
+                                             load_balancer_sku=self.config.get("loadBalancerSku", None))
 
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
