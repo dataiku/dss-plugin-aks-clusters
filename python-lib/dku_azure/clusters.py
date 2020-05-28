@@ -157,6 +157,8 @@ class NodePoolBuilder(object):
 
     def build(self):
         agent_pool_profile_params = {}
+        if self.idx == 0:
+            agent_pool_profile_params["mode"] = "System"
         agent_pool_profile_params["name"] = "nodepool{}".format(self.idx)
         agent_pool_profile_params["type"] = self.agent_pool_type
         agent_pool_profile_params["vm_size"] = self.vm_size
