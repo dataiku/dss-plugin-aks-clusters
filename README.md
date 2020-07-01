@@ -8,6 +8,11 @@ For more details, please see [the DSS reference documentation](https://doc.datai
 
 ## Release notes
 
+### v1.0.3
+
+- Minor fix on cluster autoscaler
+- Explicit definition of the code-env package versions
+
 ### v1.0.2
 
 - Minor fix on Azure API calls.
