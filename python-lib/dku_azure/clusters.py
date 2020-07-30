@@ -1,5 +1,5 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
-from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile, ManagedCluster
 from dku_utils.access import _default_if_blank
 
@@ -21,6 +21,7 @@ class ClusterBuilder(object):
         self.cluster_sp = None
         self.node_pools = []
         self.cluster_version = None
+        self.private_access = None
 
 
     def with_name(self, name):
@@ -56,6 +57,12 @@ class ClusterBuilder(object):
         self.cluster_sp = service_principal_profile
         return self
 
+    def with_private_access(self, private_access):
+        self.private_access = ManagedClusterAPIServerAccessProfile(
+            enable_private_cluster=private_access
+        )
+        return self
+
     def get_node_pool_builder(self):
         nb_node_pools = len(self.node_pools)
         return NodePoolBuilder(self).with_name("node-pool-{}".format(nb_node_pools))
@@ -79,6 +86,9 @@ class ClusterBuilder(object):
         cluster_params["service_principal_profile"] = self.cluster_sp
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
+
+        if self.private_access:
+            cluster_params["api_server_access_profile"] = self.private_access
 
         self.cluster_config = ManagedCluster(**cluster_params)
         return self.clusters_client.managed_clusters.create_or_update(self.resource_group, self.name, self.cluster_config)
