@@ -2,7 +2,7 @@ import os, json, logging, yaml, time
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
-from azure.mgmt.containerservice.models import ManagedCluster, ManagedClusterServicePrincipalProfile
+from azure.mgmt.containerservice.models import ManagedCluster, ManagedClusterServicePrincipalProfile, ManagedClusterAPIServerAccessProfile
 from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile, ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
@@ -78,6 +78,9 @@ class MyCluster(Cluster):
         else:
             cluster_sp = connection_info
         cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
+
+        if self.connection_info.get("privateAccess"):
+            cluster_builder.with_private_access(self.connection_info.get("privateAccess"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
         
