@@ -80,7 +80,7 @@ class MyCluster(Cluster):
         cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
 
         if connection_info.get("privateAccess"):
-            cluster_builder.with_private_access(self.connection_info.get("privateAccess"))
+            cluster_builder.with_private_access(connection_info.get("privateAccess"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
         
