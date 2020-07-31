@@ -57,7 +57,7 @@ class ClusterBuilder(object):
                 dns_service_ip = dns_service_ip,
                 load_balancer_profile = load_balancer_profile
             )
-            print(ContainerServiceNetworkProfile.load_balancer_profile)
+            print(self.network_profile.load_balancer_profile)
         return self
 
     def with_cluster_sp(self, cluster_service_principal_connection_info):
