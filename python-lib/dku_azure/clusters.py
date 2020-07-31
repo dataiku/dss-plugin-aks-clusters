@@ -101,7 +101,8 @@ class ClusterBuilder(object):
         if self.private_access:
             cluster_params["api_server_access_profile"] = self.private_access
             
-
+        
+        print(cluster_params)
         self.cluster_config = ManagedCluster(**cluster_params)
         return self.clusters_client.managed_clusters.create_or_update(self.resource_group, self.name, self.cluster_config)
 
