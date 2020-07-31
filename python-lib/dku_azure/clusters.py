@@ -45,18 +45,24 @@ class ClusterBuilder(object):
         return self
 
     def with_network_profile(self, service_cidr, dns_service_ip, load_balancer_sku=None, outbound_type=None):
-        if load_balancer_sku:
-            self.network_profile = ContainerServiceNetworkProfile(
-                service_cidr = service_cidr,
-                dns_service_ip = dns_service_ip,
-                load_balancer_sku = load_balancer_sku
-            )
-        else:
-            self.network_profile = ContainerServiceNetworkProfile(
-                service_cidr = service_cidr,
-                dns_service_ip = dns_service_ip,
-                outbound_type = outbound_type
-            )
+        self.network_profile = ContainerServiceNetworkProfile(
+            service_cidr = service_cidr,
+            dns_service_ip = dns_service_ip,
+            load_balancer_sku = load_balancer_sku,
+            outbound_type = outbound_type
+        )
+#         if load_balancer_sku:
+#             self.network_profile = ContainerServiceNetworkProfile(
+#                 service_cidr = service_cidr,
+#                 dns_service_ip = dns_service_ip,
+#                 load_balancer_sku = load_balancer_sku
+#             )
+#         else:
+#             self.network_profile = ContainerServiceNetworkProfile(
+#                 service_cidr = service_cidr,
+#                 dns_service_ip = dns_service_ip,
+#                 outbound_type = outbound_type
+#             )
         return self
 
     def with_cluster_sp(self, cluster_service_principal_connection_info):
