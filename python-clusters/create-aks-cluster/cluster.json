@@ -92,7 +92,7 @@
                 {"value": "loadBalancer", "label": "loadBalancer"}
             ],
             "defaultValue": "loadBalancer"
-        }
+        },
         {
             "name": "loadBalancerSku",
             "label": "Load balancer SKU",
