@@ -102,8 +102,7 @@
                 {"value":"Standard", "label":"Standard"}
             ],
             "mandatory": false,
-            "defaultValue": "Basic",
-            "visibilityCondition": "model.outboundType == 'loadBalancer'"
+            "defaultValue": "Basic"
         }
 
     ]
