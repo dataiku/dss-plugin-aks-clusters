@@ -83,8 +83,8 @@
             "mandatory": true
         },
         {
-            "name": "networkProfileType",
-            "label": "Network Profile",
+            "name": "outboundType",
+            "label": "Outbound Type",
             "description": "https://docs.microsoft.com/en-us/azure/aks/egress-outboundtype",
             "type": "SELECT",
             "selectChoices": [
