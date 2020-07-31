@@ -22,7 +22,6 @@ class ClusterBuilder(object):
         self.node_pools = []
         self.cluster_version = None
         self.private_access = None
-        self.load_balancer_profile = None
 
 
     def with_name(self, name):
@@ -61,12 +60,6 @@ class ClusterBuilder(object):
     def with_private_access(self, private_access):
         self.private_access = ManagedClusterAPIServerAccessProfile(
             enable_private_cluster=private_access
-        )
-        return self
-    
-    def with_user_defined_route(self, load_balancer_profile):
-        self.load_balancer_profile = ContainerServiceNetworkProfile(
-            load_balancer_profile = load_balancer_profile
         )
         return self
 
