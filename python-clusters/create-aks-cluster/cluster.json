@@ -103,7 +103,7 @@
             ],
             "mandatory": false,
             "defaultValue": "Basic",
-            "visibilityCondition": "model.networkProfileType == loadBalancer"
+            "visibilityCondition": "model.networkProfileType != loadBalancer"
         }
 
     ]
