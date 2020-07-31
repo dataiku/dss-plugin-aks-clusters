@@ -69,9 +69,15 @@ class MyCluster(Cluster):
         cluster_builder.with_resource_group(resource_group)
         cluster_builder.with_location(self.config.get("location", None))
         cluster_builder.with_linux_profile() # default is None
-        cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
+        
+        if self.config.get("networkProfileType") == "loadBalancer":
+            cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                              dns_service_ip=self.config.get("dnsServiceIP", None),
                                              load_balancer_sku=self.config.get("loadBalancerSku", None))
+        else:
+            cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
+                                             dns_service_ip=self.config.get("dnsServiceIP", None),
+                                             load_balancer_profile=self.config.get("networkProfileType", None))
 
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
@@ -81,9 +87,6 @@ class MyCluster(Cluster):
 
         if connection_info.get("privateAccess"):
             cluster_builder.with_private_access(connection_info.get("privateAccess"))
-            
-        if connection_info.get("clusterEgress") == "userDefinedRouting":
-            cluster_builder.with_user_defined_route(connection_info.get("clusterEgress"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
         
