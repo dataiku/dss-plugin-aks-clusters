@@ -70,7 +70,8 @@
         },
         {
             "name": "privateAccess",
-            "label": "Private Cluster",
+            "label": "Private Cluster Endpoint",
+            "description": "Cluster endpoint accessible through Private Link. If used, must set Load balancer SKU to Standard.",
             "type": "BOOLEAN",
             "defaultValue": false
         },
