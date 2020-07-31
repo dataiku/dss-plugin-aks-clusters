@@ -42,6 +42,16 @@
             "label": "Private Cluster",
             "type": "BOOLEAN",
             "defaultValue": false
+        },
+        {
+            "name": "clusterEgress",
+            "label": "Cluster Egress Type",
+            "type": "SELECT",
+            "selectChoices": [
+                { "value": "slb", "label": "loadBalancer"},
+                { "value": "udr", "label": "userDefinedRouting"}
+            ],
+            "defaultValue": "udr"
         }
     ]
 }
