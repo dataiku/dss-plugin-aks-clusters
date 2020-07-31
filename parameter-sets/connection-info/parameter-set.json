@@ -48,10 +48,10 @@
             "label": "Cluster Egress Type",
             "type": "SELECT",
             "selectChoices": [
-                { "value": "slb", "label": "loadBalancer"},
-                { "value": "udr", "label": "userDefinedRouting"}
+                { "value": "loadBalancer", "label": "loadBalancer"},
+                { "value": "userDefinedRouting", "label": "userDefinedRouting"}
             ],
-            "defaultValue": "udr"
+            "defaultValue": "userDefinedRouting"
         }
     ]
 }
