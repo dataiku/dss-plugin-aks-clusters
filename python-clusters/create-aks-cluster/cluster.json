@@ -83,6 +83,17 @@
             "mandatory": true
         },
         {
+            "name": "networkProfileType",
+            "label": "Network Profile",
+            "description": "https://docs.microsoft.com/en-us/azure/aks/egress-outboundtype",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "userDefinedRouting", "label": "userDefinedRouting"},
+                {"value": "loadBalancer", "label": "loadBalancer"}
+            ],
+            "defaultValue": "loadBalancer"
+        }
+        {
             "name": "loadBalancerSku",
             "label": "Load balancer SKU",
             "type": "SELECT",
@@ -91,7 +102,8 @@
                 {"value":"Standard", "label":"Standard"}
             ],
             "mandatory": false,
-            "defaultValue": "Basic"
+            "defaultValue": "Basic",
+            "visibilityCondition": "model.networkProfileType == loadBalancer"
         }
 
     ]
