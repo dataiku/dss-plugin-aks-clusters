@@ -45,7 +45,7 @@ class ClusterBuilder(object):
         return self
 
     def with_network_profile(self, **kwargs):
-        self.network_profile = ContainerServiceNetworkProfile(kwargs)
+        self.network_profile = ContainerServiceNetworkProfile(**kwargs)
         return self
 
     def with_cluster_sp(self, cluster_service_principal_connection_info):
