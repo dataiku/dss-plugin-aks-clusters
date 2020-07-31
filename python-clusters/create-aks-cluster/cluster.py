@@ -75,6 +75,7 @@ class MyCluster(Cluster):
                                              dns_service_ip=self.config.get("dnsServiceIP", None),
                                              load_balancer_sku=self.config.get("loadBalancerSku", None))
         else:
+            print()
             cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                              dns_service_ip=self.config.get("dnsServiceIP", None),
                                              load_balancer_profile=self.config.get("networkProfileType", None))
