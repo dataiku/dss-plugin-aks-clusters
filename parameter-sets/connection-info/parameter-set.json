@@ -36,12 +36,6 @@
             "label": "Password",
             "type": "PASSWORD",
             "mandatory" : true
-        },
-        {
-            "name": "privateAccess",
-            "label": "Private Cluster",
-            "type": "BOOLEAN",
-            "defaultValue": false
         }
     ]
 }
