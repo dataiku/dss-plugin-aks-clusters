@@ -53,8 +53,8 @@ class ClusterBuilder(object):
             )
         else:
             self.network_profile = ContainerServiceNetworkProfile(
-#                 service_cidr = service_cidr,
-#                 dns_service_ip = dns_service_ip,
+                service_cidr = service_cidr,
+                dns_service_ip = dns_service_ip,
                 outbound_type = outbound_type
             )
         return self
