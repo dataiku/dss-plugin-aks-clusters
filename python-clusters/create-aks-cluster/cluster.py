@@ -81,6 +81,9 @@ class MyCluster(Cluster):
 
         if connection_info.get("privateAccess"):
             cluster_builder.with_private_access(connection_info.get("privateAccess"))
+            
+        if connection_info.get("clusterEgress") == "userDefinedRouting":
+            cluster_builder.with_user_defined_route(connection_info.get("clusterEgress"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
         
