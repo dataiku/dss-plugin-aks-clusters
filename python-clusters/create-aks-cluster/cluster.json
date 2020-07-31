@@ -69,6 +69,12 @@
             "label": "Advanced options"
         },
         {
+            "name": "privateAccess",
+            "label": "Private Cluster",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
             "name": "serviceCIDR",
             "label": "Service CIDR",
             "description": "IP range for services in the cluster (cannot overlap the IP range of the pools' subnets)",
