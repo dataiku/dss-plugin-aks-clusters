@@ -71,9 +71,20 @@
         {
             "name": "privateAccess",
             "label": "Private Cluster Endpoint",
-            "description": "Cluster endpoint accessible through Private Link. If used, must set Load balancer SKU to Standard.",
+            "description": "Cluster endpoint accessible through Private Link. If used, must set Load balancer SKU to Standard",
             "type": "BOOLEAN",
             "defaultValue": false
+        },
+        {
+            "name": "networkPlugin",
+            "label": "Kubernetes Network Plugin",
+            "description": "Network plugin used for building Kubernetes network",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "azure", "label": "Azure CNI"},
+                {"value": "kubenet", "label": "kubenet"}
+            ],
+            "defaultValue": "kubenet"
         },
         {
             "name": "serviceCIDR",
