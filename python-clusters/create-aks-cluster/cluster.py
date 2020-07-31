@@ -77,6 +77,7 @@ class MyCluster(Cluster):
         else:
             cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                              dns_service_ip=self.config.get("dnsServiceIP", None),
+                                             load_balancer_sku=self.config.get("loadBalancerSku", None),
                                              outbound_type=self.config.get("outboundType", None))
 
         if self.config.get("useDistinctSPForCluster", False):
