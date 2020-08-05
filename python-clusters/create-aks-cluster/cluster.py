@@ -73,7 +73,8 @@ class MyCluster(Cluster):
                                          dns_service_ip=self.config.get("dnsServiceIP", None),
                                          load_balancer_sku=self.config.get("loadBalancerSku", None),
                                          outbound_type=self.config.get("outboundType", None),
-                                         network_plugin=self.config.get("networkPlugin"))
+                                         network_plugin=self.config.get("networkPlugin"),
+                                         docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
