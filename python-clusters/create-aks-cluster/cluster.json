@@ -101,6 +101,13 @@
             "mandatory": true
         },
         {
+            "name": "dockerBridgeCidr",
+            "label": "Docker Bridge CIDR",
+            "description": "A CIDR notation IP range assigned to the Docker bridge network. It must not overlap with any Subnet IP ranges or the Kubernetes service address range.",
+            "type": "STRING",
+            "defaultValue": "172.17.0.1/16"
+        },
+        {
             "name": "outboundType",
             "label": "Outbound Type",
             "description": "https://docs.microsoft.com/en-us/azure/aks/egress-outboundtype",
