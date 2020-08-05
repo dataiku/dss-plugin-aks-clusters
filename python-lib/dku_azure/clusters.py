@@ -44,13 +44,14 @@ class ClusterBuilder(object):
         self.linux_profile = linux_profile
         return self
 
-    def with_network_profile(self, service_cidr, dns_service_ip, load_balancer_sku, outbound_type, network_plugin):
+    def with_network_profile(self, service_cidr, dns_service_ip, load_balancer_sku, outbound_type, network_plugin, docker_bridge_cidr):
         self.network_profile = ContainerServiceNetworkProfile(
             service_cidr = service_cidr,
             dns_service_ip = dns_service_ip,
             load_balancer_sku = load_balancer_sku,
             outbound_type = outbound_type,
-            network_plugin = network_plugin
+            network_plugin = network_plugin,
+            docker_bridge_cidr = docker_bridge_cidr
         )
         return self
 
