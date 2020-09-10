@@ -12,9 +12,9 @@ def run_and_process_cloud_error(fn):
     try:
         return fn()
     except CloudError as e:
-        raise Exception('%s : %s' % (str(e), e.response.content))
+        raise Exception('%s : %s' % (e.error, e.response.content))
     except Exception as e:
-        raise e
+        raise e.decode('utf-8')
         
 
 def get_instance_metadata(api_version="2019-04-30"):
