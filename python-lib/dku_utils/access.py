@@ -1,4 +1,5 @@
 from collections import Mapping, Iterable
+from six import text_type
 
 def _get_in_object_or_array(o, chunk, d):
     if isinstance(chunk, int):
@@ -16,7 +17,7 @@ def _safe_get_value(o, chunks, default_value=None):
         return _safe_get_value(_get_in_object_or_array(o, chunks[0], {}), chunks[1:], default_value)
 
 def _is_none_or_blank(x):
-    return x is None or (isinstance(x, str) and len(x.strip()) == 0) or(isinstance(x, unicode) and len(x.strip()) == 0)
+    return x is None or (isinstance(x, text_type) and len(x.strip()) == 0)
 
 def _has_not_blank_property(d, k):
     return k in d and not _is_none_or_blank(d[k])
@@ -57,4 +58,13 @@ def _merge_objects(a, b):
     else:
         return a
     
-    
+def kvl_to_dict(kvl):
+    d = {l["from"]: l["to"] for l in kvl}
+    return d
+
+def kvl_to_list(kvl):
+    d = kvl_to_dict(kvl)
+    output = ["{}={}".format(k, d[k]) for k in d]
+    print("DEBUG")
+    print(output)
+    return output

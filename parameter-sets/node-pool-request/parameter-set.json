@@ -59,6 +59,39 @@
             "visibilityCondition": "model.autoScaling"
         },
         {
+            "name": "nodepoolLabels",
+            "label": "Node labels",
+            "type": "KEY_VALUE_LIST"
+        },
+        {
+            "name":  "nodepoolTags",
+            "label": "Tags",
+            "type": "KEY_VALUE_LIST"
+        },
+        {
+            "name": "applyNodeTaints",
+            "label": "Apply node taints",
+            "type": "BOOLEAN"
+        },
+        {
+            "name": "NoSchedule",
+            "label": "NoSchedule",
+            "type": "KEY_VALUE_LIST",
+            "visibilityCondition": "model.applyNodeTaints"
+        },
+        {
+            "name": "PreferNoSchedule",
+            "label": "PreferNoSchedule",
+            "type": "KEY_VALUE_LIST",
+            "visibilityCondition": "model.applyNodeTaints"
+        },
+        {
+            "name": "NoExecute",
+            "label": "NoExecute",
+            "type": "KEY_VALUE_LIST",
+            "visibilityCondition": "model.applyNodeTaints"
+        },
+        {
             "type": "SEPARATOR",
             "label": "Networking"
         },

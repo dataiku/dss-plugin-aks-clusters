@@ -2,6 +2,7 @@ from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile, ManagedCluster
 from dku_utils.access import _default_if_blank
+from dku_utils.access import kvl_to_list, kvl_to_dict
 
 import logging
 
@@ -103,6 +104,9 @@ class NodePoolBuilder(object):
         self.idx = None
         self.agent_pool_profile = None
         self.gpu = None
+        self.nodepool_taints = None
+        self.nodepool_labels = None
+        self.nodepool_tags = None
 
 
     def with_name(self, name):
@@ -155,6 +159,23 @@ class NodePoolBuilder(object):
             self.disk_size_gb = disk_size_gb
         return self
 
+    def with_nodepool_taints(self, nodepool_taints):
+        #TODO
+        if nodepool_taints:
+            self.nodepool_taints = kvl_to_list(nodepool_taints)
+        return self
+
+    def with_nodepool_labels(self, nodepool_labels):
+        #TODO
+        if nodepool_labels:
+            self.nodepool_labels = kvl_to_dict(nodepool_labels)
+        return self
+
+    def with_nodepool_tags(self, nodepool_tags):
+        #TODO
+        if nodepool_tags:
+            self.nodepool_tags = kvl_to_dict(nodepool_tags)
+
     def build(self):
         agent_pool_profile_params = {}
         if self.idx == 0:
@@ -170,6 +191,12 @@ class NodePoolBuilder(object):
             agent_pool_profile_params["min_count"] = self.min_num_nodes
         if self.max_num_nodes:
             agent_pool_profile_params["max_count"] = self.max_num_nodes
+        if self.nodepool_taints:
+            agent_pool_profile_params["node_taints"] = self.nodepool_taints
+        if self.nodepool_labels:
+            agent_pool_profile_params["node_labels"] = self.nodepool_labels
+        if self.nodepool_tags:
+            agent_pool_profile_params["tags"] = self.nodepool_tags
 
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
