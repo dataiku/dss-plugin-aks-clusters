@@ -14,7 +14,7 @@ def run_and_process_cloud_error(fn):
     except CloudError as e:
         raise Exception('%s : %s' % (e.error, e.response.content))
     except Exception as e:
-        raise e.decode('utf-8')
+        raise e.message.decode('utf-8')
         
 
 def get_instance_metadata(api_version="2019-04-30"):
