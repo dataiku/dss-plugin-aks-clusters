@@ -5,7 +5,7 @@
         "label": "AKS clusters",
         "description": "Interact with or create Microsoft Azure Kubernetes Service clusters",
         "author": "Dataiku",
-        "icon": "icon-azure-kubernetes-services-icon-cloud",
+        "icon": "icon-azure-kubernetes-services icon-cloud",
         "licenseInfo" : "Apache Software License",
         "url": "https://github.com/dataiku/dss-plugin-aks-clusters",
         "tags": ["Cloud", "Microsoft Azure"],
