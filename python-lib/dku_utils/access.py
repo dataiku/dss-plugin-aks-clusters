@@ -59,12 +59,25 @@ def _merge_objects(a, b):
         return a
     
 def kvl_to_dict(kvl):
-    d = {l["from"]: l["to"] for l in kvl}
-    return d
+    if kvl:
+        d = {l["from"]: l["to"] for l in kvl}
+        return d
+    else:
+        return None
 
 def kvl_to_list(kvl):
     d = kvl_to_dict(kvl)
-    output = ["{}={}".format(k, d[k]) for k in d]
-    print("DEBUG")
-    print(output)
-    return output
+    if d:
+        output = ["{}={}".format(k, d[k]) for k in d]
+        return output
+    else:
+        return None
+
+def collect_taints(node_pool_conf):
+    taints_list = []
+    if node_pool_conf.get("applyNodeTaints"):
+        for effect in ["NoSchedule", "PreferNoSchedule", "NoExecute"]:
+            taints_dict = kvl_to_dict(node_pool_conf.get(effect, None))
+            if taints_dict:
+                taints_list += ["{}={}:{}".format(k, taints_dict[k], effect ) for k in taints_dict]
+    return taints_list

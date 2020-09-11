@@ -160,19 +160,16 @@ class NodePoolBuilder(object):
         return self
 
     def with_nodepool_taints(self, nodepool_taints):
-        #TODO
         if nodepool_taints:
-            self.nodepool_taints = kvl_to_list(nodepool_taints)
+            self.nodepool_taints = nodepool_taints
         return self
 
     def with_nodepool_labels(self, nodepool_labels):
-        #TODO
         if nodepool_labels:
             self.nodepool_labels = kvl_to_dict(nodepool_labels)
         return self
 
     def with_nodepool_tags(self, nodepool_tags):
-        #TODO
         if nodepool_tags:
             self.nodepool_tags = kvl_to_dict(nodepool_tags)
 

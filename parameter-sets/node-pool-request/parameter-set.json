@@ -71,7 +71,8 @@
         {
             "name": "applyNodeTaints",
             "label": "Apply node taints",
-            "type": "BOOLEAN"
+            "type": "BOOLEAN",
+            "description": "WARNING: you need at least 1 untainted node pool!"
         },
         {
             "name": "NoSchedule",

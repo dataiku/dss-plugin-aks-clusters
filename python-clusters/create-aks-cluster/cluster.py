@@ -8,7 +8,7 @@ from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 from msrestazure.azure_exceptions import CloudError
 
-from dku_utils.access import _is_none_or_blank, _has_not_blank_property
+from dku_utils.access import _is_none_or_blank, _has_not_blank_property, collect_taints
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.clusters import ClusterBuilder
@@ -100,10 +100,12 @@ class MyCluster(Cluster):
                                               max_num_nodes=node_pool_conf.get("maxNumNodes", None))
 
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
-            node_pool_builder.with_nodepool_taints(nodepool_taints=node_pool_conf.get("nodepoolTaints", None))
             node_pool_builder.with_nodepool_labels(nodepool_labels=node_pool_conf.get("nodepoolLabels", None))
             node_pool_builder.with_nodepool_tags(nodepool_tags=node_pool_conf.get("nodepoolTags", None))
-            
+            #node_pool_builder.with_nodepool_taints(nodepool_taints=node_pool_conf.get("nodepoolTaints", None))
+            node_pool_builder.with_nodepool_taints(nodepool_taints=collect_taints(node_pool_conf))
+
+
             node_pool_builder.build()
             cluster_builder.with_node_pool(node_pool=node_pool_builder.agent_pool_profile)
         
