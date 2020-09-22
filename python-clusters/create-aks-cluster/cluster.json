@@ -13,7 +13,6 @@
             "parameterSetId": "connection-info",
             "mandatory": true
         },
-        
         {
             "name": "clusterVersion",
             "label": "Kubernetes version",

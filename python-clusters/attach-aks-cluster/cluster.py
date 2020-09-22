@@ -2,13 +2,8 @@ import os, json, logging, yaml
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
-from azure.mgmt.containerservice.models import ManagedCluster, ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile, ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile
-from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
-
 from dku_utils.access import _is_none_or_blank
-from dku_utils.cluster import make_overrides
+from dku_utils.cluster import make_overrides, get_subscription_id
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.utils import run_and_process_cloud_error
 
@@ -22,7 +17,7 @@ class MyCluster(Cluster):
     def start(self):
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
-        subscription_id = connection_info.get('subscriptionId', None)
+        subscription_id = get_subscription_id(connection_info)
         if _is_none_or_blank(subscription_id):
             raise Exception('Subscription must be defined')
 

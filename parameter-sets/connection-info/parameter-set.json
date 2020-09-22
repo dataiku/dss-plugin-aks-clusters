@@ -1,7 +1,7 @@
 {
     "meta" : {
         "label" : "AKS connections",
-	"pluralLabel": "AKS connections",
+        "pluralLabel": "AKS connections",
         "description" : "AKS connection settings",
         "icon" : "icon-link"
     },
@@ -14,6 +14,13 @@
 
     "params": [
         {
+            "name": "userManagedIdentity",
+            "label": "User-managed identity ID",
+            "type": "STRING",
+            "mandatory" : false,
+            "description": "Will be used to retrieve a token, Application (client) ID and Password are still required"
+        },
+        {
             "name": "subscriptionId",
             "label": "Azure subscription ID",
             "type": "STRING",
@@ -23,7 +30,7 @@
             "name": "tenantId",
             "label": "Directory (tenant) ID",
             "type": "STRING",
-            "mandatory" : true
+            "mandatory" : false
         },
         {
             "name": "clientId",

@@ -3,8 +3,8 @@ import json
 import logging
 
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.resource import ResourceManagementClient
+from dku_utils.cluster import get_subscription_id
 
 AZURE_METADATA_SERVICE="http://169.254.169.254"
 
@@ -41,7 +41,7 @@ def get_subnet_id(connection_info, resource_group, vnet, subnet):
     """
     """
     logging.info("Mapping subnet {} to its full resource ID...".format(subnet))
-    subscription_id = connection_info.get("subscriptionId", None)
+    subscription_id = get_subscription_id(connection_info)
     subnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
                                                                                                                        resource_group,
                                                                                                                        vnet,
@@ -61,7 +61,7 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("Getting instance metadata...")
     vm_name = get_instance_metadata()["compute"]["name"]
     logging.info("DSS host is on VNET {}".format(vm_name))
-    subscription_id = connection_info.get("subscriptionId", None)
+    subscription_id = get_subscription_id(connection_info)
     vm_resource_id = get_vm_resource_id(subscription_id, resource_group, vm_name)
     resource_mgmt_client = ResourceManagementClient(credentials=credentials, subscription_id=subscription_id, api_version=api_version)
     vm_properties = resource_mgmt_client.resources.get_by_id(vm_resource_id, api_version=api_version).properties

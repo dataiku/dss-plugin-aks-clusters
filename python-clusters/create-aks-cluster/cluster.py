@@ -2,14 +2,10 @@ import os, json, logging, yaml, time
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
-from azure.mgmt.containerservice.models import ManagedCluster, ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceLinuxProfile, ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile
-from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
-from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
-from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
+from dku_utils.cluster import make_overrides, get_cluster_from_connection_info, get_subscription_id
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.clusters import ClusterBuilder
 from dku_azure.utils import run_and_process_cloud_error, get_subnet_id
@@ -29,7 +25,7 @@ class MyCluster(Cluster):
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
         credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
-        subscription_id = connection_info.get('subscriptionId', None)
+        subscription_id = get_subscription_id(connection_info)
         resource_group = self.config.get('resourceGroup', None)
 
         clusters_client = ContainerServiceClient(credentials, subscription_id)
@@ -127,7 +123,7 @@ class MyCluster(Cluster):
     def stop(self, data):
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
-        subscription_id = connection_info.get('subscriptionId', None)
+        subscription_id = get_subscription_id(connection_info)
         if _is_none_or_blank(subscription_id):
             raise Exception('Subscription must be defined')
 

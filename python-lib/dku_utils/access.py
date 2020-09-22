@@ -56,5 +56,3 @@ def _merge_objects(a, b):
         return b
     else:
         return a
-    
-    

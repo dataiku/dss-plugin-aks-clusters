@@ -21,6 +21,7 @@ class ClusterBuilder(object):
         self.cluster_sp = None
         self.node_pools = []
         self.cluster_version = None
+        self.user_identity = None
 
 
     def with_name(self, name):
@@ -48,11 +49,11 @@ class ClusterBuilder(object):
         return self
 
     def with_cluster_sp(self, cluster_service_principal_connection_info):
-        client_id = cluster_service_principal_connection_info["clientId"]
-        client_secret = cluster_service_principal_connection_info["password"]
+        client_id = cluster_service_principal_connection_info.get("clientId", None)
+        client_secret = cluster_service_principal_connection_info.get("password", None)
         service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
-                                                                            secret=client_secret,
-                                                                            key_vault_secret_ref=None)
+                                                                        secret=client_secret,
+                                                                        key_vault_secret_ref=None)
         self.cluster_sp = service_principal_profile
         return self
 
