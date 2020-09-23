@@ -8,7 +8,7 @@ from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
 from azure.mgmt.containerservice.models import ContainerServiceVMSizeTypes
 from msrestazure.azure_exceptions import CloudError
 
-from dku_utils.access import _is_none_or_blank, _has_not_blank_property
+from dku_utils.access import _is_none_or_blank, _has_not_blank_property, _default_if_property_blank
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.clusters import ClusterBuilder
@@ -53,6 +53,9 @@ class MyCluster(Cluster):
         #    location = vm_infos.get('location', None)
         if _is_none_or_blank(location):
             raise Exception("A location to put the cluster in is required")
+
+        tags = self.config.get("tags", {})
+
             
         # check that the cluster doesn't exist yet, otherwise azure will try to update it
         # and will almost always fail
@@ -69,6 +72,7 @@ class MyCluster(Cluster):
         cluster_builder.with_resource_group(resource_group)
         cluster_builder.with_location(self.config.get("location", None))
         cluster_builder.with_linux_profile() # default is None
+        cluster_builder.with_tags(tags)
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                          dns_service_ip=self.config.get("dnsServiceIP", None),
                                          load_balancer_sku=self.config.get("loadBalancerSku", None),
@@ -93,7 +97,8 @@ class MyCluster(Cluster):
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
             vnet = node_pool_conf.get("vnet", None)
             subnet = node_pool_conf.get("subnet", None)
-            node_resource_group = node_pool_conf.get("resourceGroup", resource_group)
+            node_resource_group = _default_if_property_blank(node_pool_conf, resourceGroup, resource_group)
+            #edge case when inherit_from_host is True but node resource group is filled
             node_pool_builder.with_network(inherit_from_host=node_pool_conf.get("useSameNetworkAsDSSHost"),
                                            cluster_vnet=vnet,
                                            cluster_subnet=subnet,

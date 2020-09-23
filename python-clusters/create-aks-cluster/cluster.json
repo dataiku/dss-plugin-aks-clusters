@@ -34,6 +34,12 @@
             "mandatory": true
         },
         {
+            "name": "tags",
+            "label": "Tags",
+            "description": "Tags assigned to the resources created",
+            "type": "MAP"
+        },
+        {
             "name": "useDistinctSPForCluster",
             "label": "Use distinct credentials",
             "description": "Associate cluster nodes with a specific Service Principal",
