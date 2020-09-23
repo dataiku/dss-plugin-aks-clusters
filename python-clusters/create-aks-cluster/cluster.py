@@ -93,12 +93,13 @@ class MyCluster(Cluster):
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
             vnet = node_pool_conf.get("vnet", None)
             subnet = node_pool_conf.get("subnet", None)
+            node_resource_group = node_pool_conf.get("resourceGroup", resource_group)
             node_pool_builder.with_network(inherit_from_host=node_pool_conf.get("useSameNetworkAsDSSHost"),
                                            cluster_vnet=vnet,
                                            cluster_subnet=subnet,
                                            connection_info=connection_info,
                                            credentials=credentials,
-                                           resource_group=resource_group)
+                                           resource_group=node_resource_group)
 
             node_pool_builder.with_node_count(enable_autoscaling=node_pool_conf.get("autoScaling", False),
                                               num_nodes=node_pool_conf.get("numNodes", None),

@@ -86,6 +86,14 @@
             "type": "STRING",
             "mandatory": false,
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
+        },
+        {
+            "name": "resourceGroup",
+            "label": "Cluster nodes resource group",
+            "description": "Resource Group of the subnet where nodes and pods will be placed. Leave empty if it is the same as the cluster",
+            "type": "STRING",
+            "mandatory": false,
+            "visibilityCondition": "!model.useSameNetworkAsDSSHost"
         }
     ]
 }
