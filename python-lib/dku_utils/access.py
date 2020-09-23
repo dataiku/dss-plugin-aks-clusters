@@ -57,4 +57,8 @@ def _merge_objects(a, b):
     else:
         return a
     
-    
+def _default_if_dict_empty(dic, d):
+    if len(dic) == 0:
+        return d
+    else:
+        return dic

@@ -97,7 +97,7 @@ class MyCluster(Cluster):
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
             vnet = node_pool_conf.get("vnet", None)
             subnet = node_pool_conf.get("subnet", None)
-            node_resource_group = _default_if_property_blank(node_pool_conf, resourceGroup, resource_group)
+            node_resource_group = _default_if_property_blank(node_pool_conf, "resourceGroup", resource_group)
             #edge case when inherit_from_host is True but node resource group is filled
             node_pool_builder.with_network(inherit_from_host=node_pool_conf.get("useSameNetworkAsDSSHost"),
                                            cluster_vnet=vnet,
