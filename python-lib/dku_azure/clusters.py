@@ -16,6 +16,7 @@ class ClusterBuilder(object):
         self.dns_prefix = None
         self.resource_group = None
         self.location = None
+        self.tags = None
         self.linux_profile = None
         self.network_profile = None
         self.cluster_sp = None
@@ -38,6 +39,10 @@ class ClusterBuilder(object):
 
     def with_location(self, location):
         self.location = _default_if_blank(location, None)
+        return self
+
+    def with_tags(self, tags):
+        self.tags = _default_if_dict_empty(tags, None)
         return self
 
     def with_linux_profile(self, linux_profile=None):
@@ -89,6 +94,7 @@ class ClusterBuilder(object):
         cluster_params["location"] = self.location
         cluster_params["dns_prefix"] = self.dns_prefix
         cluster_params["linux_profile"] = self.linux_profile
+        cluster_params["tags"] = self.tags
         cluster_params["network_profile"] = self.network_profile
         cluster_params["service_principal_profile"] = self.cluster_sp
         cluster_params["kubernetes_version"] = self.cluster_version
