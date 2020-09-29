@@ -69,6 +69,24 @@
             "label": "Advanced options"
         },
         {
+            "name": "privateAccess",
+            "label": "Private Cluster Endpoint",
+            "description": "Cluster endpoint accessible through Private Link. If used, must set Load balancer SKU to Standard",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
+            "name": "networkPlugin",
+            "label": "Kubernetes Network Plugin",
+            "description": "Network plugin used for building Kubernetes network",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "azure", "label": "Azure CNI"},
+                {"value": "kubenet", "label": "kubenet"}
+            ],
+            "defaultValue": "kubenet"
+        },
+        {
             "name": "serviceCIDR",
             "label": "Service CIDR",
             "description": "IP range for services in the cluster (cannot overlap the IP range of the pools' subnets)",
@@ -81,6 +99,24 @@
             "description": "IP in the service IP range to use for the DNS server",
             "type": "STRING",
             "mandatory": true
+        },
+        {
+            "name": "dockerBridgeCidr",
+            "label": "Docker Bridge CIDR",
+            "description": "A CIDR notation IP range assigned to the Docker bridge network. It must not overlap with any Subnet IP ranges or the Kubernetes service address range.",
+            "type": "STRING",
+            "defaultValue": "172.17.0.1/16"
+        },
+        {
+            "name": "outboundType",
+            "label": "Outbound Type",
+            "description": "https://docs.microsoft.com/en-us/azure/aks/egress-outboundtype",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "userDefinedRouting", "label": "userDefinedRouting"},
+                {"value": "loadBalancer", "label": "loadBalancer"}
+            ],
+            "defaultValue": "loadBalancer"
         },
         {
             "name": "loadBalancerSku",

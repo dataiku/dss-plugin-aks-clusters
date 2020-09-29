@@ -70,14 +70,20 @@ class MyCluster(Cluster):
         cluster_builder.with_location(self.config.get("location", None))
         cluster_builder.with_linux_profile() # default is None
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
-                                             dns_service_ip=self.config.get("dnsServiceIP", None),
-                                             load_balancer_sku=self.config.get("loadBalancerSku", None))
+                                         dns_service_ip=self.config.get("dnsServiceIP", None),
+                                         load_balancer_sku=self.config.get("loadBalancerSku", None),
+                                         outbound_type=self.config.get("outboundType", None),
+                                         network_plugin=self.config.get("networkPlugin"),
+                                         docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
         else:
             cluster_sp = connection_info
         cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
+
+        if self.config.get("privateAccess"):
+            cluster_builder.with_private_access(self.config.get("privateAccess"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
         
