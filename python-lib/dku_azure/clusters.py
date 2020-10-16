@@ -120,6 +120,8 @@ class NodePoolBuilder(object):
         self.idx = None
         self.agent_pool_profile = None
         self.gpu = None
+        self.labels = None
+        self.taints = None
 
 
     def with_name(self, name):
@@ -164,6 +166,19 @@ class NodePoolBuilder(object):
         else:
             self.num_nodes = num_nodes
         return self
+    
+    def with_node_labels(self, labels):
+        lbls = {}
+        if labels:
+            for label in labels:
+                lbls[label["from"]] = label["to"]
+            self.labels = lbls
+        return self
+    
+    def with_node_taints(self, taints):
+        if taints:
+            self.taints = taints
+        return self
 
     def with_disk_size_gb(self, disk_size_gb):
         if disk_size_gb == 0:
@@ -187,10 +202,12 @@ class NodePoolBuilder(object):
             agent_pool_profile_params["min_count"] = self.min_num_nodes
         if self.max_num_nodes:
             agent_pool_profile_params["max_count"] = self.max_num_nodes
+        if self.labels:
+            agent_pool_profile_params["node_labels"] = self.labels
+        if self.taints:
+            agent_pool_profile_params["node_taints"] = self.taints
 
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
         self.agent_pool_profile = ManagedClusterAgentPoolProfile(**agent_pool_profile_params)
         return self
-
-
