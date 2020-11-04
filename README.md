@@ -8,6 +8,9 @@ For more details, please see [the DSS reference documentation](https://doc.datai
 
 ## Release notes
 
+### v1.0.5
+- Add node labels and node taints to AKS nodepools
+
 ### v1.0.4
 - Fix `Test network connectivity` macro when the hostname is already an IP.
 

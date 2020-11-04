@@ -86,6 +86,24 @@
             "type": "STRING",
             "mandatory": false,
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
+        },
+        {
+            "type": "SEPARATOR",
+            "label": "Kubernetes"
+        },
+        {
+            "name": "labels",
+            "label": "Node Labels",
+            "description": "https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/",
+            "type": "KEY_VALUE_LIST",
+            "mandatory": false
+        },
+        {
+            "name": "taints",
+            "label": "Node Taints",
+            "description": "WARNING: MUST CREATE AT LEAST ONE NODE POOL WITHOUT TAINTS. https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
+            "type": "STRINGS",
+            "mandatory": false
         }
     ]
 }
