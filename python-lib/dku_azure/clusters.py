@@ -9,7 +9,7 @@ import logging
 class ClusterBuilder(object):
     """
     """
-    
+
     def __init__(self, clusters_client):
         self.clusters_client = clusters_client
         self.name = None
@@ -73,8 +73,8 @@ class ClusterBuilder(object):
     def get_node_pool_builder(self):
         nb_node_pools = len(self.node_pools)
         return NodePoolBuilder(self).with_name("node-pool-{}".format(nb_node_pools))
-    
-        
+
+
     def with_cluster_version(self, cluster_version):
         if cluster_version != "latest":
             self.cluster_version = cluster_version
@@ -96,7 +96,7 @@ class ClusterBuilder(object):
 
         if self.private_access:
             cluster_params["api_server_access_profile"] = self.private_access
-            
+
         self.cluster_config = ManagedCluster(**cluster_params)
         return self.clusters_client.managed_clusters.create_or_update(self.resource_group, self.name, self.cluster_config)
 
@@ -131,7 +131,7 @@ class NodePoolBuilder(object):
     def with_idx(self, idx):
         self.idx = idx
         return self
-    
+
     def with_vm_size(self, vm_size):
         self.vm_size = vm_size
         return self
@@ -166,7 +166,7 @@ class NodePoolBuilder(object):
         else:
             self.num_nodes = num_nodes
         return self
-    
+
     def with_node_labels(self, labels):
         lbls = {}
         if labels:
@@ -174,7 +174,7 @@ class NodePoolBuilder(object):
                 lbls[label["from"]] = label["to"]
             self.labels = lbls
         return self
-    
+
     def with_node_taints(self, taints):
         if taints:
             self.taints = taints
