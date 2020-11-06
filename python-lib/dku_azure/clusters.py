@@ -167,6 +167,11 @@ class NodePoolBuilder(object):
             self.num_nodes = num_nodes
         return self
 
+    def with_mode(self, mode):
+        logging.info("Setting pool mode=%s" % mode)
+        self.mode = mode
+        return self
+
     def with_node_labels(self, labels):
         lbls = {}
         if labels:
@@ -189,8 +194,10 @@ class NodePoolBuilder(object):
 
     def build(self):
         agent_pool_profile_params = {}
-        if self.idx == 0:
+        if self.mode == "Automatic" and self.idx == 0:
             agent_pool_profile_params["mode"] = "System"
+        else:
+            agent_pool_profile_params["mode"] = self.mode
         agent_pool_profile_params["name"] = "nodepool{}".format(self.idx)
         agent_pool_profile_params["type"] = self.agent_pool_type
         agent_pool_profile_params["vm_size"] = self.vm_size

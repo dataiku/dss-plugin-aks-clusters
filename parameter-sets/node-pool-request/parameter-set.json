@@ -59,6 +59,27 @@
             "visibilityCondition": "model.autoScaling"
         },
         {
+            "name": "mode",
+            "label": "Node pool mode",
+            "type": "SELECT",
+            "selectChoices": [
+                {
+                    "value": "Automatic",
+                    "label": "Automatic (recommended)"
+                },
+                {
+                    "value": "System",
+                    "label": "System"
+                },
+                {
+                    "value": "User",
+                    "label": "User"
+                }
+            ],
+            "mandatory": true,
+            "defaultValue": "Automatic"
+        },
+        {
             "type": "SEPARATOR",
             "label": "Networking"
         },

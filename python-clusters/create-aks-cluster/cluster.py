@@ -105,6 +105,8 @@ class MyCluster(Cluster):
                                               min_num_nodes=node_pool_conf.get("minNumNodes", None),
                                               max_num_nodes=node_pool_conf.get("maxNumNodes", None))
 
+            node_pool_builder.with_mode(mode=node_pool_conf.get("mode", "Automatic"))
+
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
