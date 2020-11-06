@@ -33,27 +33,27 @@ class MyCluster(Cluster):
         resource_group = self.config.get('resourceGroup', None)
 
         clusters_client = ContainerServiceClient(credentials, subscription_id)
-        
+
         # Credit the cluster to DATAIKU
         if os.environ.get("DISABLE_AZURE_USAGE_ATTRIBUTION", "0") == "1":
             logging.info("Azure usage attribution is disabled")
         else:
             clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
-        
+
         resource_group_name = self.config.get('resourceGroup', None)
         # TODO: Auto detection
         #if _is_none_or_blank(resource_group_name):
         #    resource_group_name = vm_infos.get('resource_group_name', None)
         if _is_none_or_blank(resource_group_name):
             raise Exception("A resource group to put the cluster in is required")
-        
+
         location = self.config.get('location', None)
         # TODO: Auto detection
         #if _is_none_or_blank(location):
         #    location = vm_infos.get('location', None)
         if _is_none_or_blank(location):
             raise Exception("A location to put the cluster in is required")
-            
+
         # check that the cluster doesn't exist yet, otherwise azure will try to update it
         # and will almost always fail
         try:
@@ -86,7 +86,7 @@ class MyCluster(Cluster):
             cluster_builder.with_private_access(self.config.get("privateAccess"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
-        
+
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)
@@ -112,7 +112,7 @@ class MyCluster(Cluster):
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
             node_pool_builder.build()
             cluster_builder.with_node_pool(node_pool=node_pool_builder.agent_pool_profile)
-        
+
 
         def do_creation():
             cluster_create_op = cluster_builder.build()
@@ -128,7 +128,7 @@ class MyCluster(Cluster):
         kube_config_path = os.path.join(os.getcwd(), "kube_config")
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_content)
-        
+
         overrides = make_overrides(self.config, yaml.safe_load(kube_config_content), kube_config_path)
 
         return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict()}]
@@ -143,7 +143,7 @@ class MyCluster(Cluster):
 
         credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
         clusters_client = ContainerServiceClient(credentials, subscription_id)
-        
+
         resource_group_name = self.config.get('resourceGroup', None)
         if _is_none_or_blank(resource_group_name):
             raise Exception("A resource group to put the cluster in is required")
@@ -152,7 +152,7 @@ class MyCluster(Cluster):
         def do_delete():
             return clusters_client.managed_clusters.delete(resource_group_name, self.cluster_name)
         delete_result = run_and_process_cloud_error(do_delete)
-        
+
         # delete returns void, so we poll until the cluster is really gone
         gone = False
         while not gone:
@@ -164,4 +164,4 @@ class MyCluster(Cluster):
             except Exception as e:
                 logging.info("Could not get cluster, should be gone (%s)" % str(e))
                 gone = True
-        
+
