@@ -34,6 +34,21 @@
             "mandatory": true
         },
         {
+            "name": "useCustomNodeResourceGroup",
+            "label": "Use custom Node Resource Group",
+            "description": "Create node resources in a custom resource group",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": true
+        },
+        {
+            "name": "nodeResourceGroup",
+            "label": "Node Resource Group",
+            "description": "Name of the Resource Group where node resources will be created",
+            "type": "STRING",
+            "visibilityCondition": "model.useCustomNodeResourceGroup"
+        },
+        {
             "name": "useDistinctSPForCluster",
             "label": "Use distinct credentials",
             "description": "Associate cluster nodes with a specific Service Principal",

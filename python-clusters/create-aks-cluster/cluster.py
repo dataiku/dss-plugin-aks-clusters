@@ -76,6 +76,9 @@ class MyCluster(Cluster):
                                          network_plugin=self.config.get("networkPlugin"),
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
+        if self.config.get("useCustomNodeResourceGroup", False):
+            cluster_builder.with_node_resource_group(self.config.get("nodeResourceGroup"))
+
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
         else:

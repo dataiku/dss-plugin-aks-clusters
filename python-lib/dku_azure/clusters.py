@@ -55,6 +55,9 @@ class ClusterBuilder(object):
         )
         return self
 
+    def with_node_resource_group(self, node_resource_group):
+        self.node_resource_group = node_resource_group
+
     def with_cluster_sp(self, cluster_service_principal_connection_info):
         client_id = cluster_service_principal_connection_info["clientId"]
         client_secret = cluster_service_principal_connection_info["password"]
@@ -90,6 +93,7 @@ class ClusterBuilder(object):
         cluster_params["dns_prefix"] = self.dns_prefix
         cluster_params["linux_profile"] = self.linux_profile
         cluster_params["network_profile"] = self.network_profile
+        cluster_params["node_resource_group"] = self.node_resource_group
         cluster_params["service_principal_profile"] = self.cluster_sp
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
