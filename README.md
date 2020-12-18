@@ -8,6 +8,9 @@ For more details, please see [the DSS reference documentation](https://doc.datai
 
 ## Release notes
 
+### v1.0.6
+- Allow nodepools with a minimum of 0 nodes (allowed for user node pools)
+
 ### v1.0.5
 - Add node labels and node taints to AKS nodepools
 
