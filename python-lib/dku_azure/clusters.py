@@ -121,7 +121,7 @@ class NodePoolBuilder(object):
         self.agent_pool_profile = None
         self.gpu = None
         self.labels = None
-        self.taints = None
+        self.taints = []
 
 
     def with_name(self, name):
@@ -167,9 +167,11 @@ class NodePoolBuilder(object):
             self.num_nodes = num_nodes
         return self
 
-    def with_mode(self, mode):
+    def with_mode(self, mode, system_pods_only):
         logging.info("Setting pool mode=%s" % mode)
         self.mode = mode
+        if mode == "System" and system_pods_only:
+            self.taints.append("CriticalAddonsOnly=true:NoSchedule")
         return self
 
     def with_node_labels(self, labels):
@@ -182,7 +184,7 @@ class NodePoolBuilder(object):
 
     def with_node_taints(self, taints):
         if taints:
-            self.taints = taints
+            self.taints.append(taints)
         return self
 
     def with_disk_size_gb(self, disk_size_gb):
