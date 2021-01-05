@@ -5,10 +5,10 @@
         "description": "Configuration for an AKS node pool",
         "icon": "icon-tasks"
     },
-    
+
     "defaultDefinableAtProjectLevel" : true,
     "defaultDefinableInline" : true,
-    
+
     "pluginParams": [
     ],
 
@@ -57,6 +57,35 @@
             "mandatory": true,
             "defaultValue": 5,
             "visibilityCondition": "model.autoScaling"
+        },
+        {
+            "name": "mode",
+            "label": "Node pool mode",
+            "type": "SELECT",
+            "selectChoices": [
+                {
+                    "value": "Automatic",
+                    "label": "Automatic (recommended)"
+                },
+                {
+                    "value": "System",
+                    "label": "System"
+                },
+                {
+                    "value": "User",
+                    "label": "User"
+                }
+            ],
+            "mandatory": true,
+            "defaultValue": "Automatic"
+        },
+        {
+            "name": "systemPodsOnly",
+            "label": "Run critical system pods only",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true,
+            "visibilityCondition": "model.mode == 'System'"
         },
         {
             "type": "SEPARATOR",
