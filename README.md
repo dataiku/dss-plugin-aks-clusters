@@ -26,3 +26,8 @@ For more details, please see [the DSS reference documentation](https://doc.datai
 ### v1.0.2
 
 - Minor fix on Azure API calls.
+
+## License
+Copyright (C) 2019-2021 Dataiku
+
+Licensed under the Apache License, version 2.0
