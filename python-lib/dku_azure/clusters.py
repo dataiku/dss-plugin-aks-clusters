@@ -1,5 +1,5 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
-from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile
+from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile, ManagedCluster
 from dku_utils.access import _default_if_blank
 
@@ -9,7 +9,7 @@ import logging
 class ClusterBuilder(object):
     """
     """
-    
+
     def __init__(self, clusters_client):
         self.clusters_client = clusters_client
         self.name = None
@@ -22,6 +22,7 @@ class ClusterBuilder(object):
         self.node_pools = []
         self.cluster_version = None
         self.user_identity = None
+        self.private_access = None
 
 
     def with_name(self, name):
@@ -44,8 +45,15 @@ class ClusterBuilder(object):
         self.linux_profile = linux_profile
         return self
 
-    def with_network_profile(self, service_cidr, dns_service_ip, load_balancer_sku):
-        self.network_profile = ContainerServiceNetworkProfile(service_cidr=service_cidr, dns_service_ip=dns_service_ip, load_balancer_sku=load_balancer_sku)
+    def with_network_profile(self, service_cidr, dns_service_ip, load_balancer_sku, outbound_type, network_plugin, docker_bridge_cidr):
+        self.network_profile = ContainerServiceNetworkProfile(
+            service_cidr = service_cidr,
+            dns_service_ip = dns_service_ip,
+            load_balancer_sku = load_balancer_sku,
+            outbound_type = outbound_type,
+            network_plugin = network_plugin,
+            docker_bridge_cidr = docker_bridge_cidr
+        )
         return self
 
     def with_cluster_sp(self, cluster_service_principal_connection_info):
@@ -57,11 +65,17 @@ class ClusterBuilder(object):
         self.cluster_sp = service_principal_profile
         return self
 
+    def with_private_access(self, private_access):
+        self.private_access = ManagedClusterAPIServerAccessProfile(
+            enable_private_cluster=private_access
+        )
+        return self
+
     def get_node_pool_builder(self):
         nb_node_pools = len(self.node_pools)
         return NodePoolBuilder(self).with_name("node-pool-{}".format(nb_node_pools))
-    
-        
+
+
     def with_cluster_version(self, cluster_version):
         if cluster_version != "latest":
             self.cluster_version = cluster_version
@@ -80,6 +94,9 @@ class ClusterBuilder(object):
         cluster_params["service_principal_profile"] = self.cluster_sp
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
+
+        if self.private_access:
+            cluster_params["api_server_access_profile"] = self.private_access
 
         self.cluster_config = ManagedCluster(**cluster_params)
         return self.clusters_client.managed_clusters.create_or_update(self.resource_group, self.name, self.cluster_config)
@@ -104,6 +121,8 @@ class NodePoolBuilder(object):
         self.idx = None
         self.agent_pool_profile = None
         self.gpu = None
+        self.labels = None
+        self.taints = []
 
 
     def with_name(self, name):
@@ -113,7 +132,7 @@ class NodePoolBuilder(object):
     def with_idx(self, idx):
         self.idx = idx
         return self
-    
+
     def with_vm_size(self, vm_size):
         self.vm_size = vm_size
         return self
@@ -149,6 +168,26 @@ class NodePoolBuilder(object):
             self.num_nodes = num_nodes
         return self
 
+    def with_mode(self, mode, system_pods_only):
+        logging.info("Setting pool mode=%s" % mode)
+        self.mode = mode
+        if mode == "System" and system_pods_only:
+            self.taints.append("CriticalAddonsOnly=true:NoSchedule")
+        return self
+
+    def with_node_labels(self, labels):
+        lbls = {}
+        if labels:
+            for label in labels:
+                lbls[label["from"]] = label["to"]
+            self.labels = lbls
+        return self
+
+    def with_node_taints(self, taints):
+        if taints:
+            self.taints.append(taints)
+        return self
+
     def with_disk_size_gb(self, disk_size_gb):
         if disk_size_gb == 0:
             self.disk_size_gb = None
@@ -158,23 +197,26 @@ class NodePoolBuilder(object):
 
     def build(self):
         agent_pool_profile_params = {}
-        if self.idx == 0:
+        if self.mode == "Automatic" and self.idx == 0:
             agent_pool_profile_params["mode"] = "System"
+        else:
+            agent_pool_profile_params["mode"] = self.mode
         agent_pool_profile_params["name"] = "nodepool{}".format(self.idx)
         agent_pool_profile_params["type"] = self.agent_pool_type
         agent_pool_profile_params["vm_size"] = self.vm_size
         agent_pool_profile_params["count"] = self.num_nodes
         agent_pool_profile_params["os_disk_size_gb"] = self.disk_size_gb
         agent_pool_profile_params["vnet_subnet_id"] = self.subnet_id
-        agent_pool_profile_params["enable_auto_scaling"] = self.enable_autoscaling
-        if self.min_num_nodes:
+        if self.enable_autoscaling:
+            agent_pool_profile_params["enable_auto_scaling"] = self.enable_autoscaling
             agent_pool_profile_params["min_count"] = self.min_num_nodes
-        if self.max_num_nodes:
             agent_pool_profile_params["max_count"] = self.max_num_nodes
+        if self.labels:
+            agent_pool_profile_params["node_labels"] = self.labels
+        if self.taints:
+            agent_pool_profile_params["node_taints"] = self.taints
 
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
         self.agent_pool_profile = ManagedClusterAgentPoolProfile(**agent_pool_profile_params)
         return self
-
-
