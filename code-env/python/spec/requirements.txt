@@ -1,5 +1,4 @@
 azure-common==1.1.27
-azure-core==0.15.0
 azure-identity==1.6.0
 azure-mgmt-authorization==1.0.0
 azure-mgmt-compute==21.0.0
