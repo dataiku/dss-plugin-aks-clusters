@@ -18,7 +18,7 @@
             "label": "User-managed identity ID",
             "type": "STRING",
             "mandatory" : false,
-            "description": "Will be used to retrieve a token, Application (client) ID and Password are still required"
+            "description": "Specify for machines with several identities, or if you need a specific one for the cluster nodes"
         },
         {
             "name": "subscriptionId",
