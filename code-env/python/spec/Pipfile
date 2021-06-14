@@ -9,6 +9,8 @@ azure-mgmt-authorization = "*"
 azure-mgmt-resource = "*"
 azure-mgmt-compute = "*"
 PyYAML = "*"
+azure-identity = "*"
+ipaddress = "*"
 
 [requires]
 python_version = "3.6"
