@@ -19,6 +19,7 @@ class ClusterBuilder(object):
         self.linux_profile = None
         self.network_profile = None
         self.cluster_sp = None
+        self.identity = None
         self.node_pools = []
         self.cluster_version = None
         self.user_identity = None
@@ -56,13 +57,12 @@ class ClusterBuilder(object):
         )
         return self
 
-    def with_cluster_sp(self, cluster_service_principal_connection_info):
-        client_id = cluster_service_principal_connection_info.get("clientId", None)
-        client_secret = cluster_service_principal_connection_info.get("password", None)
-        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
-                                                                        secret=client_secret,
-                                                                        key_vault_secret_ref=None)
+    def with_cluster_sp(self, client_id, secret):
+        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id, secret)
         self.cluster_sp = service_principal_profile
+        return self
+
+    def with_managed_identities(self, control_plane_mi=None, kubelet_mi=None):
         return self
 
     def with_private_access(self, private_access):
