@@ -2,6 +2,7 @@ import os, json, logging, yaml, time
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.msi import ManagedServiceIdentityClient
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
@@ -9,6 +10,7 @@ from dku_utils.cluster import make_overrides, get_cluster_from_connection_info, 
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.clusters import ClusterBuilder
 from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata
+from dku_azure.auth import AzureIdentityCredentialAdapter
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -29,14 +31,15 @@ class MyCluster(Cluster):
         # Resource group and location
         resource_group = self.config.get('resourceGroup', None)
         location = self.config.get('location', None)
-        if _is_none_or_blank(resource_group) or _is_none_or_blank(location):
-            # Try to get it from metadata
+        if not self.config.get("useSameResourceGroupAsDSSHost",True) or not self.config.get("useSameLocationAsDSSHost"):
             metadata = get_instance_metadata()
-            if _is_none_or_blank(resource_group):
+            if not self.config.get("useSameResourceGroupAsDSSHost",True):
                 resource_group = metadata["compute"]["resourceGroupName"]
-            if _is_none_or_blank(location):
+                logging.info(f"Using same resource group as DSS: {resource_group}")
+            if not self.config.get("useSameLocationAsDSSHost"):
                 location = metadata["compute"]["location"]
-        if _is_none_or_blank(resource_group_name):
+                logging.info(f"Using same location as DSS: {location}")
+        if _is_none_or_blank(resource_group):
             raise Exception("A resource group to put the cluster in is required")
         if _is_none_or_blank(location):
             raise Exception("A location to put the cluster in is required")
@@ -54,9 +57,9 @@ class MyCluster(Cluster):
         # check that the cluster doesn't exist yet, otherwise azure will try to update it
         # and will almost always fail
         try:
-            existing = clusters_client.managed_clusters.get(resource_group_name, self.cluster_name)
+            existing = clusters_client.managed_clusters.get(resource_group, self.cluster_name)
             if existing is not None:
-                raise Exception("A cluster with name %s in resource group %s already exists" % (self.cluster_name, resource_group_name))
+                raise Exception("A cluster with name %s in resource group %s already exists" % (self.cluster_name, resource_group))
         except CloudError as e:
             logging.info("Cluster doesn't seem to exist yet")
 
@@ -74,18 +77,38 @@ class MyCluster(Cluster):
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
         # Cluster identity
-        cluster_identity = self.config.get("clusterIdentity",{"identityType":"default"})  
-        if self.config.get("useDistinctSPForCluster", False):
-            cluster_sp = self.config.get("clusterServicePrincipal")
+        cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
+        cluster_identity_type = cluster_identity.get("identityType", "managed-identity")
+        if cluster_identity_type == "managed-identity":
+            control_plane_mi = None if cluster_identity.get("useAKSManagedIdentity",True) else cluster_identity["controlPlaneUserAssignedIdentity"]
+            cluster_builder.with_managed_identity(control_plane_mi)
+            if control_plane_mi is None:
+                logging.info("Configure cluster with system managed identity.")
+            else:
+                logging.info(f"Configure cluster with user assigned identity: {control_plane_mi}")
+            if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
+                kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
+                _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
+                msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
+                mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
+                cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
+                logging.info(f"Configure kubelet identity with user assigned identity resourceId=\"{kubelet_mi}\", clientId=\"{mi.client_id}\", objectId=\"{mi.principal_id}\"")
+        elif cluster_identity_type == "service-principal":
+            cluster_builder.with_cluster_sp(cluster_identity["clientId"], cluster_identity["password"])
+            logging.info("Configure cluster with service principal")
+        elif cluster_identity_type == 'aks-default':
+            cluster_builder.with_azure_managed_sp()
+            logging.info("Configure cluster with AKS managed service principal")
         else:
-            cluster_sp = connection_info
-        cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
+            raise Exception(f"Cluster identity type \"{cluster_identity_type}\" is unknown")
 
+        # Access level
         if self.config.get("privateAccess"):
             cluster_builder.with_private_access(self.config.get("privateAccess"))
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
 
+        # Node pools
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)
@@ -137,20 +160,25 @@ class MyCluster(Cluster):
     def stop(self, data):
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
+        credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
         subscription_id = get_subscription_id(connection_info)
         if _is_none_or_blank(subscription_id):
             raise Exception('Subscription must be defined')
 
-        credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 
-        resource_group_name = self.config.get('resourceGroup', None)
-        if _is_none_or_blank(resource_group_name):
-            raise Exception("A resource group to put the cluster in is required")
+        # Find resource group
+        resource_group = self.config.get('resourceGroup', None)
+        if not self.config.get("useSameResourceGroupAsDSSHost",True):
+            metadata = get_instance_metadata()
+            resource_group = metadata["compute"]["resourceGroupName"]
+            logging.info(f"Using same resource group as DSS: {resource_group}")
+        if _is_none_or_blank(resource_group):
+            raise Exception("A resource in which to find the is required")
 
-        logging.info("Fetching kubeconfig for cluster %s in %s" % (self.cluster_name, resource_group_name))
+        logging.info("Fetching kubeconfig for cluster %s in %s" % (self.cluster_name, resource_group))
         def do_delete():
-            return clusters_client.managed_clusters.delete(resource_group_name, self.cluster_name)
+            return clusters_client.managed_clusters.delete(resource_group, self.cluster_name)
         delete_result = run_and_process_cloud_error(do_delete)
 
         # delete returns void, so we poll until the cluster is really gone
@@ -158,7 +186,7 @@ class MyCluster(Cluster):
         while not gone:
             time.sleep(5)
             try:
-                cluster = clusters_client.managed_clusters.get(resource_group_name, self.cluster_name)
+                cluster = clusters_client.managed_clusters.get(resource_group, self.cluster_name)
                 if cluster.provisioning_state.lower() != 'deleting':
                     logging.info("Cluster is not deleting anymore, must be deleted now (state = %s)" % cluster.provisioning_state)
             except Exception as e:

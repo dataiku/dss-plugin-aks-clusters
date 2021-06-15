@@ -31,7 +31,7 @@
             "label": "Client ID",
             "type": "STRING",
             "mandatory" : false,
-            "description": "User Assigned Managed Identity Client ID",
+            "description": "Client ID of User Assigned Managed Identity",
             "visibilityCondition": "model.identityType=='user-assigned-client-id'"
         },
         {
@@ -39,7 +39,7 @@
             "label": "Resource ID",
             "type": "STRING",
             "mandatory" : false,
-            "description": "User Assigned Managed Identity Resource ID",
+            "description": "Resource ID of User Assigned Managed Identity",
             "visibilityCondition": "model.identityType=='user-assigned-resource-id'"
         },
         {

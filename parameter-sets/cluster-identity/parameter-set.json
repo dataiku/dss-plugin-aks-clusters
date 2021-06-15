@@ -19,28 +19,46 @@
             "description": "Select the type of identity and the method of specifying it",
             "type": "SELECT",
             "selectChoices": [
-                {"value": "default", "label": "Let default AKS behavior"},
-                {"value": "managed-identity", "label": "Enable managed identities"},
-                {"value": "service-principal", "label": "Service principal (legacy)"}
+                {"value": "managed-identity", "label": "Managed identities (Recommended)"},
+                {"value": "aks-default", "label": "AKS Managed Service Principal"},
+                {"value": "service-principal", "label": "Service principal"}
             ],
-            "defaultValue": "default",
+            "defaultValue": "managed-identity",
             "mandatory" : true
+        },
+        {
+            "name": "useAKSManagedIdentity",
+            "label": "AKS managed identity",
+            "description": "Control plane gets a System Assigned Managed Identity handled by AKS",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true,
+            "visibilityCondition": "model.identityType=='managed-identity'"
         },
         {
             "name": "controlPlaneUserAssignedIdentity",
             "label": "Control plane user identity",
             "type": "STRING",
             "mandatory" : false,
-            "description": "User Assigned Managed Identity for the control plane, as Resource Id. If empty, a System Assigned Managed identity will be used.",
+            "description": "Resouce ID of User Assigned Managed Identity for the control plane",
+            "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedIdentity"
+        },
+        {
+            "name": "useAKSManagedKubeletIdentity",
+            "label": "AKS managed Kubelet identity",
+            "description": "Kubelets get a User Assigned Managed Identity created and handled by AKS",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true,
             "visibilityCondition": "model.identityType=='managed-identity'"
         },
         {
             "name": "kubeletUserAssignedIdentity",
-            "label": "Kubelet user identity (Azure preview only)",
+            "label": "Kubelet user identity",
             "type": "STRING",
             "mandatory" : false,
-            "description": "User Assigned Managed Identity for the kubelets, as Resource Id. If empty, a System Assigned Managed identity will be used. Only available as a preview feature in Azure.",
-            "visibilityCondition": "model.identityType=='managed-identity'"
+            "description": "Resource ID of User Assigned Managed Identity for the kubelets. Only available with Azure feature Microsoft.ContainerService/CustomKubeletIdentityPreview. See documentation.",
+            "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedKubeletIdentity"
         },
         {
             "name": "clientId",
