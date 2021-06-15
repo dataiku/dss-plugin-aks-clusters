@@ -11,6 +11,7 @@ azure-mgmt-compute = "*"
 PyYAML = "*"
 azure-identity = "*"
 ipaddress = "*"
+azure-mgmt-msi = "*"
 
 [requires]
 python_version = "3.6"
