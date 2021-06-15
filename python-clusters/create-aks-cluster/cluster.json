@@ -33,21 +33,12 @@
             "mandatory": true
         },
         {
-            "name": "useDistinctSPForCluster",
-            "label": "Use distinct credentials",
-            "description": "Associate cluster nodes with a specific Service Principal",
-            "type": "BOOLEAN",
-            "default": false,
-            "mandatory": true
-        },
-        {
-            "name": "clusterServicePrincipal",
-            "label": "Identity assumed by nodes",
-            "description": "Service principal used by the cluster's nodes (if different from the connection)",
+            "name": "clusterIdentity",
+            "label": "Identity assumed by cluster components",
+            "description": "Identity configuration for the cluster components",
             "type": "PRESET",
-            "parameterSetId": "connection-info",
-            "mandatory": false,
-            "visibilityCondition": "model.useDistinctSPForCluster"
+            "parameterSetId": "cluster-identity",
+            "mandatory": true
         },
         {
             "name": "s-nodes",

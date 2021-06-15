@@ -1,5 +1,5 @@
 from azure.common.credentials import ServicePrincipalCredentials
-from msrestazure.azure_active_directory import MSIAuthentication
+from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
 
 from dku_utils.access import _is_none_or_blank
 
@@ -13,5 +13,5 @@ def get_credentials_from_connection_info(connection_info, connection_info_secret
     elif not _is_none_or_blank(client_id) and not _is_none_or_blank(tenant_id) and not _is_none_or_blank(password):
         credentials = ServicePrincipalCredentials(client_id = client_id, secret = password, tenant = tenant_id)
     else:
-        raise Exception('You must defined User-assigned managed identity or Tenant with Client and Password')
+        return DefaultAzureCredential()
     return credentials
