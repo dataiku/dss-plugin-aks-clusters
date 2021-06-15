@@ -8,7 +8,7 @@ from dku_utils.access import _is_none_or_blank, _has_not_blank_property
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info, get_subscription_id
 from dku_azure.auth import get_credentials_from_connection_info
 from dku_azure.clusters import ClusterBuilder
-from dku_azure.utils import run_and_process_cloud_error, get_subnet_id
+from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -21,13 +21,27 @@ class MyCluster(Cluster):
         """
         Build the create cluster request.
         """
-
         connection_info = self.config.get("connectionInfo", {})
         connection_info_secret = self.plugin_config.get("connectionInfo", {})
         credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
         subscription_id = get_subscription_id(connection_info)
-        resource_group = self.config.get('resourceGroup', None)
 
+        # Resource group and location
+        resource_group = self.config.get('resourceGroup', None)
+        location = self.config.get('location', None)
+        if _is_none_or_blank(resource_group) or _is_none_or_blank(location):
+            # Try to get it from metadata
+            metadata = get_instance_metadata()
+            if _is_none_or_blank(resource_group):
+                resource_group = metadata["compute"]["resourceGroupName"]
+            if _is_none_or_blank(location):
+                location = metadata["compute"]["location"]
+        if _is_none_or_blank(resource_group_name):
+            raise Exception("A resource group to put the cluster in is required")
+        if _is_none_or_blank(location):
+            raise Exception("A location to put the cluster in is required")
+
+        # AKS Client
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 
         # Credit the cluster to DATAIKU
@@ -36,19 +50,6 @@ class MyCluster(Cluster):
         else:
             clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
 
-        resource_group_name = self.config.get('resourceGroup', None)
-        # TODO: Auto detection
-        #if _is_none_or_blank(resource_group_name):
-        #    resource_group_name = vm_infos.get('resource_group_name', None)
-        if _is_none_or_blank(resource_group_name):
-            raise Exception("A resource group to put the cluster in is required")
-
-        location = self.config.get('location', None)
-        # TODO: Auto detection
-        #if _is_none_or_blank(location):
-        #    location = vm_infos.get('location', None)
-        if _is_none_or_blank(location):
-            raise Exception("A location to put the cluster in is required")
 
         # check that the cluster doesn't exist yet, otherwise azure will try to update it
         # and will almost always fail
@@ -63,7 +64,7 @@ class MyCluster(Cluster):
         cluster_builder.with_name(self.cluster_name)
         cluster_builder.with_dns_prefix("{}-dns".format(self.cluster_name))
         cluster_builder.with_resource_group(resource_group)
-        cluster_builder.with_location(self.config.get("location", None))
+        cluster_builder.with_location(location)
         cluster_builder.with_linux_profile() # default is None
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                          dns_service_ip=self.config.get("dnsServiceIP", None),
@@ -72,6 +73,8 @@ class MyCluster(Cluster):
                                          network_plugin=self.config.get("networkPlugin"),
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
+        # Cluster identity
+        cluster_identity = self.config.get("clusterIdentity",{"identityType":"default"})  
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
         else:

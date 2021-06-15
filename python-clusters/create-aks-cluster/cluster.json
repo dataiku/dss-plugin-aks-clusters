@@ -20,22 +20,42 @@
             "defaultValue": "latest"
         },
         {
+            "name": "useSameResourceGroupAsDSSHost",
+            "label": "Inherit DSS resource group name",
+            "description": "Create cluster in same resource group as DSS host",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
+
+        },
+        {
             "name": "resourceGroup",
-            "label": "Resource group",
+            "label": "Resource group name",
+            "description": "Resource group in which to create the cluster",
             "type": "STRING",
-            "mandatory": true
+            "mandatory": false,
+            "visibilityCondition": "!model.useSameResourceGroupAsDSSHost"
+        },
+        {
+            "name": "useSameLocationAsDSSHost",
+            "label": "Inherit DSS location",
+            "description": "Create cluster in the same location as DSS host",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
+
         },
         {
             "name": "location",
             "label": "Location",
             "description": "Region in which to create the cluster, e.g. 'France Central'",
             "type": "STRING",
-            "mandatory": true
+            "mandatory": false,
+            "visibilityCondition": "!model.useSameLocationAsDSSHost"
         },
         {
             "name": "clusterIdentity",
             "label": "Identity assumed by cluster components",
-            "description": "Identity configuration for the cluster components",
             "type": "PRESET",
             "parameterSetId": "cluster-identity",
             "mandatory": true
