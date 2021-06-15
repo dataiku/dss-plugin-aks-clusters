@@ -1,24 +1,21 @@
-from dku_utils.access import _default_if_blank, _default_if_property_blank
-import dataiku
-from dataiku.core.intercom import backend_json_call
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 import json, logging
-from dku_azure.auth import get_credentials_from_connection_info
+import requests
+import dataiku
 from azure.mgmt.containerservice import ContainerServiceClient
-import re
+from dataiku.core.intercom import backend_json_call
+from dku_azure.auth import get_credentials_from_connection_info
+from dku_azure.utils import get_instance_metadata
+from dku_utils.access import _default_if_blank, _default_if_property_blank
+from dku_utils.access import _has_not_blank_property, _is_none_or_blank
+
 
 def get_subscription_id(connection_info):
-    user_managed_identity = connection_info.get('userManagedIdentity', None)
+    identity_type = connection_info.get('identityType', None)
     subscription_id = connection_info.get('subscriptionId', None)
-    if not _is_none_or_blank(user_managed_identity):
-        # /subscriptions/x-y-z/resourceGroups/
-        # The regex is not the real one for a GUID but it's simpler and works
-        match = re.search('subscriptions/([\w-]+)/resourceGroups', user_managed_identity)
-        if match:
-            subscription_id = match.group(1)
-    if _is_none_or_blank(subscription_id):
-        raise Exception("Cannot find the subscription id.")
-    return subscription_id
+    if (identity_type == 'default' || identity_type == 'service-principal') and not _is_none_or_blank(subscription_id):
+        return subscription_id
+    else:
+        return get_instance_metadata()["compute"]["subscriptionId"]
 
 def make_overrides(config, kube_config, kube_config_path):
     # alter the spark configurations to put the cluster master and image repo in the properties
