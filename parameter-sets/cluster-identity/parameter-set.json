@@ -23,7 +23,8 @@
                 {"value": "managed-identity", "label": "Enable managed identities"},
                 {"value": "service-principal", "label": "Service principal (legacy)"}
             ],
-            "defaultValue": "default"
+            "defaultValue": "default",
+            "mandatory" : true
         },
         {
             "name": "controlPlaneUserAssignedIdentity",
@@ -45,14 +46,14 @@
             "name": "clientId",
             "label": "Application (client) ID",
             "type": "STRING",
-            "mandatory" : true,
+            "mandatory" : false,
             "visibilityCondition": "model.identityType=='service-principal'"
         },
         {
             "name": "password",
             "label": "Password",
             "type": "PASSWORD",
-            "mandatory" : true,
+            "mandatory" : false,
             "visibilityCondition": "model.identityType=='service-principal'"
         }
     ]
