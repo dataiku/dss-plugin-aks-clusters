@@ -19,7 +19,7 @@
             "description": "Select the type of identity and the method of specifying it",
             "type": "SELECT",
             "selectChoices": [
-                {"value": "default", "label": "Default auto-detected credentials"},
+                {"value": "default", "label": "Default credentials, from environment or System Assigned Managed Identity"},
                 {"value": "user-assigned-client-id", "label": "User Assigned Managed Identity - Client Id"},
                 {"value": "user-assigned-resource-id", "label": "User Assigned Managed Identity - Resource Id"},
                 {"value": "service-principal", "label": "App registration"}
@@ -43,13 +43,6 @@
             "visibilityCondition": "model.identityType=='user-assigned-resource-id'"
         },
         {
-            "name": "subscriptionId",
-            "label": "Azure subscription ID",
-            "type": "STRING",
-            "mandatory" : false,
-            "visibilityCondition": "model.identityType=='service-principal'"
-        },
-        {
             "name": "tenantId",
             "label": "Directory (tenant) ID",
             "type": "STRING",
@@ -69,6 +62,14 @@
             "type": "PASSWORD",
             "mandatory" : true,
             "visibilityCondition": "model.identityType=='service-principal'"
+        },
+        {
+            "name": "subscriptionId",
+            "label": "Azure subscription ID (Optional)",
+            "type": "STRING",
+            "mandatory" : false,
+            "description": "Only required if not running on Azure",
+            "visibilityCondition": "model.identityType=='service-principal' || model.identityType=='default'"
         }
     ]
 }
