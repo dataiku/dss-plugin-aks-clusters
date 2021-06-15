@@ -7,6 +7,7 @@ from azure.mgmt.resource import ResourceManagementClient
 from dku_utils.cluster import get_subscription_id
 
 AZURE_METADATA_SERVICE="http://169.254.169.254"
+INSTANCE_API_VERSION = "2019-04-30"
 
 def run_and_process_cloud_error(fn):
     try:
@@ -17,13 +18,13 @@ def run_and_process_cloud_error(fn):
         raise e
         
 
-def get_instance_metadata(api_version="2019-04-30"):
+def get_instance_metadata(api_version=INSTANCE_API_VERSION):
     """
     Return VM metadata.
     """
-    metadata_svc_endpoint = "{}/metadata/instance?api-version={}".format(AZURE_METADATA_SERVICE, api_version)
-    req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"})
-    resp = json.loads(req.text)
+    metadata_svc_endpoint = f"{AZURE_METADATA_SERVICE}/metadata/instance?api-version={api_version}"
+    req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"}, proxies={"http":None, "http":None})
+    resp = req.json()
     return resp
 
 
@@ -33,7 +34,6 @@ def get_vm_resource_id(subscription_id=None,
     """
     Return full resource ID given a VM's name.
     """
-    
     return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}".format(subscription_id, resource_group, vm_name)
 
 
