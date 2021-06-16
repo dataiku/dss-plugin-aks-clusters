@@ -137,10 +137,13 @@ class MyCluster(Cluster):
             cluster_builder.with_node_pool(node_pool=node_pool_builder.agent_pool_profile)
 
 
+        logging.info("Start creation of cluster")
         def do_creation():
             cluster_create_op = cluster_builder.build()
             return cluster_create_op.result()
         create_result = run_and_process_cloud_error(do_creation)
+        logging.info("Cluster creation finished")
+
 
         logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
         def do_fetch():
