@@ -103,6 +103,8 @@ class MyCluster(Cluster):
         # Cluster identity
         cluster_idendity_legacy_use_distinct_sp = self.config.get("useDistinctSPForCluster", False)
         cluster_idendity_legacy_sp = self.config.get("clusterServicePrincipal",None)
+        cluster_identity_type = None
+        cluster_identity = None
         if not _is_none_or_blank(connection_info) or not _is_none_or_blank(cluster_idendity_legacy_sp):
             logging.warn("Using legacy options to configure cluster identity. Clear them to use the new ones.")
             if not cluster_idendity_legacy_use_distinct_sp and not _is_none_or_blank(connection_info):
@@ -174,12 +176,19 @@ class MyCluster(Cluster):
             cluster_builder.with_node_pool(node_pool=node_pool_builder.agent_pool_profile)
 
 
+        # Run creation
         logging.info("Start creation of cluster")
         def do_creation():
             cluster_create_op = cluster_builder.build()
             return cluster_create_op.result()
         create_result = run_and_process_cloud_error(do_creation)
         logging.info("Cluster creation finished")
+
+        # Attach to ACR
+        if cluster_identity_type is not None and cluster_identity is not None:
+            if cluster_identity_type == "managed-identy" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
+                kubelet_mi = create_result.identity_profile.get("kubeletidentity").resource_id
+
 
 
         logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
