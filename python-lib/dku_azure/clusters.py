@@ -58,6 +58,15 @@ class ClusterBuilder(object):
         )
         return self
 
+    def with_cluster_sp_legacy(self, cluster_service_principal_connection_info):
+        client_id = cluster_service_principal_connection_info["clientId"]
+        client_secret = cluster_service_principal_connection_info["password"]
+        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
+                                                                            secret=client_secret,
+                                                                            key_vault_secret_ref=None)
+        self.cluster_sp = service_principal_profile
+        return self
+
     def with_azure_managed_sp(self):
         self.identity = {
             "type": "None",

@@ -23,22 +23,46 @@ class MyCluster(Cluster):
         """
         Build the create cluster request.
         """
-        connection_info = self.config.get("connectionInfo", {})
-        connection_info_secret = self.plugin_config.get("connectionInfo", {})
-        credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
-        subscription_id = get_subscription_id(connection_info)
+        connection_info = self.config.get("connectionInfo", None)
+        connection_info_secret = self.plugin_config.get("connectionInfo", None)
+        if not _is_none_or_blank(connection_info) or not _is_none_or_blank(connection_info_secret):
+            logging.warn("Using legacy authentication fields. Clear them to use the new ones.")
+            credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
+            subscription_id = connection_info.get('subscriptionId', None)
+        else:
+            connection_info_v2 = self.config.get("connectionInfoV2",{"identityType":"default"})
+            credentials = get_credentials_from_connection_infoV2(connection_info_v2)
+            subscription_id = get_subscription_id(connection_info_v2)
 
-        # Resource group and location
-        resource_group = self.config.get('resourceGroup', None)
-        location = self.config.get('location', None)
-        if not self.config.get("useSameResourceGroupAsDSSHost",True) or not self.config.get("useSameLocationAsDSSHost"):
+
+        # Resource group
+        if self.config.get("useSameResourceGroupAsDSSHost",True) or self.config.get("useSameLocationAsDSSHost",True):
             metadata = get_instance_metadata()
-            if not self.config.get("useSameResourceGroupAsDSSHost",True):
+
+        resource_group = self.config.get('resourceGroup', None)
+        if _is_none_or_blank(resource_group):
+            if self.config.get("useSameResourceGroupAsDSSHost",True):
                 resource_group = metadata["compute"]["resourceGroupName"]
                 logging.info(f"Using same resource group as DSS: {resource_group}")
-            if not self.config.get("useSameLocationAsDSSHost"):
+            else:
+                resource_group = self.config.get("resourceGroupV2",None)
+        else: 
+            logging.warn(f"Fetching resource group \"{resource_group}\" from legacy setting. Clear it to use the new one.")
+
+
+        # Location
+        location = self.config.get('location', None)
+        if _is_none_or_blank(location):
+            if self.config.get("useSameLocationAsDSSHost",True):
                 location = metadata["compute"]["location"]
                 logging.info(f"Using same location as DSS: {location}")
+            else:
+                location = self.config.get("locationV2",None)
+        else:
+            logging.warn(f"Fetching location \"{location}\" from legacy setting. Clear it to use the new one.")
+
+
+        # Consistency checks
         if _is_none_or_blank(resource_group):
             raise Exception("A resource group to put the cluster in is required")
         if _is_none_or_blank(location):
@@ -77,30 +101,43 @@ class MyCluster(Cluster):
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
         # Cluster identity
-        cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
-        cluster_identity_type = cluster_identity.get("identityType", "managed-identity")
-        if cluster_identity_type == "managed-identity":
-            control_plane_mi = None if cluster_identity.get("useAKSManagedIdentity",True) else cluster_identity["controlPlaneUserAssignedIdentity"]
-            cluster_builder.with_managed_identity(control_plane_mi)
-            if control_plane_mi is None:
-                logging.info("Configure cluster with system managed identity.")
+        cluster_idendity_legacy_use_distinct_sp = self.config.get("useDistinctSPForCluster", False)
+        cluster_idendity_legacy_sp = self.config.get("clusterServicePrincipal",None)
+        if not _is_none_or_blank(connection_info) or not _is_none_or_blank(cluster_idendity_legacy_sp):
+            logging.warn("Using legacy options to configure cluster identity. Clear them to use the new ones.")
+            if not cluster_idendity_legacy_use_distinct_sp and not _is_none_or_blank(connection_info):
+                cluster_sp = connection_info
+            elif cluster_idendity_legacy_use_distinct_sp and not _is_none_or_blank(cluster_idendity_legacy_sp):
+                cluster_sp = self.config.get("clusterServicePrincipal")
             else:
-                logging.info(f"Configure cluster with user assigned identity: {control_plane_mi}")
-            if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
-                kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
-                _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
-                msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
-                mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
-                cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
-                logging.info(f"Configure kubelet identity with user assigned identity resourceId=\"{kubelet_mi}\", clientId=\"{mi.client_id}\", objectId=\"{mi.principal_id}\"")
-        elif cluster_identity_type == "service-principal":
-            cluster_builder.with_cluster_sp(cluster_identity["clientId"], cluster_identity["password"])
-            logging.info("Configure cluster with service principal")
-        elif cluster_identity_type == 'aks-default':
-            cluster_builder.with_azure_managed_sp()
-            logging.info("Configure cluster with AKS managed service principal")
+                raise "Legacy options are not complete enough to determine cluster identity settings"
+            cluster_builder.with_cluster_sp_legacy(cluster_service_principal_connection_info=cluster_sp)
         else:
-            raise Exception(f"Cluster identity type \"{cluster_identity_type}\" is unknown")
+            cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
+            cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
+            cluster_identity_type = cluster_identity.get("identityType", "managed-identity")
+            if cluster_identity_type == "managed-identity":
+                control_plane_mi = None if cluster_identity.get("useAKSManagedIdentity",True) else cluster_identity["controlPlaneUserAssignedIdentity"]
+                cluster_builder.with_managed_identity(control_plane_mi)
+                if control_plane_mi is None:
+                    logging.info("Configure cluster with system managed identity.")
+                else:
+                    logging.info(f"Configure cluster with user assigned identity: {control_plane_mi}")
+                if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
+                    kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
+                    _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
+                    msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
+                    mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
+                    cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
+                    logging.info(f"Configure kubelet identity with user assigned identity resourceId=\"{kubelet_mi}\", clientId=\"{mi.client_id}\", objectId=\"{mi.principal_id}\"")
+            elif cluster_identity_type == "service-principal":
+                cluster_builder.with_cluster_sp(cluster_identity["clientId"], cluster_identity["password"])
+                logging.info("Configure cluster with service principal")
+            elif cluster_identity_type == 'aks-default':
+                cluster_builder.with_azure_managed_sp()
+                logging.info("Configure cluster with AKS managed service principal")
+            else:
+                raise Exception(f"Cluster identity type \"{cluster_identity_type}\" is unknown")
 
         # Access level
         if self.config.get("privateAccess"):
