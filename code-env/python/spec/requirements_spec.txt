@@ -4,6 +4,7 @@ azure-core==1.15.0
 azure-identity==1.6.0
 azure-mgmt-authorization==1.0.0
 azure-mgmt-compute==21.0.0
+azure-mgmt-containerregistry==8.0.0
 azure-mgmt-containerservice==15.1.0
 azure-mgmt-core==1.2.2
 azure-mgmt-msi==1.0.0

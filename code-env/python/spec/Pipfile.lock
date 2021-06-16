@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a74cd96e635fe0d42047eb5f6dda6d205167bda55c33eba88c60c7fd69b6c3d6"
+            "sha256": "b382c9a03cf2a93a3fa728444c59a17ebd1b7eaef550a15dbb008513a00fa5f5"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -60,6 +60,14 @@
             ],
             "index": "pypi",
             "version": "==21.0.0"
+        },
+        "azure-mgmt-containerregistry": {
+            "hashes": [
+                "sha256:28678bdb9f678f85b88e003fd4f435b462bc5566348c6030da2277a9cb152b76",
+                "sha256:480eb5d1bb910da4e87a5d7047e2f3e426083b14911ac64c48badd0218e9e756"
+            ],
+            "index": "pypi",
+            "version": "==8.0.0"
         },
         "azure-mgmt-containerservice": {
             "hashes": [

@@ -12,6 +12,7 @@ PyYAML = "*"
 azure-identity = "*"
 ipaddress = "*"
 azure-mgmt-msi = "*"
+azure-mgmt-containerregistry = "*"
 
 [requires]
 python_version = "3.6"
