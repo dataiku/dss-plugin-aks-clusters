@@ -10,7 +10,7 @@
             "name": "connectionInfoV2",
             "label": "Connection",
             "type": "PRESET",
-            "parameterSetId": "connection-info",
+            "parameterSetId": "connection-info-v2",
             "mandatory": true
         },
         {
