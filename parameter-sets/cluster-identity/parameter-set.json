@@ -65,7 +65,7 @@
             "label": "Attach to ACR",
             "type": "STRING",
             "mandatory" : false,
-            "description": "Name of the ACR to attach to. Syntax [RESOURCE_GROUP/]NAME. RESOURCE_GROUP defaults to the same as the cluster.",
+            "description": "Name of the ACR to attach to. Syntax \"[RESOURCE_GROUP/]NAME\".  RESOURCE_GROUP defaults to the same as the cluster.",
             "visibilityCondition": "model.identityType=='managed-identity' && model.useAKSManagedKubeletIdentity"
         },
         {
