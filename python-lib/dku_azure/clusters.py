@@ -1,6 +1,6 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile, ManagedCluster, ManagedClusterIdentity
+from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
 from dku_utils.access import _default_if_blank
 
 import logging
@@ -61,9 +61,11 @@ class ClusterBuilder(object):
     def with_cluster_sp_legacy(self, cluster_service_principal_connection_info):
         client_id = cluster_service_principal_connection_info["clientId"]
         client_secret = cluster_service_principal_connection_info["password"]
-        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
-                                                                            secret=client_secret,
-                                                                            key_vault_secret_ref=None)
+        service_principal_profile = {
+            "client_id": client_id,
+            "secret": client_secret,
+        }
+                                       
         self.cluster_sp = service_principal_profile
         return self
 
