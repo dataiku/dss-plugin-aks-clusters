@@ -3,7 +3,7 @@ from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, M
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
 from dku_utils.access import _default_if_blank
 
-import logging
+import logging, copy
 
 
 class ClusterBuilder(object):
@@ -143,6 +143,13 @@ class ClusterBuilder(object):
             cluster_params["api_server_access_profile"] = self.private_access
 
         self.cluster_config = ManagedCluster(**cluster_params)
+
+        # Log full conf
+        log_cluster = copy.deepcopy(self.cluster_config)
+        if "service_principal_profile" in log_cluster:
+            log_cluster["service_principal_profile"] = "REDACTED"
+        logging.info("Start creation with config: %s", log_cluster)
+
         future = self.clusters_client.managed_clusters.begin_create_or_update(self.resource_group, self.name, self.cluster_config)
         return future.result()
 
