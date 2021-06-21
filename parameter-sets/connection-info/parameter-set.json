@@ -1,8 +1,8 @@
 {
     "meta" : {
-        "label" : "AKS connections",
-	"pluralLabel": "AKS connections",
-        "description" : "AKS connection settings",
+        "label" : "AKS connection (Legacy)",
+        "pluralLabel": "AKS connections (Legacy)",
+        "description" : "AKS connection legacy settings",
         "icon" : "icon-link"
     },
     
