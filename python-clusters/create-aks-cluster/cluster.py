@@ -122,7 +122,6 @@ class MyCluster(Cluster):
                 raise "Legacy options are not complete enough to determine cluster identity settings"
             cluster_builder.with_cluster_sp_legacy(cluster_service_principal_connection_info=cluster_sp)
         else:
-            cluster_builder.with_cluster_sp(cluster_service_principal_connection_info=cluster_sp)
             cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
             cluster_identity_type = cluster_identity.get("identityType", "managed-identity")
             if cluster_identity_type == "managed-identity":
