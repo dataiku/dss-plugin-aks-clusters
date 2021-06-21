@@ -143,8 +143,8 @@ class ClusterBuilder(object):
             cluster_params["api_server_access_profile"] = self.private_access
 
         self.cluster_config = ManagedCluster(**cluster_params)
-    
-        return self.clusters_client.managed_clusters.create_or_update(self.resource_group, self.name, self.cluster_config)
+        future = self.clusters_client.managed_clusters.begin_create_or_update(self.resource_group, self.name, self.cluster_config)
+        return future.result()
 
 
 class NodePoolBuilder(object):
