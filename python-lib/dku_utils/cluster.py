@@ -4,18 +4,10 @@ import dataiku
 from azure.mgmt.containerservice import ContainerServiceClient
 from dataiku.core.intercom import backend_json_call
 from dku_azure.auth import get_credentials_from_connection_info
-from dku_azure.utils import get_instance_metadata
+from dku_azure.utils import get_instance_metadata, get_subscription_id
 from dku_utils.access import _default_if_blank, _default_if_property_blank
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 
-
-def get_subscription_id(connection_info):
-    identity_type = connection_info.get('identityType', None)
-    subscription_id = connection_info.get('subscriptionId', None)
-    if (identity_type == 'default' or identity_type == 'service-principal') and not _is_none_or_blank(subscription_id):
-        return subscription_id
-    else:
-        return get_instance_metadata()["compute"]["subscriptionId"]
 
 def make_overrides(config, kube_config, kube_config_path):
     # alter the spark configurations to put the cluster master and image repo in the properties

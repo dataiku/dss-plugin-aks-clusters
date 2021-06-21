@@ -4,7 +4,6 @@ import logging
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource import ResourceManagementClient
-from dku_utils.cluster import get_subscription_id
 
 AZURE_METADATA_SERVICE="http://169.254.169.254"
 INSTANCE_API_VERSION = "2019-04-30"
@@ -27,6 +26,13 @@ def get_instance_metadata(api_version=INSTANCE_API_VERSION):
     resp = req.json()
     return resp
 
+def get_subscription_id(connection_info):
+    identity_type = connection_info.get('identityType', None)
+    subscription_id = connection_info.get('subscriptionId', None)
+    if (identity_type == 'default' or identity_type == 'service-principal') and not _is_none_or_blank(subscription_id):
+        return subscription_id
+    else:
+        return get_instance_metadata()["compute"]["subscriptionId"]
 
 def get_vm_resource_id(subscription_id=None,
                        resource_group=None,
