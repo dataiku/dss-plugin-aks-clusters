@@ -69,7 +69,7 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("DSS host is on VNET {}".format(vm_name))
     subscription_id = get_subscription_id(connection_info)
     vm_resource_id = get_vm_resource_id(subscription_id, resource_group, vm_name)
-    resource_mgmt_client = ResourceManagementClient(credentials=credentials, subscription_id=subscription_id, api_version=api_version)
+    resource_mgmt_client = ResourceManagementClient(credential=credentials, subscription_id=subscription_id, api_version=api_version)
     vm_properties = resource_mgmt_client.resources.get_by_id(vm_resource_id, api_version=api_version).properties
     vm_network_interfaces = vm_properties["networkProfile"]["networkInterfaces"]
     if len(vm_network_interfaces) > 1:
@@ -84,7 +84,3 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("VNET: {}".format(vnet))
     logging.info("SUBNET ID: {}".format(subnet_id))
     return vnet, subnet_id
-        
-
-    
-
