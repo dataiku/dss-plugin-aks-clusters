@@ -8,7 +8,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
-from dku_azure.auth import get_credentials_from_connection_info
+from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
 from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata, get_subscription_id
 from dku_azure.auth import AzureIdentityCredentialAdapter
