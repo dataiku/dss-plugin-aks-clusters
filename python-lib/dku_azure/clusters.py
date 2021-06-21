@@ -145,7 +145,7 @@ class ClusterBuilder(object):
         self.cluster_config = ManagedCluster(**cluster_params)
 
         # Log full conf
-        log_cluster = copy.deepcopy(cluster_params)
+        log_cluster = copy.deepcopy(self.cluster_config.as_dict())
         if "service_principal_profile" in log_cluster:
             log_cluster["service_principal_profile"] = "REDACTED"
         logging.info("Start creation with config: %s", log_cluster)
