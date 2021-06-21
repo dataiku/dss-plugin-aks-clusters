@@ -5,6 +5,7 @@ from azure.mgmt.containerservice import ContainerServiceClient
 from azure.mgmt.msi import ManagedServiceIdentityClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.core.pipeline.policies import UserAgentPolicy
+from azure.core.exceptions import ResourceNotFoundError
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
@@ -89,6 +90,8 @@ class MyCluster(Cluster):
             if existing is not None:
                 raise Exception("A cluster with name %s in resource group %s already exists" % (self.cluster_name, resource_group))
         except CloudError as e:
+            logging.info("Cluster doesn't seem to exist yet")
+        except ResourceNotFoundError as e:
             logging.info("Cluster doesn't seem to exist yet")
 
         cluster_builder = ClusterBuilder(clusters_client)
