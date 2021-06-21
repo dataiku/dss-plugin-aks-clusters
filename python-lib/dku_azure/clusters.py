@@ -56,7 +56,7 @@ class ClusterBuilder(object):
             network_plugin = network_plugin,
             docker_bridge_cidr = docker_bridge_cidr
         )
-        logging.info("User network profile: %s", json.dumps(self.network_profile.as_dict()))
+        logging.info("With network profile: %s", json.dumps(self.network_profile.as_dict()))
         return self
 
     def with_cluster_sp_legacy(self, cluster_service_principal_connection_info):
@@ -146,7 +146,7 @@ class ClusterBuilder(object):
         self.cluster_config = ManagedCluster(**cluster_params)
 
         future = self.clusters_client.managed_clusters.begin_create_or_update(self.resource_group, self.name, self.cluster_config)
-        return future.result()
+        return future
 
 
 class NodePoolBuilder(object):
@@ -209,7 +209,6 @@ class NodePoolBuilder(object):
         if enable_autoscaling:
             self.agent_pool_type = "VirtualMachineScaleSets"
             self.min_num_nodes = min_num_nodes
-            self.max_num_nodes = max_num_nodes
             self.num_nodes = min_num_nodes
         else:
             self.num_nodes = num_nodes
