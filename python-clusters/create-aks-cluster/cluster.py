@@ -1,8 +1,9 @@
-import os, json, logging, yaml, time
+import os, json, logging, yaml, time, uuid
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
 from azure.mgmt.msi import ManagedServiceIdentityClient
+from azure.mgmt.authorization import AuthorizationManagementClient
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
@@ -186,10 +187,38 @@ class MyCluster(Cluster):
 
         # Attach to ACR
         if cluster_identity_type is not None and cluster_identity is not None:
-            if cluster_identity_type == "managed-identy" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
-                kubelet_mi = create_result.identity_profile.get("kubeletidentity").resource_id
-
-
+            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
+                kubelet_mi_object_id = create_result.identity_profile.get("kubeletidentity").object_id
+                logging.info("Kubelet Managed Identity object id: %s", kubelet_mi_object_id)
+                authorization_client = AuthorizationManagementClient(credentials, subscription_id)
+                acr_name = cluster_idendity.get("attachToACRName", None)
+                if not _is_none_or_blank(acr_name):
+                    # build acr scope
+                    acr_identifier_splitted = acr_name.split('/')
+                    acr_subscription_id = subscription_id
+                    acr_resource_group = resource_group
+                    if 9 == len(acr_identifier_splitted):
+                        _,_,acr_subscription_id,_,acr_resource_group,_,_,_,acr_name = acr_identifier_splitted
+                    elif 2 == len(acr_identifier_splitted):
+                        acr_resource_group, acr_name = acr_identifier_splitted
+                        
+                    acr_scope = f"/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}"
+                    acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))[0]
+                    if 0 == len(acr_roles):
+                        raise f"Exception could not find the AcrPull role on the ACR {acr_scope}. Are you owner of the ACR ?"
+                    else:
+                        acr_role_id = acr_roles[0].id
+                        logging.info("ACR pull role id: %s", acr_role_id)
+                        authorization_client.role_assignments.create(
+                                scope=acr_scope,
+                                role_assignment_name=str(uuid.uuid4()),
+                                parameters= {
+                                    "properties": {
+                                        "role_definition_id": acr_role_id,
+                                        "principal_id": kubelet_mi_object_id,
+                                    },
+                                },
+                        )
 
         logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
         def do_fetch():

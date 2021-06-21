@@ -9,3 +9,4 @@ azure-mgmt-resource==18.0.0
 azure-mgmt-msi==1.0.0
 ipaddress==1.0.23
 pyyaml==5.4.1
+uuid==1.30
