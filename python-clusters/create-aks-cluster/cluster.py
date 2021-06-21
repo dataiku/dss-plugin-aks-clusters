@@ -196,7 +196,7 @@ class MyCluster(Cluster):
                 kubelet_mi_object_id = create_result.identity_profile.get("kubeletidentity").object_id
                 logging.info("Kubelet Managed Identity object id: %s", kubelet_mi_object_id)
                 authorization_client = AuthorizationManagementClient(credentials, subscription_id)
-                acr_name = cluster_idendity.get("attachToACRName", None)
+                acr_name = cluster_identity.get("attachToACRName", None)
                 if not _is_none_or_blank(acr_name):
                     # build acr scope
                     acr_identifier_splitted = acr_name.split('/')
@@ -208,7 +208,7 @@ class MyCluster(Cluster):
                         acr_resource_group, acr_name = acr_identifier_splitted
                         
                     acr_scope = f"/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}"
-                    acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))[0]
+                    acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
                     if 0 == len(acr_roles):
                         raise f"Exception could not find the AcrPull role on the ACR {acr_scope}. Are you owner of the ACR ?"
                     else:
