@@ -4,6 +4,7 @@ from dataiku.cluster import Cluster
 from azure.mgmt.containerservice import ContainerServiceClient
 from azure.mgmt.msi import ManagedServiceIdentityClient
 from azure.mgmt.authorization import AuthorizationManagementClient
+from azure.core.pipeline.policies import UserAgentPolicy
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
@@ -70,14 +71,16 @@ class MyCluster(Cluster):
             raise Exception("A location to put the cluster in is required")
 
         # AKS Client
-        clusters_client = ContainerServiceClient(credentials, subscription_id)
+        clusters_client = None
 
         # Credit the cluster to DATAIKU
         if os.environ.get("DISABLE_AZURE_USAGE_ATTRIBUTION", "0") == "1":
             logging.info("Azure usage attribution is disabled")
+            clusters_client = ContainerServiceClient(credentials, subscription_id)
         else:
-            clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
-
+            policy = UserAgentPolicy()
+            policy.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
+            clusters_client = ContainerServiceClient(credentials, subscription_id, user_agent_policy=policy)
 
         # check that the cluster doesn't exist yet, otherwise azure will try to update it
         # and will almost always fail
