@@ -110,6 +110,7 @@ class MyCluster(Cluster):
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
         # Cluster identity
+        connection_info = self.config.get("connectionInfo", None)
         cluster_idendity_legacy_use_distinct_sp = self.config.get("useDistinctSPForCluster", False)
         cluster_idendity_legacy_sp = self.config.get("clusterServicePrincipal",None)
         cluster_identity_type = None
