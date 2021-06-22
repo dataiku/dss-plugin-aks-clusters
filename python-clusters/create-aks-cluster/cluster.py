@@ -267,7 +267,7 @@ class MyCluster(Cluster):
         if not _is_none_or_blank(acr_attachment):
             logging.info("Cluster has an ACR attachment, check managed identity")
             cluster_identity_profile = data["cluster"]["identity_profile"]
-            kubelet_mi_resource_id = cluster_idendity_profile["kubeletidentity"].get("resource_id", None)
+            kubelet_mi_resource_id = cluster_identity_profile["kubeletidentity"].get("resource_id", None)
             if  kubelet_mi_resource_id is not None:
                 _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi_resource_id.split("/")
                 if mi_resource_group == node_resource_group:
