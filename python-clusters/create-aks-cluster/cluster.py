@@ -22,10 +22,7 @@ class MyCluster(Cluster):
         self.config = config
         self.plugin_config = plugin_config
 
-    def start(self):
-        """
-        Build the create cluster request.
-        """
+    def _get_credentials(self):
         connection_info = self.config.get("connectionInfo", None)
         connection_info_secret = self.plugin_config.get("connectionInfo", None)
         if not _is_none_or_blank(connection_info) or not _is_none_or_blank(connection_info_secret):
@@ -36,7 +33,13 @@ class MyCluster(Cluster):
             connection_info_v2 = self.config.get("connectionInfoV2",{"identityType":"default"})
             credentials = get_credentials_from_connection_infoV2(connection_info_v2)
             subscription_id = get_subscription_id(connection_info_v2)
+        return credentials
 
+    def start(self):
+        """
+        Build the create cluster request.
+        """
+        credentials = self._get_credentials()
 
         # Resource group
         if self.config.get("useSameResourceGroupAsDSSHost",True) or self.config.get("useSameLocationAsDSSHost",True):
@@ -191,6 +194,7 @@ class MyCluster(Cluster):
         logging.info("Cluster creation finished")
 
         # Attach to ACR
+        acr_attachment = {}
         if cluster_identity_type is not None and cluster_identity is not None:
             if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
                 kubelet_mi_object_id = create_result.identity_profile.get("kubeletidentity").object_id
@@ -224,6 +228,12 @@ class MyCluster(Cluster):
                                     },
                                 },
                         )
+                        acr_attachment.update({
+                            "name": acr_name,
+                            "resource_group": acr_resource_group,
+                            "subscription_id": acr_subscription_id,
+                            "resource_id": acr_scope,
+                        })
 
         logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
         def do_fetch():
@@ -237,7 +247,7 @@ class MyCluster(Cluster):
 
         overrides = make_overrides(self.config, yaml.safe_load(kube_config_content), kube_config_path)
 
-        return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict()}]
+        return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment}]
 
 
     def stop(self, data):
@@ -247,6 +257,7 @@ class MyCluster(Cluster):
         subscription_id = get_subscription_id(connection_info)
         if _is_none_or_blank(subscription_id):
             raise Exception('Subscription must be defined')
+        credentials = self._get_credentials()
 
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 
