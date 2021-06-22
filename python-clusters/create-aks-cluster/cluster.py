@@ -265,7 +265,7 @@ class MyCluster(Cluster):
         node_resource_group = data["cluster"]["node_resource_group"]
         acr_attachment = data.get("acr_attachment", None)
         if not _is_none_or_blank(acr_attachment):
-            loggin.info("Cluster has an ACR attachment, check managed identity")
+            logging.info("Cluster has an ACR attachment, check managed identity")
             cluster_identity_profile = data["cluster"]["identity_profile"]
             kubelet_mi_resource_id = cluster_idendity_profile["kubeletidentity"].get("resource_id", None)
             if  kubelet_mi_resource_id is not None:
