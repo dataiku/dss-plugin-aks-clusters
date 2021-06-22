@@ -21,7 +21,7 @@
         },
         {
             "name": "useSameResourceGroupAsDSSHost",
-            "label": "Inherit DSS resource group name",
+            "label": "Use DSS resource group",
             "description": "Create cluster in same resource group as DSS host",
             "type": "BOOLEAN",
             "mandatory": true,
@@ -38,7 +38,7 @@
         },
         {
             "name": "useSameLocationAsDSSHost",
-            "label": "Inherit DSS location",
+            "label": "Use DSS location",
             "description": "Create cluster in the same location as DSS host",
             "type": "BOOLEAN",
             "mandatory": true,
