@@ -247,7 +247,12 @@ class MyCluster(Cluster):
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_content)
 
-        overrides = make_overrides(self.config, yaml.safe_load(kube_config_content), kube_config_path)
+        overrides = make_overrides(
+                self.config,
+                yaml.safe_load(kube_config_content),
+                kube_config_path,
+                acr_name = None if _is_none_or_blank(acr_attachment) else acr_attachment["name"],
+        )
 
         return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment}]
 

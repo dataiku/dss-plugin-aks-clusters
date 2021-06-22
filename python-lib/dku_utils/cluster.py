@@ -9,14 +9,16 @@ from dku_utils.access import _default_if_blank, _default_if_property_blank
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 
 
-def make_overrides(config, kube_config, kube_config_path):
+def make_overrides(config, kube_config, kube_config_path, acr_name=None):
     # alter the spark configurations to put the cluster master and image repo in the properties
     container_settings = {
-                            'executionConfigsGenericOverrides': {
-                                'kubeCtlContext': kube_config["current-context"], # has to exist, it's a config file we just built
-                                'kubeConfigPath': kube_config_path # the config is not merged into the main config file, so we need to pass the config file pth
-                            }
-                        }
+        'executionConfigsGenericOverrides': {
+            'kubeCtlContext': kube_config["current-context"], # has to exist, it's a config file we just built
+            'kubeConfigPath': kube_config_path # the config is not merged into the main config file, so we need to pass the config file pth
+        }
+    }
+    if acr_name is not None:
+        container_settings['executionConfigsGenericOverrides']['repositoryURL'] = f"{acr_name}.azurecr.io"
     return {'container':container_settings}
 
 
