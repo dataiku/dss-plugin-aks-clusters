@@ -33,18 +33,19 @@ class MyCluster(Cluster):
             connection_info_v2 = self.config.get("connectionInfoV2",{"identityType":"default"})
             credentials = get_credentials_from_connection_infoV2(connection_info_v2)
             subscription_id = get_subscription_id(connection_info_v2)
-        return credentials
+        return credentials, subscription_id
 
     def start(self):
         """
         Build the create cluster request.
         """
-        credentials = self._get_credentials()
+        credentials, subscription_id = self._get_credentials()
 
-        # Resource group
+        # Fetch metadata should we need them
         if self.config.get("useSameResourceGroupAsDSSHost",True) or self.config.get("useSameLocationAsDSSHost",True):
             metadata = get_instance_metadata()
 
+        # Resource group
         resource_group = self.config.get('resourceGroup', None)
         if _is_none_or_blank(resource_group):
             if self.config.get("useSameResourceGroupAsDSSHost",True):
@@ -54,7 +55,6 @@ class MyCluster(Cluster):
                 resource_group = self.config.get("resourceGroupV2",None)
         else: 
             logging.warn(f"Fetching resource group \"{resource_group}\" from legacy setting. Clear it to use the new one.")
-
 
         # Location
         location = self.config.get('location', None)
@@ -66,7 +66,6 @@ class MyCluster(Cluster):
                 location = self.config.get("locationV2",None)
         else:
             logging.warn(f"Fetching location \"{location}\" from legacy setting. Clear it to use the new one.")
-
 
         # Consistency checks
         if _is_none_or_blank(resource_group):
@@ -193,13 +192,13 @@ class MyCluster(Cluster):
         create_result = run_and_process_cloud_error(do_creation)
         logging.info("Cluster creation finished")
 
+
         # Attach to ACR
         acr_attachment = {}
         if cluster_identity_type is not None and cluster_identity is not None:
             if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
                 kubelet_mi_object_id = create_result.identity_profile.get("kubeletidentity").object_id
                 logging.info("Kubelet Managed Identity object id: %s", kubelet_mi_object_id)
-                authorization_client = AuthorizationManagementClient(credentials, subscription_id)
                 acr_name = cluster_identity.get("attachToACRName", None)
                 if not _is_none_or_blank(acr_name):
                     # build acr scope
@@ -211,6 +210,7 @@ class MyCluster(Cluster):
                     elif 2 == len(acr_identifier_splitted):
                         acr_resource_group, acr_name = acr_identifier_splitted
                         
+                    authorization_client = AuthorizationManagementClient(credentials, acr_subscription_id)
                     acr_scope = f"/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}"
                     acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
                     if 0 == len(acr_roles):
@@ -218,21 +218,22 @@ class MyCluster(Cluster):
                     else:
                         acr_role_id = acr_roles[0].id
                         logging.info("ACR pull role id: %s", acr_role_id)
-                        authorization_client.role_assignments.create(
-                                scope=acr_scope,
-                                role_assignment_name=str(uuid.uuid4()),
-                                parameters= {
-                                    "properties": {
-                                        "role_definition_id": acr_role_id,
-                                        "principal_id": kubelet_mi_object_id,
-                                    },
+                        role_assignment = authorization_client.role_assignments.create(
+                            scope=acr_scope,
+                            role_assignment_name=str(uuid.uuid4()),
+                            parameters= {
+                                "properties": {
+                                    "role_definition_id": acr_role_id,
+                                    "principal_id": kubelet_mi_object_id,
                                 },
+                            },
                         )
                         acr_attachment.update({
                             "name": acr_name,
                             "resource_group": acr_resource_group,
                             "subscription_id": acr_subscription_id,
                             "resource_id": acr_scope,
+                            "role_assignment": role_assignment.as_dict(),
                         })
 
         logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
@@ -251,28 +252,35 @@ class MyCluster(Cluster):
 
 
     def stop(self, data):
-        connection_info = self.config.get("connectionInfo", {})
-        connection_info_secret = self.plugin_config.get("connectionInfo", {})
-        credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
-        subscription_id = get_subscription_id(connection_info)
-        if _is_none_or_blank(subscription_id):
-            raise Exception('Subscription must be defined')
-        credentials = self._get_credentials()
+        credentials, _ = self._get_credentials()
 
+        # Do NOT use the conf but the actual values from the cluster here
+        cluster_resource_id = data["cluster"]["id"]
+        _,_,subscription_id,_,resource_group,_,_,_,cluster_name = cluster_resource_id.split("/")
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 
-        # Find resource group
-        resource_group = self.config.get('resourceGroup', None)
-        if not self.config.get("useSameResourceGroupAsDSSHost",True):
-            metadata = get_instance_metadata()
-            resource_group = metadata["compute"]["resourceGroupName"]
-            logging.info(f"Using same resource group as DSS: {resource_group}")
-        if _is_none_or_blank(resource_group):
-            raise Exception("A resource in which to find the is required")
+        # Try to detach from ACR if required. It is not mandatory but if not done, it would pollute
+        # the ACR with multiple invalid role attachments and consume attachment quotas
+        node_resource_group = data["cluster"]["node_resource_group"]
+        acr_attachment = data.get("acr_attachment", None)
+        if not _is_none_or_blank(acr_attachment):
+            loggin.info("Cluster has an ACR attachment, check managed identity")
+            cluster_identity_profile = data["cluster"]["identity_profile"]
+            kubelet_mi_resource_id = cluster_idendity_profile["kubeletidentity"].get("resource_id", None)
+            if  kubelet_mi_resource_id is not None:
+                _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi_resource_id.split("/")
+                if mi_resource_group == node_resource_group:
+                    logging.info("Cluster has an AKS managed kubelet identity, try to detach")
+                    authorization_client = AuthorizationManagementClient(credentials, acr_attachment["subscription_id"])
+                    try:
+                        authorization_client.delete_by_id(acr_attachment["role_assignment"]["id"])
+                    except ResourceNotFoundError as e:
+                        logging.warn("It looks that the ACR role assignment doesnt exist. Ignore this step")
 
-        logging.info("Fetching kubeconfig for cluster %s in %s" % (self.cluster_name, resource_group))
+
         def do_delete():
-            return clusters_client.managed_clusters.delete(resource_group, self.cluster_name)
+            future = clusters_client.managed_clusters.begin_delete(resource_group, cluster_name)
+            return future.result()
         delete_result = run_and_process_cloud_error(do_delete)
 
         # delete returns void, so we poll until the cluster is really gone
@@ -280,10 +288,9 @@ class MyCluster(Cluster):
         while not gone:
             time.sleep(5)
             try:
-                cluster = clusters_client.managed_clusters.get(resource_group, self.cluster_name)
+                cluster = clusters_client.managed_clusters.get(resource_group, cluster_name)
                 if cluster.provisioning_state.lower() != 'deleting':
                     logging.info("Cluster is not deleting anymore, must be deleted now (state = %s)" % cluster.provisioning_state)
-            except Exception as e:
-                logging.info("Could not get cluster, should be gone (%s)" % str(e))
-                gone = True
-
+            # other exceptions should not be ignored
+            except ResourceNotFoundError as e:
+                logging.info("Cluster doesn't seem to exist anymore, considering it deleted")
