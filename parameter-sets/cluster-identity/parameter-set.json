@@ -16,7 +16,7 @@
         {
             "name": "identityType",
             "label": "Identity type",
-            "description": "Select the type of identity and the method of specifying it",
+            "description": "Select the type of identity",
             "type": "SELECT",
             "selectChoices": [
                 {"value": "managed-identity", "label": "Managed identities (Recommended)"},
