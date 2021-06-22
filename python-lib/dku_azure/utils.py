@@ -4,6 +4,7 @@ import logging
 
 from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource import ResourceManagementClient
+from dku_utils.access import _is_none_or_blank
 
 AZURE_METADATA_SERVICE="http://169.254.169.254"
 INSTANCE_API_VERSION = "2019-04-30"
