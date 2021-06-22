@@ -274,7 +274,7 @@ class MyCluster(Cluster):
                     logging.info("Cluster has an AKS managed kubelet identity, try to detach")
                     authorization_client = AuthorizationManagementClient(credentials, acr_attachment["subscription_id"])
                     try:
-                        authorization_client.delete_by_id(acr_attachment["role_assignment"]["id"])
+                        authorization_client.role_assignments.delete_by_id(acr_attachment["role_assignment"]["id"])
                     except ResourceNotFoundError as e:
                         logging.warn("It looks that the ACR role assignment doesnt exist. Ignore this step")
 
