@@ -294,3 +294,4 @@ class MyCluster(Cluster):
             # other exceptions should not be ignored
             except ResourceNotFoundError as e:
                 logging.info("Cluster doesn't seem to exist anymore, considering it deleted")
+                gone = True
