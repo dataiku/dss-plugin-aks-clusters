@@ -1,5 +1,4 @@
-from azure.common.credentials import ServicePrincipalCredentials
-from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
+from azure.identity import DefaultAzureCredential, ManagedIdentityCredential, ClientSecretCredential
 from azure.mgmt.msi import ManagedServiceIdentityClient
 from msrest.authentication import BasicTokenAuthentication
 from azure.core.pipeline.policies import BearerTokenCredentialPolicy
@@ -15,7 +14,7 @@ def get_credentials_from_connection_info(connection_info, connection_info_secret
     if _is_none_or_blank(client_id) or _is_none_or_blank(password) or _is_none_or_blank(tenant_id):
         raise Exception('Client, password and tenant must all be defined')
 
-    credentials = ServicePrincipalCredentials(client_id = client_id, secret = password, tenant = tenant_id)
+    credentials = ClientSecretCredential(tenant_id, client_id, password)
     return credentials
 
 
@@ -33,7 +32,7 @@ def get_credentials_from_connection_infoV2(connection_infos):
         client_id = infos.get('clientId', None)
         password = infos.get('password', None)
         tenant_id = infos.get('tenantId', None)
-        credentials = ServicePrincipalCredentials(client_id = client_id, secret = password, tenant = tenant_id)
+        credentials = ClientSecretCredential(tenant_id, client_id, password)
     else:
         raise "Identity type {} is unknown and cannot be used".format(identity_type)
 
