@@ -38,7 +38,7 @@ class MyCluster(Cluster):
                 cluster_name = self.cluster_name
                 logging.info(f"Using same cluster name as DSS: {cluster_name}")
             else:
-                clusterName = self.config.get("clusterName")
+                cluster_name = self.config.get("clusterName")
         else: 
             logging.warn(f"Fetching cluster name \"{cluster_name}\" from legacy setting. Clear it to use the new one.")
 
