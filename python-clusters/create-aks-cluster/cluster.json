@@ -64,7 +64,7 @@
             "name": "useCustomNodeResourceGroup",
             "label": "Custom node resource group",
             "description": "Create node resources in a custom resource group",
-            "type": "boolean",
+            "type": "BOOLEAN",
             "default": false,
             "mandatory": true
         },
@@ -72,7 +72,7 @@
             "name": "nodeResourceGroup",
             "label": "node resource group",
             "description": "Name of the resource group where node resources will be created",
-            "type": "string",
+            "type": "STRING",
             "visibilitycondition": "model.useCustomNodeResourceGroup"
         },
         {
