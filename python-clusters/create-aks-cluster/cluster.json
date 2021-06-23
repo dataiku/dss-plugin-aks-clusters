@@ -165,7 +165,7 @@
             "label": "Resource group",
             "type": "STRING",
             "description": "(legacy)",
-            "mandatory": true,
+            "mandatory": false,
             "visibilityCondition": "model.showLegacyOptions"
         },
         {
@@ -173,7 +173,7 @@
             "label": "Location",
             "description": "Region in which to create the cluster, e.g. 'France Central' (legacy)",
             "type": "STRING",
-            "mandatory": true,
+            "mandatory": false,
             "visibilityCondition": "model.showLegacyOptions"
         },
         {

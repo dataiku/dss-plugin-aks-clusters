@@ -74,7 +74,7 @@
             "name": "resourceGroup",
             "label" : "Resource group (legacy)",
             "type": "STRING",
-            "mandatory" : true,
+            "mandatory" : false,
             "visibilityCondition": "model.showLegacyOptions"
         },
         {
@@ -82,7 +82,7 @@
             "label" : "AKS Cluster name (legacy)",
             "description" : "If different from the DSS cluster name",
             "type": "STRING",
-            "mandatory" : true,
+            "mandatory" : false,
             "visibilityCondition": "model.showLegacyOptions"
         }
     ]
