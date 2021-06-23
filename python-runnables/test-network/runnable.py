@@ -1,5 +1,5 @@
 from dataiku.runnables import Runnable
-import os, sys, json, yaml, random, subprocess, socket, re
+import os, sys, json, yaml, random, subprocess, socket, re, traceback, ipaddress
 from dku_kube.busybox_pod import BusyboxPod
 from dku_kube.kubectl_command import KubeCommandException
 from dku_utils.cluster import get_cluster_from_dss_cluster
@@ -15,7 +15,7 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        cluster_data, clusters, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
+        cluster_data, _, dss_cluster_settings, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
 
         # the cluster is accessible via the kubeconfig
         kube_config_path = dss_cluster_settings.get_raw()['containerSettings']['executionConfigsGenericOverrides']['kubeConfigPath']
@@ -26,7 +26,6 @@ class MyRunnable(Runnable):
         cluster_def = cluster_data.get("cluster", None)
         if cluster_def is None:
             raise Exception("No cluster definition (starting failed?)")
-        cluster_name = cluster_def["name"]
         
         result = ''
         
@@ -42,32 +41,39 @@ class MyRunnable(Runnable):
             if host.startswith("127.0.0") or 'localhost' in host:
                 raise Exception('Host appears to not be a public hostname. Set DKU_BACKEND_EXT_HOST')
             with BusyboxPod(kube_config_path) as b:
-                # check that the pod resolved the hostname
-                ip = None
-                cmd = ['nslookup', host]
-                out, err = b.exec_cmd(cmd)
-                result = add_to_result(result, 'Resolve host', cmd, out, err)
-                for line in out.split('\n'):
-                    m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)\\s.*$', line)
-                    if m is not None:
-                        ip = m.group(1)
-                if ip is None:
-                    raise Exception('Hostname resolution of DSS node failed: %s' % out)
+                try:
+                    ip = str(ipaddress.ip_address(unicode(host)))
+                    result = result + '<h5>Host %s is an ip. No need to resolve it, testing connection directly</h5>' % (host)
+
+                except ValueError:
+                    # check that the pod resolved the hostname
+                    ip = None
+                    cmd = ['nslookup', host]
+                    out, err = b.exec_cmd(cmd)
+                    result =  result + '<h5>Resolve host</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Output</div><pre class="debug">%s</pre><div>Error</div><pre class="debug">%s</pre></div>' % (json.dumps(cmd), out, err)
+                    for line in out.split('\n'):
+                        m = re.match('^Address.*\\s([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+[^\\s]*)\\s.*$', line)
+                        if m is not None:
+                            ip = m.group(1)
+                    if ip is None:
+                        raise Exception('Hostname resolution of DSS node failed: %s' % out)
                     
-                result = result + '<h5>Host %s resolved to %s</h5>' % (host, ip)
+                    result = result + '<h5>Host %s resolved to %s</h5>' % (host, ip)
 
                 # try to connect on the backend port
-                cmd = ['nc', '-vz', ip, port]
-                out, err = b.exec_cmd(cmd)
-                result = add_to_result(result, 'Test connection to port', cmd, out, err)
+                cmd = ['nc', '-vz', ip, port, '-w', '5']
+                out, err = b.exec_cmd(cmd, timeout=10)
+                result =  result + '<h5>Test connection to port</h5><div style="margin-left: 20px;"><div>Command</div><pre class="debug">%s</pre><div>Debug (stderr)</div><pre class="debug">%s</pre></div>' % (json.dumps(cmd), err)
                 if 'no route to host' in err.lower():
-                    raise Exception("DSS node resolved but unreachable on port %s : %s" % (port, err))
+                    raise Exception("DSS node resolved but unreachable on port %s : %s" % (str(port), err))
 
                 result = result + '<h5>Connection successful</h5>'
+
         except KubeCommandException as e:
+            traceback.print_exc()
             result = result + '<div class="alert alert-error"><div>%s</div><div>out:</div><pre>%s</pre><div>err:</div><pre>%s</pre></div>' % (str(e), e.out, e.err)
         except Exception as e:
+            traceback.print_exc()
             result = result + '<div class="alert alert-error">%s</div>' % str(e)
                 
         return '<div>%s</div>' % result
-            

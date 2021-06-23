@@ -1,11 +1,11 @@
 {
     "id": "aks-clusters",
-    "version": "1.0.2",
+    "version": "1.0.6",
     "meta": {
         "label": "AKS clusters",
         "description": "Interact with or create Microsoft Azure Kubernetes Service clusters",
         "author": "Dataiku",
-        "icon": "icon-puzzle-piece",
+        "icon": "icon-azure-kubernetes-services icon-cloud",
         "licenseInfo" : "Apache Software License",
         "url": "https://github.com/dataiku/dss-plugin-aks-clusters",
         "tags": ["Cloud", "Microsoft Azure"],
