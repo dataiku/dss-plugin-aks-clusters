@@ -1,9 +1,9 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ContainerServiceServicePrincipalProfile, ManagedCluster
+from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
 from dku_utils.access import _default_if_blank
 
-import logging
+import logging, copy, json
 
 
 class ClusterBuilder(object):
@@ -19,8 +19,11 @@ class ClusterBuilder(object):
         self.linux_profile = None
         self.network_profile = None
         self.cluster_sp = None
+        self.identity = None
+        self.identity_profile = None
         self.node_pools = []
         self.cluster_version = None
+        self.user_identity = None
         self.private_access = None
 
 
@@ -53,18 +56,59 @@ class ClusterBuilder(object):
             network_plugin = network_plugin,
             docker_bridge_cidr = docker_bridge_cidr
         )
+        logging.info("With network profile: %s", json.dumps(self.network_profile.as_dict()))
         return self
 
     def with_node_resource_group(self, node_resource_group):
         self.node_resource_group = node_resource_group
 
-    def with_cluster_sp(self, cluster_service_principal_connection_info):
+    def with_cluster_sp_legacy(self, cluster_service_principal_connection_info):
         client_id = cluster_service_principal_connection_info["clientId"]
         client_secret = cluster_service_principal_connection_info["password"]
-        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id=client_id,
-                                                                            secret=client_secret,
-                                                                            key_vault_secret_ref=None)
+        service_principal_profile = {
+            "client_id": client_id,
+            "secret": client_secret,
+        }
+                                       
         self.cluster_sp = service_principal_profile
+        return self
+
+    def with_azure_managed_sp(self):
+        self.identity = {
+            "type": "None",
+        }
+        return self
+
+    def with_cluster_sp(self, client_id, secret):
+        service_principal_profile = ContainerServiceServicePrincipalProfile(client_id, secret)
+        self.cluster_sp = service_principal_profile
+        self.identity = {
+            "type": "None",
+        }
+        return self
+
+    def with_managed_identity(self, control_plane_mi=None):
+        if control_plane_mi is not None:
+            self.identity = {
+                "type": "UserAssigned",
+                "user_assigned_identities": {
+                    control_plane_mi: {}
+                }
+            }
+        else:
+            self.identity = {
+                "type": "SystemAssigned",
+            }
+        return self
+
+    def with_kubelet_identity(self, kubelet_mi_resource_id, kubelet_mi_client_id, kubelet_mi_object_id):
+        self.identity_profile = {
+            "kubeletidentity": {
+                "resource_id": kubelet_mi_resource_id,
+                "client_id": kubelet_mi_client_id,
+                "object_id": kubelet_mi_object_id,
+            },
+        }
         return self
 
     def with_private_access(self, private_access):
@@ -95,6 +139,8 @@ class ClusterBuilder(object):
         cluster_params["network_profile"] = self.network_profile
         cluster_params["node_resource_group"] = self.node_resource_group
         cluster_params["service_principal_profile"] = self.cluster_sp
+        cluster_params["identity"] = self.identity
+        cluster_params["identity_profile"] = self.identity_profile
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
 
@@ -102,7 +148,9 @@ class ClusterBuilder(object):
             cluster_params["api_server_access_profile"] = self.private_access
 
         self.cluster_config = ManagedCluster(**cluster_params)
-        return self.clusters_client.managed_clusters.create_or_update(self.resource_group, self.name, self.cluster_config)
+
+        future = self.clusters_client.managed_clusters.begin_create_or_update(self.resource_group, self.name, self.cluster_config)
+        return future
 
 
 class NodePoolBuilder(object):
@@ -165,7 +213,6 @@ class NodePoolBuilder(object):
         if enable_autoscaling:
             self.agent_pool_type = "VirtualMachineScaleSets"
             self.min_num_nodes = min_num_nodes
-            self.max_num_nodes = max_num_nodes
             self.num_nodes = min_num_nodes
         else:
             self.num_nodes = num_nodes
