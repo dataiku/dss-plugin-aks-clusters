@@ -59,6 +59,9 @@ class ClusterBuilder(object):
         logging.info("With network profile: %s", json.dumps(self.network_profile.as_dict()))
         return self
 
+    def with_node_resource_group(self, node_resource_group):
+        self.node_resource_group = node_resource_group
+
     def with_cluster_sp_legacy(self, cluster_service_principal_connection_info):
         client_id = cluster_service_principal_connection_info["clientId"]
         client_secret = cluster_service_principal_connection_info["password"]
@@ -134,6 +137,7 @@ class ClusterBuilder(object):
         cluster_params["dns_prefix"] = self.dns_prefix
         cluster_params["linux_profile"] = self.linux_profile
         cluster_params["network_profile"] = self.network_profile
+        cluster_params["node_resource_group"] = self.node_resource_group
         cluster_params["service_principal_profile"] = self.cluster_sp
         cluster_params["identity"] = self.identity
         cluster_params["identity_profile"] = self.identity_profile

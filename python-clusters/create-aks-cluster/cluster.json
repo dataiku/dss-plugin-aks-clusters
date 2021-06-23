@@ -66,6 +66,21 @@
             "label": "Cluster nodes"
         },
         {
+            "name": "useCustomNodeResourceGroup",
+            "label": "Custom node resource group",
+            "description": "Create node resources in a custom resource group",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": true
+        },
+        {
+            "name": "nodeResourceGroup",
+            "label": "Nodes resource group",
+            "description": "Name of the resource group where node resources will be created",
+            "type": "STRING",
+            "visibilityCondition": "model.useCustomNodeResourceGroup"
+        },
+        {
             "name": "nodePools",
             "label": "Node pools",
             "description": "Node pools to create in the cluster",
