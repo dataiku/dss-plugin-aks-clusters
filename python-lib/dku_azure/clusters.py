@@ -282,7 +282,7 @@ class NodePoolBuilder(object):
         if self.taints:
             agent_pool_profile_params["node_taints"] = self.taints
         if self.tags:
-            agent_pool_profile["tags"] = self.tags
+            agent_pool_profile_params["tags"] = self.tags
 
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
