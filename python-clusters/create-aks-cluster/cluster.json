@@ -61,6 +61,11 @@
             "mandatory": true
         },
         {
+            "name": "s-nodes",
+            "type": "SEPARATOR",
+            "label": "Cluster nodes"
+        },
+        {
             "name": "useCustomNodeResourceGroup",
             "label": "Custom node resource group",
             "description": "Create node resources in a custom resource group",
@@ -74,11 +79,6 @@
             "description": "Name of the resource group where node resources will be created",
             "type": "STRING",
             "visibilityCondition": "model.useCustomNodeResourceGroup"
-        },
-        {
-            "name": "s-nodes",
-            "type": "SEPARATOR",
-            "label": "Cluster nodes"
         },
         {
             "name": "nodePools",
