@@ -101,6 +101,7 @@ class MyCluster(Cluster):
         cluster_builder.with_dns_prefix("{}-dns".format(self.cluster_name))
         cluster_builder.with_resource_group(resource_group)
         cluster_builder.with_location(location)
+        cluster_builder.add_tags(self.config.get("tags", None))
         cluster_builder.with_linux_profile() # default is None
         cluster_builder.with_network_profile(service_cidr=self.config.get("serviceCIDR", None),
                                          dns_service_ip=self.config.get("dnsServiceIP", None),
@@ -184,6 +185,8 @@ class MyCluster(Cluster):
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
+            node_pool_builder.add_tags(self.config.get("tags", None))
+            node_pool_builder.add_tags(node_pool_conf.get("tags", None))
             node_pool_builder.build()
             cluster_builder.with_node_pool(node_pool=node_pool_builder.agent_pool_profile)
 

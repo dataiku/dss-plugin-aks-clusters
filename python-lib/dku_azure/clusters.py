@@ -16,6 +16,7 @@ class ClusterBuilder(object):
         self.dns_prefix = None
         self.resource_group = None
         self.location = None
+        self.tags = None
         self.linux_profile = None
         self.network_profile = None
         self.cluster_sp = None
@@ -25,7 +26,6 @@ class ClusterBuilder(object):
         self.cluster_version = None
         self.user_identity = None
         self.private_access = None
-
 
     def with_name(self, name):
         self.name = name
@@ -42,6 +42,14 @@ class ClusterBuilder(object):
     def with_location(self, location):
         self.location = _default_if_blank(location, None)
         return self
+
+    def add_tags(self, tags):
+        if 0 < len(tags):
+            if self.tags is None:
+                self.tags = {}
+            self.tags.update(tags)
+        return self
+
 
     def with_linux_profile(self, linux_profile=None):
         self.linux_profile = linux_profile
@@ -174,6 +182,7 @@ class NodePoolBuilder(object):
         self.gpu = None
         self.labels = None
         self.taints = []
+        self.tags = None
 
 
     def with_name(self, name):
@@ -193,6 +202,13 @@ class NodePoolBuilder(object):
             self.gpu = True
         else:
             self.gpu = False
+        return self
+
+    def add_tags(self, tags):
+        if 0 < len(tags):
+            if self.tags is None:
+                self.tags = {}
+            self.tags.update(tags)
         return self
 
     def with_network(self, inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group):
@@ -265,6 +281,8 @@ class NodePoolBuilder(object):
             agent_pool_profile_params["node_labels"] = self.labels
         if self.taints:
             agent_pool_profile_params["node_taints"] = self.taints
+        if self.tags:
+            agent_pool_profile["tags"] = self.tags
 
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 

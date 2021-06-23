@@ -133,6 +133,13 @@
             "description": "WARNING: MUST CREATE AT LEAST ONE NODE POOL WITHOUT TAINTS. https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/",
             "type": "STRINGS",
             "mandatory": false
+        },
+        {
+            "name": "tags",
+            "label": "Node tags",
+            "description": "Additional Azure tags assigned to the nodes",
+            "type": "MAP",
+            "mandatory": false
         }
     ]
 }

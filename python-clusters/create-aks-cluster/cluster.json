@@ -26,7 +26,6 @@
             "type": "BOOLEAN",
             "mandatory": true,
             "defaultValue": true
-
         },
         {
             "name": "resourceGroupV2",
@@ -43,7 +42,6 @@
             "type": "BOOLEAN",
             "mandatory": true,
             "defaultValue": true
-
         },
         {
             "name": "locationV2",
@@ -59,6 +57,13 @@
             "type": "PRESET",
             "parameterSetId": "cluster-identity",
             "mandatory": true
+        },
+        {
+            "name": "tags",
+            "label": "Tags",
+            "description": "Tags assigned to the resources created",
+            "type": "MAP",
+            "mandatory": false
         },
         {
             "name": "s-nodes",
