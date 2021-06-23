@@ -1,20 +1,26 @@
-from dku_utils.access import _default_if_blank, _default_if_property_blank
-import dataiku
-from dataiku.core.intercom import backend_json_call
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 import json, logging
-from dku_azure.auth import get_credentials_from_connection_info
+import requests
+import dataiku
 from azure.mgmt.containerservice import ContainerServiceClient
+from dataiku.core.intercom import backend_json_call
+from dku_azure.auth import get_credentials_from_connection_info
+from dku_azure.utils import get_instance_metadata, get_subscription_id
+from dku_utils.access import _default_if_blank, _default_if_property_blank
+from dku_utils.access import _has_not_blank_property, _is_none_or_blank
 
-def make_overrides(config, kube_config, kube_config_path):
+
+def make_overrides(config, kube_config, kube_config_path, acr_name=None):
     # alter the spark configurations to put the cluster master and image repo in the properties
     container_settings = {
-                            'executionConfigsGenericOverrides': {
-                                'kubeCtlContext': kube_config["current-context"], # has to exist, it's a config file we just built
-                                'kubeConfigPath': kube_config_path # the config is not merged into the main config file, so we need to pass the config file pth
-                            }
-                        }
+        'executionConfigsGenericOverrides': {
+            'kubeCtlContext': kube_config["current-context"], # has to exist, it's a config file we just built
+            'kubeConfigPath': kube_config_path # the config is not merged into the main config file, so we need to pass the config file pth
+        }
+    }
+    if acr_name is not None:
+        container_settings['executionConfigsGenericOverrides']['repositoryURL'] = f"{acr_name}.azurecr.io"
     return {'container':container_settings}
+
 
 def get_cluster_from_connection_info(config, plugin_config):
     """
@@ -23,7 +29,7 @@ def get_cluster_from_connection_info(config, plugin_config):
     
     connection_info = config.get("connectionInfo", {})
     connection_info_secret = plugin_config.get("connectionInfo", {})
-    subscription_id = connection_info.get('subscriptionId', None)
+    subscription_id = get_subscription_id(connection_info)
     if _is_none_or_blank(subscription_id):
         raise Exception('Subscription must be defined')
 

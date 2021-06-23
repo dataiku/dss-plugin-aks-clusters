@@ -7,13 +7,12 @@
     "architecture": "KUBERNETES",
     "params": [
         {
-            "name": "connectionInfo",
+            "name": "connectionInfoV2",
             "label": "Connection",
             "type": "PRESET",
-            "parameterSetId": "connection-info",
+            "parameterSetId": "connection-info-v2",
             "mandatory": true
         },
-        
         {
             "name": "clusterVersion",
             "label": "Kubernetes version",
@@ -21,34 +20,45 @@
             "defaultValue": "latest"
         },
         {
-            "name": "resourceGroup",
-            "label": "Resource group",
-            "type": "STRING",
-            "mandatory": true
+            "name": "useSameResourceGroupAsDSSHost",
+            "label": "Use DSS resource group",
+            "description": "Create cluster in same resource group as DSS host",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
+
         },
         {
-            "name": "location",
+            "name": "resourceGroupV2",
+            "label": "Resource group name",
+            "description": "Resource group in which to create the cluster",
+            "type": "STRING",
+            "mandatory": false,
+            "visibilityCondition": "!model.useSameResourceGroupAsDSSHost"
+        },
+        {
+            "name": "useSameLocationAsDSSHost",
+            "label": "Use DSS location",
+            "description": "Create cluster in the same location as DSS host",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
+
+        },
+        {
+            "name": "locationV2",
             "label": "Location",
             "description": "Region in which to create the cluster, e.g. 'France Central'",
             "type": "STRING",
-            "mandatory": true
-        },
-        {
-            "name": "useDistinctSPForCluster",
-            "label": "Use distinct credentials",
-            "description": "Associate cluster nodes with a specific Service Principal",
-            "type": "BOOLEAN",
-            "default": false,
-            "mandatory": true
-        },
-        {
-            "name": "clusterServicePrincipal",
-            "label": "Identity assumed by nodes",
-            "description": "Service principal used by the cluster's nodes (if different from the connection)",
-            "type": "PRESET",
-            "parameterSetId": "connection-info",
             "mandatory": false,
-            "visibilityCondition": "model.useDistinctSPForCluster"
+            "visibilityCondition": "!model.useSameLocationAsDSSHost"
+        },
+        {
+            "name": "clusterIdentity",
+            "label": "Identity assumed by cluster components",
+            "type": "PRESET",
+            "parameterSetId": "cluster-identity",
+            "mandatory": true
         },
         {
             "name": "s-nodes",
@@ -84,7 +94,7 @@
                 {"value": "azure", "label": "Azure CNI"},
                 {"value": "kubenet", "label": "kubenet"}
             ],
-            "defaultValue": "kubenet"
+            "defaultValue": "azure"
         },
         {
             "name": "serviceCIDR",
@@ -128,7 +138,60 @@
             ],
             "mandatory": false,
             "defaultValue": "Basic"
+        },
+        {
+            "name": "s-legacy",
+            "type": "SEPARATOR",
+            "label": "Legacy options"
+        },
+        {
+            "name": "showLegacyOptions",
+            "label": "Show legacy options",
+            "description": "Display values migrated from previous versions of the plugin",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": false 
+        },
+        {
+            "name": "connectionInfo",
+            "label": "Connection (legacy)",
+            "type": "PRESET",
+            "parameterSetId": "connection-info",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
+        },
+        {
+            "name": "resourceGroup",
+            "label": "Resource group",
+            "type": "STRING",
+            "description": "(legacy)",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
+        },
+        {
+            "name": "location",
+            "label": "Location",
+            "description": "Region in which to create the cluster, e.g. 'France Central' (legacy)",
+            "type": "STRING",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
+        },
+        {
+            "name": "useDistinctSPForCluster",
+            "label": "Use distinct credentials (legacy)",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
+        },
+        {
+            "name": "clusterServicePrincipal",
+            "label": "Identity assumed by nodes",
+            "description": "Service principal used by the cluster's nodes (if different from the connection)",
+            "type": "PRESET",
+            "parameterSetId": "connection-info",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions && model.useDistinctSPForCluster"
         }
-
     ]
 }
