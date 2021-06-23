@@ -13,7 +13,7 @@
             "parameterSetId": "connection-info",
             "mandatory": true
         },
-        
+
         {
             "name": "clusterVersion",
             "label": "Kubernetes version",
@@ -32,6 +32,21 @@
             "description": "Region in which to create the cluster, e.g. 'France Central'",
             "type": "STRING",
             "mandatory": true
+        },
+        {
+            "name": "useCustomNodeResourceGroup",
+            "label": "Use custom Node Resource Group",
+            "description": "Create node resources in a custom resource group",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": true
+        },
+        {
+            "name": "nodeResourceGroup",
+            "label": "Node Resource Group",
+            "description": "Name of the Resource Group where node resources will be created",
+            "type": "STRING",
+            "visibilityCondition": "model.useCustomNodeResourceGroup"
         },
         {
             "name": "useDistinctSPForCluster",
