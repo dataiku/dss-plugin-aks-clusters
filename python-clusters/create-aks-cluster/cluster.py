@@ -73,29 +73,6 @@ class MyCluster(Cluster):
         if _is_none_or_blank(location):
             raise Exception("A location to put the cluster in is required")
 
-        # Fail fast for non existing ACRs to avoid drama in case of failure AFTER cluster is created
-        if cluster_identity_type is not None and cluster_identity is not None:
-            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
-                acr_name = cluster_identity.get("attachToACRName", None)
-                if not _is_none_or_blank(acr_name):
-                    # build acr scope
-                    acr_identifier_splitted = acr_name.split('/')
-                    acr_subscription_id = subscription_id
-                    acr_resource_group = resource_group
-                    if 9 == len(acr_identifier_splitted):
-                        _,_,acr_subscription_id,_,acr_resource_group,_,_,_,acr_name = acr_identifier_splitted
-                    elif 2 == len(acr_identifier_splitted):
-                        acr_resource_group, acr_name = acr_identifier_splitted
-                        
-                    authorization_client = AuthorizationManagementClient(credentials, acr_subscription_id)
-                    acr_scope = "/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}".format(**locals())
-                    acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
-                    if 0 == len(acr_roles):
-                        raise "Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope)
-                    else:
-                        acr_role_id = acr_roles[0].id
-                        logging.info("ACR pull role id: %s", acr_role_id)
-
         # AKS Client
         clusters_client = None
 
@@ -176,6 +153,31 @@ class MyCluster(Cluster):
                 logging.info("Configure cluster with AKS managed service principal")
             else:
                 raise Exception("Cluster identity type \"{}\" is unknown".format(cluster_identity_type))
+
+
+        # Fail fast for non existing ACRs to avoid drama in case of failure AFTER cluster is created
+        if cluster_identity_type is not None and cluster_identity is not None:
+            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
+                acr_name = cluster_identity.get("attachToACRName", None)
+                if not _is_none_or_blank(acr_name):
+                    # build acr scope
+                    acr_identifier_splitted = acr_name.split('/')
+                    acr_subscription_id = subscription_id
+                    acr_resource_group = resource_group
+                    if 9 == len(acr_identifier_splitted):
+                        _,_,acr_subscription_id,_,acr_resource_group,_,_,_,acr_name = acr_identifier_splitted
+                    elif 2 == len(acr_identifier_splitted):
+                        acr_resource_group, acr_name = acr_identifier_splitted
+                        
+                    authorization_client = AuthorizationManagementClient(credentials, acr_subscription_id)
+                    acr_scope = "/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}".format(**locals())
+                    acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
+                    if 0 == len(acr_roles):
+                        raise "Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope)
+                    else:
+                        acr_role_id = acr_roles[0].id
+                        logging.info("ACR pull role id: %s", acr_role_id)
+
 
         # Access level
         if self.config.get("privateAccess"):
