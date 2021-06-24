@@ -151,6 +151,7 @@ class ClusterBuilder(object):
         cluster_params["identity_profile"] = self.identity_profile
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
+        cluster_params["tags"] = self.tags
 
         if self.private_access:
             cluster_params["api_server_access_profile"] = self.private_access
