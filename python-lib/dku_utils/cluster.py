@@ -18,7 +18,7 @@ def make_overrides(config, kube_config, kube_config_path, acr_name=None):
         }
     }
     if acr_name is not None:
-        container_settings['executionConfigsGenericOverrides']['repositoryURL'] = f"{acr_name}.azurecr.io"
+        container_settings['executionConfigsGenericOverrides']['repositoryURL'] = "{}.azurecr.io".format(acr_name)
     return {'container':container_settings}
 
 
