@@ -34,7 +34,7 @@ def get_credentials_from_connection_infoV2(connection_infos):
         tenant_id = infos.get('tenantId', None)
         credentials = ClientSecretCredential(tenant_id, client_id, password)
     else:
-        raise "Identity type {} is unknown and cannot be used".format(identity_type)
+        raise Exception("Identity type {} is unknown and cannot be used".format(identity_type))
 
     return credentials
 
