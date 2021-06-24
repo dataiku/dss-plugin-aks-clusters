@@ -50,22 +50,22 @@ class MyCluster(Cluster):
         if _is_none_or_blank(resource_group):
             if self.config.get("useSameResourceGroupAsDSSHost",True):
                 resource_group = metadata["compute"]["resourceGroupName"]
-                logging.info(f"Using same resource group as DSS: {resource_group}")
+                logging.info("Using same resource group as DSS: {}".format(resource_group))
             else:
                 resource_group = self.config.get("resourceGroupV2",None)
         else: 
-            logging.warn(f"Fetching resource group \"{resource_group}\" from legacy setting. Clear it to use the new one.")
+            logging.warn("Fetching resource group \"{}\" from legacy setting. Clear it to use the new one.".format(resource_group))
 
         # Location
         location = self.config.get('location', None)
         if _is_none_or_blank(location):
             if self.config.get("useSameLocationAsDSSHost",True):
                 location = metadata["compute"]["location"]
-                logging.info(f"Using same location as DSS: {location}")
+                logging.info("Using same location as DSS: {location}")
             else:
                 location = self.config.get("locationV2",None)
         else:
-            logging.warn(f"Fetching location \"{location}\" from legacy setting. Clear it to use the new one.")
+            logging.warn("Fetching location \"{}\" from legacy setting. Clear it to use the new one.".format(location))
 
         # Consistency checks
         if _is_none_or_blank(resource_group):
@@ -137,14 +137,14 @@ class MyCluster(Cluster):
                 if control_plane_mi is None:
                     logging.info("Configure cluster with system managed identity.")
                 else:
-                    logging.info(f"Configure cluster with user assigned identity: {control_plane_mi}")
+                    logging.info("Configure cluster with user assigned identity: {}".format(control_plane_mi))
                 if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
                     kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
                     _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
                     msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
                     mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
                     cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
-                    logging.info(f"Configure kubelet identity with user assigned identity resourceId=\"{kubelet_mi}\", clientId=\"{mi.client_id}\", objectId=\"{mi.principal_id}\"")
+                    logging.info("Configure kubelet identity with user assigned identity resourceId=\"{}\", clientId=\"{}\", objectId=\"{}\"".format(kubelet_mi, mi.client_id, mi.principal_id))
             elif cluster_identity_type == "service-principal":
                 cluster_builder.with_cluster_sp(cluster_identity["clientId"], cluster_identity["password"])
                 logging.info("Configure cluster with service principal")
@@ -152,7 +152,7 @@ class MyCluster(Cluster):
                 cluster_builder.with_azure_managed_sp()
                 logging.info("Configure cluster with AKS managed service principal")
             else:
-                raise Exception(f"Cluster identity type \"{cluster_identity_type}\" is unknown")
+                raise Exception("Cluster identity type \"{}\" is unknown".format(cluster_identity_type))
 
         # Access level
         if self.config.get("privateAccess"):
@@ -218,10 +218,10 @@ class MyCluster(Cluster):
                         acr_resource_group, acr_name = acr_identifier_splitted
                         
                     authorization_client = AuthorizationManagementClient(credentials, acr_subscription_id)
-                    acr_scope = f"/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}"
+                    acr_scope = "/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}".format(**locals())
                     acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
                     if 0 == len(acr_roles):
-                        raise f"Exception could not find the AcrPull role on the ACR {acr_scope}. Are you owner of the ACR ?"
+                        raise "Exception could not find the AcrPull role on the ACR {}. Are you owner of the ACR ?".format(acr_scope)
                     else:
                         acr_role_id = acr_roles[0].id
                         logging.info("ACR pull role id: %s", acr_role_id)

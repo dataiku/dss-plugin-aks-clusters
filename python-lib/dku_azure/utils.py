@@ -22,7 +22,7 @@ def get_instance_metadata(api_version=INSTANCE_API_VERSION):
     """
     Return VM metadata.
     """
-    metadata_svc_endpoint = f"{AZURE_METADATA_SERVICE}/metadata/instance?api-version={api_version}"
+    metadata_svc_endpoint = "{}/metadata/instance?api-version={}".format(AZURE_METADATA_SERVICE, api_version)
     req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"}, proxies={"http":None, "http":None})
     resp = req.json()
     return resp
