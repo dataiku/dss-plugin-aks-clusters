@@ -126,7 +126,7 @@ class MyCluster(Cluster):
             elif cluster_idendity_legacy_use_distinct_sp and not _is_none_or_blank(cluster_idendity_legacy_sp):
                 cluster_sp = self.config.get("clusterServicePrincipal")
             else:
-                raise "Legacy options are not complete enough to determine cluster identity settings"
+                raise Exception("Legacy options are not complete enough to determine cluster identity settings")
             cluster_builder.with_cluster_sp_legacy(cluster_service_principal_connection_info=cluster_sp)
         else:
             cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
@@ -174,9 +174,9 @@ class MyCluster(Cluster):
                     try:
                         acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
                     except ResourceNotFoundError as e:
-                        raise "ACR {} not found. Check it exists and you are Owner of it.".format(acr_scope)
+                        raise Exception("ACR {} not found. Check it exists and you are Owner of it.".format(acr_scope))
                     if 0 == len(acr_roles):
-                        raise "Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope)
+                        raise Exception("Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope))
                     else:
                         acr_role_id = acr_roles[0].id
                         logging.info("ACR pull role id: %s", acr_role_id)
