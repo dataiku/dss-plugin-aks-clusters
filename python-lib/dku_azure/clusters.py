@@ -26,6 +26,7 @@ class ClusterBuilder(object):
         self.cluster_version = None
         self.user_identity = None
         self.private_access = None
+        self.node_resource_group = None
 
     def with_name(self, name):
         self.name = name
