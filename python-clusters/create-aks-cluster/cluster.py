@@ -171,7 +171,10 @@ class MyCluster(Cluster):
                         
                     authorization_client = AuthorizationManagementClient(credentials, acr_subscription_id)
                     acr_scope = "/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}".format(**locals())
-                    acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
+                    try:
+                        acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
+                    except ResourceNotFoundError as e:
+                        raise "ACR {} not found. Check it exists and you are Owner of it.".format(acr_scope)
                     if 0 == len(acr_roles):
                         raise "Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope)
                     else:
