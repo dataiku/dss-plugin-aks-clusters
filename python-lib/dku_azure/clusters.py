@@ -232,6 +232,7 @@ class NodePoolBuilder(object):
             self.agent_pool_type = "VirtualMachineScaleSets"
             self.min_num_nodes = min_num_nodes
             self.num_nodes = min_num_nodes
+            self.max_num_nodes = max_num_nodes
         else:
             self.num_nodes = num_nodes
         return self
