@@ -3,7 +3,7 @@ import requests
 import dataiku
 from azure.mgmt.containerservice import ContainerServiceClient
 from dataiku.core.intercom import backend_json_call
-from dku_azure.auth import get_credentials_from_connection_info
+from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.utils import get_instance_metadata, get_subscription_id
 from dku_utils.access import _default_if_blank, _default_if_property_blank
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
@@ -26,19 +26,17 @@ def get_cluster_from_connection_info(config, plugin_config):
     """
     Return a ContainerServiceClient after authenticating using the connection info.
     """
-    
-    connection_info = config.get("connectionInfo", {})
-    connection_info_secret = plugin_config.get("connectionInfo", {})
-    subscription_id = get_subscription_id(connection_info)
-    if _is_none_or_blank(subscription_id):
-        raise Exception('Subscription must be defined')
-
-    credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
+    connection_info = config.get("connectionInfo", None)
+    connection_info_secret = plugin_config.get("connectionInfo", None)
+    if not _is_none_or_blank(connection_info) or not _is_none_or_blank(connection_info_secret):
+        logging.warn("Using legacy authentication fields. Clear them to use the new ones.")
+        credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
+        subscription_id = connection_info.get('subscriptionId', None)
+    else:
+        connection_info_v2 = config.get("connectionInfoV2",{"identityType":"default"})
+        credentials = get_credentials_from_connection_infoV2(connection_info_v2)
+        subscription_id = get_subscription_id(connection_info_v2)
     clusters_client = ContainerServiceClient(credentials, subscription_id)
-            
-    # credit this cluster to Dataiku
-    # clusters_client.config.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
-
     return clusters_client
 
 def get_cluster_from_dss_cluster(dss_cluster_id):
