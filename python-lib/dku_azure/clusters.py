@@ -82,12 +82,6 @@ class ClusterBuilder(object):
         self.cluster_sp = service_principal_profile
         return self
 
-    def with_azure_managed_sp(self):
-        self.identity = {
-            "type": "None",
-        }
-        return self
-
     def with_cluster_sp(self, client_id, secret):
         service_principal_profile = ContainerServiceServicePrincipalProfile(client_id, secret)
         self.cluster_sp = service_principal_profile

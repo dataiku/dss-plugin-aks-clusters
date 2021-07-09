@@ -20,7 +20,6 @@
             "type": "SELECT",
             "selectChoices": [
                 {"value": "managed-identity", "label": "Managed identities (Recommended)"},
-                {"value": "aks-default", "label": "AKS Managed Service Principal"},
                 {"value": "service-principal", "label": "Service principal"}
             ],
             "defaultValue": "managed-identity",

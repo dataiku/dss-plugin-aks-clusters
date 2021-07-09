@@ -148,9 +148,6 @@ class MyCluster(Cluster):
             elif cluster_identity_type == "service-principal":
                 cluster_builder.with_cluster_sp(cluster_identity["clientId"], cluster_identity["password"])
                 logging.info("Configure cluster with service principal")
-            elif cluster_identity_type == 'aks-default':
-                cluster_builder.with_azure_managed_sp()
-                logging.info("Configure cluster with AKS managed service principal")
             else:
                 raise Exception("Cluster identity type \"{}\" is unknown".format(cluster_identity_type))
 
