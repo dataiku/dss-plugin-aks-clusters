@@ -3,7 +3,7 @@ import requests
 import dataiku
 from azure.mgmt.containerservice import ContainerServiceClient
 from dataiku.core.intercom import backend_json_call
-from dku_azure.auth import get_credentials_from_connection_info
+from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.utils import get_instance_metadata, get_subscription_id
 from dku_utils.access import _default_if_blank, _default_if_property_blank
 from dku_utils.access import _has_not_blank_property, _is_none_or_blank
