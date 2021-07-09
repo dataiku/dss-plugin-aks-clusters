@@ -26,7 +26,6 @@ def get_cluster_from_connection_info(config, plugin_config):
     """
     Return a ContainerServiceClient after authenticating using the connection info.
     """
-    credentials = get_credentials_from_connection_info(connection_info, connection_info_secret)
     connection_info = config.get("connectionInfo", None)
     connection_info_secret = plugin_config.get("connectionInfo", None)
     if not _is_none_or_blank(connection_info) or not _is_none_or_blank(connection_info_secret):
