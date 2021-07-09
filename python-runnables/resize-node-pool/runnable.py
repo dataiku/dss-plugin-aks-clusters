@@ -47,7 +47,7 @@ class MyRunnable(Runnable):
             logging.info("Waiting for cluster resize")
 
         def do_update():
-            cluster_update_op = clusters.managed_clusters.create_or_update(resource_group, cluster_name, cluster)
+            cluster_update_op = clusters.managed_clusters.begin_create_or_update(resource_group, cluster_name, cluster)
             return cluster_update_op.result()
         update_result = run_and_process_cloud_error(do_update)
         logging.info("Cluster updated")
