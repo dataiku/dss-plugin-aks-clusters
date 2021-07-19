@@ -231,7 +231,7 @@ class MyCluster(Cluster):
             if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
                 kubelet_mi_object_id = create_result.identity_profile.get("kubeletidentity").object_id
                 logging.info("Kubelet Managed Identity object id: %s", kubelet_mi_object_id)
-                if not _is_none_or_blank(acr_role_id):
+                if not _is_none_or_blank(acr_name):
                     logging.info("Assign ACR pull role id %s to %s", acr_role_id, kubelet_mi_object_id)
                     role_assignment = authorization_client.role_assignments.create(
                         scope=acr_scope,
