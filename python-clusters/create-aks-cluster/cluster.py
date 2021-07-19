@@ -61,7 +61,7 @@ class MyCluster(Cluster):
         if _is_none_or_blank(location):
             if self.config.get("useSameLocationAsDSSHost",True):
                 location = metadata["compute"]["location"]
-                logging.info("Using same location as DSS: {location}")
+                logging.info("Using same location as DSS: {}".format(location))
             else:
                 location = self.config.get("locationV2",None)
         else:
