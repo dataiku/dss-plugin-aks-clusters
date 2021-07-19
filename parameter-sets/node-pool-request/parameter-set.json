@@ -109,21 +109,20 @@
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
         },
         {
-            "name": "useAvailabilityZones",
-            "label": "Availability zones",
-            "description": "Deploy nodes in multiple availability zones (need to be supported by the selected location)",
-            "type": "BOOLEAN",
-            "mandatory": true,
-            "defaultValue": true
-
-        },
-        {
             "name": "subnet",
             "label": "Cluster subnet",
             "description": "Subnet where nodes and pods will be placed",
             "type": "STRING",
             "mandatory": false,
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
+        },
+        {
+            "name": "useAvailabilityZones",
+            "label": "Availability zones",
+            "description": "Deploy nodes in multiple availability zones (need to be supported by the selected location)",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
         },
         {
             "type": "SEPARATOR",
