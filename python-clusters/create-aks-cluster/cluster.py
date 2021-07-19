@@ -198,6 +198,8 @@ class MyCluster(Cluster):
                                            connection_info=connection_info,
                                            credentials=credentials,
                                            resource_group=resource_group)
+            
+            node_pool_builder.with_availability_zones(use_availability_zones=node_pool_conf.get("useAvailabilityZones", True))
 
             node_pool_builder.with_node_count(enable_autoscaling=node_pool_conf.get("autoScaling", False),
                                               num_nodes=node_pool_conf.get("numNodes", None),
