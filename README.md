@@ -8,6 +8,10 @@ For more details, please see [the DSS reference documentation](https://doc.datai
 
 ## Release notes
 
+### v2.0.1
+- Allow nodepools to run within multiple availability zones
+- Minor fix when ACR is empty
+
 ### v1.0.6
 - Allow nodepools with a minimum of 0 nodes (allowed for user node pools)
 - Users can now create node pools with specific [modes](https://docs.microsoft.com/en-us/azure/aks/use-system-pools#system-and-user-node-pools).
