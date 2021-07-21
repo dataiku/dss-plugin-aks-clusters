@@ -14,6 +14,13 @@
             "mandatory": true
         },
         {
+            "name": "s-nodes",
+            "type": "SEPARATOR",
+            "label": "WARNING: Connection parameters overriden by legacy options",
+            "description": "Clear legacy connection parameters in the legacy section to fix it.",
+            "visibilityCondition": "model.connectionInfo"
+        },
+        {
             "name": "clusterVersion",
             "label": "Kubernetes version",
             "type": "STRING",
