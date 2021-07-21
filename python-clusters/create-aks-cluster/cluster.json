@@ -11,7 +11,7 @@
             "type": "SEPARATOR",
             "label": "WARNING: Connection parameters overriden by existing legacy settings",
             "description": "Clear all legacy identity settings in the legacy section to fix it",
-            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.clusterServicePrincipal.mode != 'NONE'"
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.useDistinctSPForCluster"
         },
         {
             "name": "connectionInfoV2",
@@ -45,7 +45,7 @@
             "type": "SEPARATOR",
             "label": "WARNING: Cluster identity parameters overriden by existing legacy settings",
             "description": "Clear all legacy identity settings in the legacy section to fix it",
-            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.clusterServicePrincipal.mode != 'NONE'"
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.useDistinctSPForCluster"
         },
         {
             "name": "clusterIdentity",
