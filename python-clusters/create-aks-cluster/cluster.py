@@ -48,24 +48,14 @@ class MyCluster(Cluster):
         # Resource group
         resource_group = self.config.get('resourceGroup', None)
         if _is_none_or_blank(resource_group):
-            if self.config.get("useSameResourceGroupAsDSSHost",True):
-                resource_group = metadata["compute"]["resourceGroupName"]
-                logging.info("Using same resource group as DSS: {}".format(resource_group))
-            else:
-                resource_group = self.config.get("resourceGroupV2",None)
-        else: 
-            logging.warn("Fetching resource group \"{}\" from legacy setting. Clear it to use the new one.".format(resource_group))
+            resource_group = metadata["compute"]["resourceGroupName"]
+            logging.info("Using same resource group as DSS: {}".format(resource_group))
 
         # Location
         location = self.config.get('location', None)
         if _is_none_or_blank(location):
-            if self.config.get("useSameLocationAsDSSHost",True):
-                location = metadata["compute"]["location"]
-                logging.info("Using same location as DSS: {location}")
-            else:
-                location = self.config.get("locationV2",None)
-        else:
-            logging.warn("Fetching location \"{}\" from legacy setting. Clear it to use the new one.".format(location))
+            location = metadata["compute"]["location"]
+            logging.info("Using same location as DSS: {}".format(location))
 
         # Consistency checks
         if _is_none_or_blank(resource_group):

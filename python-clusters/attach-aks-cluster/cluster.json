@@ -16,38 +16,18 @@
             "mandatory" : true
         },
         {
-            "name": "useSameNameAsDSSCluster",
-            "label": "Use DSS cluster name",
-            "description": "Attach to cluster with the same name as DSS cluster",
-            "type": "BOOLEAN",
-            "mandatory": true,
-            "defaultValue": true
-
-        },
-        {
-            "name": "clusterName",
-            "label" : "Cluster name",
-            "description" : "Name of the AKS cluster",
+            "name": "cluster",
+            "label" : "Custom AKS cluster name",
+            "description" : "Leave blank to inherit DSS cluster name",
             "type": "STRING",
-            "mandatory" : false,
-            "visibilityCondition": "!model.useSameNameAsDSSCluster"
+            "mandatory" : false
         },
         {
-            "name": "useSameResourceGroupAsDSSHost",
-            "label": "Use DSS resource group",
-            "description": "Attach to a cluster in the same resource group as DSS host",
-            "type": "BOOLEAN",
-            "mandatory": true,
-            "defaultValue": true
-
-        },
-        {
-            "name": "resourceGroupV2",
-            "label": "Resource group",
-            "description": "Resource group of the cluster",
+            "name": "resourceGroup",
+            "label" : "Custom resource group",
+            "description" : "Leave blank to inherit DSS resource group",
             "type": "STRING",
-            "mandatory": false,
-            "visibilityCondition": "!model.useSameResourceGroupAsDSSHost"
+            "mandatory" : false
         },
         {
             "name": "s-legacy",
@@ -68,21 +48,6 @@
             "type": "PRESET",
             "parameterSetId": "connection-info",
             "mandatory": false,
-            "visibilityCondition": "model.showLegacyOptions"
-        },
-        {
-            "name": "resourceGroup",
-            "label" : "Resource group (legacy)",
-            "type": "STRING",
-            "mandatory" : false,
-            "visibilityCondition": "model.showLegacyOptions"
-        },
-        {
-            "name": "cluster",
-            "label" : "AKS Cluster name (legacy)",
-            "description" : "If different from the DSS cluster name",
-            "type": "STRING",
-            "mandatory" : false,
             "visibilityCondition": "model.showLegacyOptions"
         }
     ]
