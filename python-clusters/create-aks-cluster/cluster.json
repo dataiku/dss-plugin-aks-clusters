@@ -10,8 +10,8 @@
             "name": "s-nodes",
             "type": "SEPARATOR",
             "label": "WARNING: Connection parameters overriden by existing legacy settings",
-            "description": "Clear legacy connection settings in the legacy section to fix it",
-            "visibilityCondition": "model.connectionInfo.mode != 'NONE'"
+            "description": "Clear all legacy identity settings in the legacy section to fix it",
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.clusterServicePrincipal.mode != 'NONE'"
         },
         {
             "name": "connectionInfoV2",
@@ -39,6 +39,13 @@
             "description": "Leave blank to inherit DSS location",
             "type": "STRING",
             "mandatory": false
+        },
+        {
+            "name": "s-nodes",
+            "type": "SEPARATOR",
+            "label": "WARNING: Cluster identity parameters overriden by existing legacy settings",
+            "description": "Clear all legacy identity settings in the legacy section to fix it",
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.clusterServicePrincipal.mode != 'NONE'"
         },
         {
             "name": "clusterIdentity",
