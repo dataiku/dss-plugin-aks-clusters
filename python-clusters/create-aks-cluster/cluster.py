@@ -153,6 +153,7 @@ class MyCluster(Cluster):
 
 
         # Fail fast for non existing ACRs to avoid drama in case of failure AFTER cluster is created
+        acr_role_id = None
         if cluster_identity_type is not None and cluster_identity is not None:
             if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
                 acr_name = cluster_identity.get("attachToACRName", None)
