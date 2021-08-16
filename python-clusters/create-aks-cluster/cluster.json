@@ -64,6 +64,19 @@
             "mandatory": true
         },
         {
+            "name": "availabilityZones",
+            "label": "Availability Zones",
+            "description": "High availability offering that allows you to separate nodes in this pool across multiple physical locations.",
+            "type": "MULTISELECT",
+            "selectChoices": [
+                {"value": "1", "label": "Zone 1"},
+                {"value": "2", "label": "Zone 2"},
+                {"value": "3", "label": "Zone 3"}
+            ],
+            "mandatory": false,
+            "defaultValue": null
+        },
+        {
             "name": "advanced-options",
             "type": "SEPARATOR",
             "label": "Advanced options"
@@ -74,6 +87,19 @@
             "description": "Cluster endpoint accessible through Private Link. If used, must set Load balancer SKU to Standard",
             "type": "BOOLEAN",
             "defaultValue": false
+        },
+        {
+            "name": "availabilityZones",
+            "label": "Availability Zones",
+            "description": "High availability offering that allows you to separate nodes in this pool across multiple physical locations.",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value": "1", "label": "Zone 1"},
+                {"value": "2", "label": "Zone 2"},
+                {"value": "3", "label": "Zone 3"}
+            ],
+            "mandatory": false,
+            "defaultValue": ""
         },
         {
             "name": "networkPlugin",

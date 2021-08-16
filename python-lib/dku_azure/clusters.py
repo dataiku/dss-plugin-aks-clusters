@@ -51,7 +51,8 @@ class ClusterBuilder(object):
             load_balancer_sku = load_balancer_sku,
             outbound_type = outbound_type,
             network_plugin = network_plugin,
-            docker_bridge_cidr = docker_bridge_cidr
+            docker_bridge_cidr = docker_bridge_cidr,
+            availability_zones = availability_zones
         )
         return self
 
