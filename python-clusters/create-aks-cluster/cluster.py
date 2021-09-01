@@ -74,8 +74,7 @@ class MyCluster(Cluster):
                                          load_balancer_sku=self.config.get("loadBalancerSku", None),
                                          outbound_type=self.config.get("outboundType", None),
                                          network_plugin=self.config.get("networkPlugin"),
-                                         docker_bridge_cidr=self.config.get("dockerBridgeCidr"),
-                                         availability_zones=self.config.get("availabilityZones", None))
+                                         docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
 
         if self.config.get("useDistinctSPForCluster", False):
             cluster_sp = self.config.get("clusterServicePrincipal")
@@ -112,11 +111,14 @@ class MyCluster(Cluster):
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
+            logging.info("adding availability zones %s" %  self.config.get('availability_zones', None))
+            node_pool_builder.with_availability_zones(self.config.get('availability_zones', None))
             node_pool_builder.build()
             cluster_builder.with_node_pool(node_pool=node_pool_builder.agent_pool_profile)
 
 
         def do_creation():
+            
             cluster_create_op = cluster_builder.build()
             return cluster_create_op.result()
         create_result = run_and_process_cloud_error(do_creation)

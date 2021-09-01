@@ -24,6 +24,7 @@ class ClusterBuilder(object):
         self.private_access = None
 
 
+
     def with_name(self, name):
         self.name = name
         return self
@@ -51,8 +52,7 @@ class ClusterBuilder(object):
             load_balancer_sku = load_balancer_sku,
             outbound_type = outbound_type,
             network_plugin = network_plugin,
-            docker_bridge_cidr = docker_bridge_cidr,
-            availability_zones = availability_zones
+            docker_bridge_cidr = docker_bridge_cidr
         )
         return self
 
@@ -123,6 +123,7 @@ class NodePoolBuilder(object):
         self.gpu = None
         self.labels = None
         self.taints = []
+        self.availability_zones = None
 
 
     def with_name(self, name):
@@ -188,6 +189,13 @@ class NodePoolBuilder(object):
             self.taints.append(taints)
         return self
 
+    def with_availability_zones(self, availability_zones):
+        if availability_zones:
+            logging.info("setting availabilityzone")
+            # self.availability_zones.append(availability_zones)
+            self.availability_zones=availability_zones
+        return self
+    
     def with_disk_size_gb(self, disk_size_gb):
         if disk_size_gb == 0:
             self.disk_size_gb = None
@@ -215,6 +223,8 @@ class NodePoolBuilder(object):
             agent_pool_profile_params["node_labels"] = self.labels
         if self.taints:
             agent_pool_profile_params["node_taints"] = self.taints
+        if self.availability_zones:
+            agent_pool_profile_params["availability_zones"] = self.availability_zones
 
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
