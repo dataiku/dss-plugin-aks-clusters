@@ -43,8 +43,8 @@
         {
             "name": "s-warning-legacy-node-identity",
             "type": "SEPARATOR",
-            "label": "WARNING: Cluster identity parameters overriden by existing legacy settings",
-            "description": "Clear all legacy identity settings in the legacy section to fix it",
+            "label": "Legacy disclaimer",
+            "description": "<div class=\"alert alert-warning\"><h4><b>WARNING</b>: Cluster identity parameters overriden by existing legacy settings</h4><br/>Clear all legacy settings to fix it</div>",
             "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.useDistinctSPForCluster"
         },
         {
