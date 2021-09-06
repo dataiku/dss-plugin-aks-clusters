@@ -103,7 +103,7 @@
         {
             "name": "vnet",
             "label": "Virtual network",
-            "description": "",
+            "description": "Supports both vnet name and resource id",
             "type": "STRING",
             "mandatory": false,
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
