@@ -61,7 +61,7 @@ class MyCluster(Cluster):
         if _is_none_or_blank(location):
             if self.config.get("useSameLocationAsDSSHost",True):
                 location = metadata["compute"]["location"]
-                logging.info("Using same location as DSS: {location}")
+                logging.info("Using same location as DSS: {}".format(location))
             else:
                 location = self.config.get("locationV2",None)
         else:
@@ -199,6 +199,9 @@ class MyCluster(Cluster):
                                            connection_info=connection_info,
                                            credentials=credentials,
                                            resource_group=resource_group)
+
+            node_pool_builder.with_availability_zones(
+                use_availability_zones=node_pool_conf.get("useAvailabilityZones", True))
 
             node_pool_builder.with_node_count(enable_autoscaling=node_pool_conf.get("autoScaling", False),
                                               num_nodes=node_pool_conf.get("numNodes", None),

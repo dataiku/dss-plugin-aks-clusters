@@ -173,13 +173,13 @@ class NodePoolBuilder(object):
         self.max_num_nodes = None
         self.disk_size_gb = None
         self.agent_pool_type = None
+        self.use_availability_zones = None
         self.idx = None
         self.agent_pool_profile = None
         self.gpu = None
         self.labels = None
         self.taints = []
         self.tags = None
-
 
     def with_name(self, name):
         self.name = name
@@ -258,6 +258,10 @@ class NodePoolBuilder(object):
             self.disk_size_gb = disk_size_gb
         return self
 
+    def with_availability_zones(self, use_availability_zones):
+        self.use_availability_zones = use_availability_zones
+        return self
+
     def build(self):
         agent_pool_profile_params = {}
         if self.mode == "Automatic" and self.idx == 0:
@@ -270,6 +274,8 @@ class NodePoolBuilder(object):
         agent_pool_profile_params["count"] = self.num_nodes
         agent_pool_profile_params["os_disk_size_gb"] = self.disk_size_gb
         agent_pool_profile_params["vnet_subnet_id"] = self.subnet_id
+        if self.use_availability_zones:
+            agent_pool_profile_params["availability_zones"] = ["1", "2", "3"]
         if self.enable_autoscaling:
             agent_pool_profile_params["enable_auto_scaling"] = self.enable_autoscaling
             agent_pool_profile_params["min_count"] = self.min_num_nodes
