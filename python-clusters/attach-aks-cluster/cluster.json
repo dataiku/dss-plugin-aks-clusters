@@ -9,6 +9,13 @@
 
     "params": [
         {
+            "name": "s-warning-legacy-connection",
+            "type": "SEPARATOR",
+            "label": "Legacy disclaimer",
+            "description": "<div class=\"alert alert-warning\"><h4><b>WARNING</b>: Connection parameters overriden by existing legacy settings</h4><br/>Clear all legacy settings to fix it</div>",
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.useDistinctSPForCluster"
+        },
+        {
             "name": "connectionInfoV2",
             "label" : "Connection",
             "type": "PRESET",
