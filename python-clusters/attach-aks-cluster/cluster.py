@@ -34,25 +34,15 @@ class MyCluster(Cluster):
         # Cluster name
         cluster_name = self.config.get("cluster", None)
         if _is_none_or_blank(cluster_name):
-            if self.config.get("useSameNameAsDSSCluster",True):
-                cluster_name = self.cluster_name
-                logging.info("Using same cluster name as DSS: {}".format(cluster_name))
-            else:
-                cluster_name = self.config.get("clusterName")
-        else: 
-            logging.warn("Fetching cluster name \"{}\" from legacy setting. Clear it to use the new one.".format(cluster_name))
+            cluster_name = self.cluster_name
+            logging.info("Using same cluster name as DSS: {}".format(cluster_name))
 
         # Resource group
         resource_group = self.config.get('resourceGroup', None)
         if _is_none_or_blank(resource_group):
-            if self.config.get("useSameResourceGroupAsDSSHost",True):
-                metadata = get_instance_metadata()
-                resource_group = metadata["compute"]["resourceGroupName"]
-                logging.info("Using same resource group as DSS: {}".format(resource_group))
-            else:
-                resource_group = self.config.get("resourceGroupV2",None)
-        else: 
-            logging.warn("Fetching resource group \"{}\" from legacy setting. Clear it to use the new one.".format(resource_group))
+            metadata = get_instance_metadata()
+            resource_group = metadata["compute"]["resourceGroupName"]
+            logging.info("Using same resource group as DSS: {}".format(resource_group))
 
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 

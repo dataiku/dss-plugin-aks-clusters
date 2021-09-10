@@ -39,7 +39,7 @@
             "label": "Control plane user identity",
             "type": "STRING",
             "mandatory" : false,
-            "description": "Resouce ID of User Assigned Managed Identity for the control plane",
+            "description": "Resource ID of User Assigned Managed Identity for the control plane",
             "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedIdentity"
         },
         {
