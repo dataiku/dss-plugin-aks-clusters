@@ -48,16 +48,19 @@ def get_subnet_id(connection_info, resource_group, vnet, subnet):
     """
     """
     logging.info("Mapping subnet {} to its full resource ID...".format(subnet))
-    subscription_id = get_subscription_id(connection_info)
-    subnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
-                                                                                                                       resource_group,
-                                                                                                                       vnet,
-                                                                                                                       subnet)
+
+    if vnet.startswith("/subscriptions/"):
+        logging.info("Vnet is specified by its full resource ID: {}".format(vnet))
+        subnet_id = "{}/subnets/{}".format(vnet, subnet)
+    else:
+        logging.info("Vnet is specified by its name: {}".format(vnet))
+        subscription_id = get_subscription_id(connection_info)
+        subnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
+                                                                                                                           resource_group,
+                                                                                                                           vnet,
+                                                                                                                           subnet)
     logging.info("Subnet {} linked to the resource {}".format(subnet, subnet_id))
-    return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
-                                                                                                                  resource_group,
-                                                                                                                  vnet,
-                                                                                                                  subnet)
+    return subnet_id
 
 
 def get_host_network(credentials=None, resource_group=None, connection_info=None, api_version="2019-07-01"):

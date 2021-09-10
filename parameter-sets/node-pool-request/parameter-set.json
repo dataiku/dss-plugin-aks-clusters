@@ -103,7 +103,7 @@
         {
             "name": "vnet",
             "label": "Virtual network",
-            "description": "",
+            "description": "Supports both vnet name and resource id",
             "type": "STRING",
             "mandatory": false,
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
@@ -115,6 +115,15 @@
             "type": "STRING",
             "mandatory": false,
             "visibilityCondition": "!model.useSameNetworkAsDSSHost"
+        },
+        {
+            "name": "useAvailabilityZones",
+            "label": "Availability zones",
+            "description": "Deploy nodes in multiple availability zones (need to be supported by the selected location)",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": true
+
         },
         {
             "type": "SEPARATOR",
