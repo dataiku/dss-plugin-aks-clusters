@@ -5,7 +5,7 @@ from azure.mgmt.containerservice import ContainerServiceClient
 from azure.mgmt.msi import ManagedServiceIdentityClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.core.pipeline.policies import UserAgentPolicy
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
@@ -164,10 +164,33 @@ class MyCluster(Cluster):
                     except ResourceNotFoundError as e:
                         raise Exception("ACR {} not found. Check it exists and you are Owner of it.".format(acr_scope))
                     if 0 == len(acr_roles):
-                        raise Exception("Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope))
+                        raise Exception("Could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope))
                     else:
                         acr_role_id = acr_roles[0].id
                         logging.info("ACR pull role id: %s", acr_role_id)
+                        
+                    # Try to run a fake role assignment. Depending on the failure type we know if we are Owner or not
+                    try:
+                        fake_role_assignment = authorization_client.role_assignments.create(
+                            scope=acr_scope,
+                            role_assignment_name=str(uuid.uuid4()),
+                            parameters= {
+                                "properties": {
+                                    "role_definition_id": acr_role_id,
+                                    "principal_id": "00000000-0000-0000-0000-000000000000",
+                                },
+                            },
+                        )
+                    except HttpResponseError as e:
+                        if e.reason == "Forbidden" and "AuthorizationFailed" in str(e.error):
+                            raise Exception("Cannot create role assignments on ACR {}. Check that your are Owner of it or provide an existing Kubelet identity.".format(acr_scope))
+                        elif e.reason == "Bad Request" and "PrincipalNotFound" in str(e.error):
+                            logging.info("Fake role assignment on ACR looks ok. Identity should be allowed to assign roles in further steps.")
+                        else:
+                            raise(e)
+                    except Exception as e:
+                        raise(e)
+                    
 
 
         # Access level
