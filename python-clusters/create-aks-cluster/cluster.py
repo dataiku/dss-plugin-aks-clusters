@@ -422,9 +422,7 @@ class MyCluster(Cluster):
         vnet_attachment = data.get("vnet_attachment", None)
         if not _is_none_or_blank(vnet_attachment):
             logging.info("Cluster has an Vnet attachment, check managed identity")
-            #cluster_identity_profile = data["cluster"]["identity_profile"]
-            controle_plane_mi_id = None
-            if  controle_plane_mi_id is not None and "role_assignment" in vnet_attachment:
+            if "role_assignment" in vnet_attachment:
                 logging.info("Cluster has an AKS managed kubelet identity, try to detach")
                 authorization_client = AuthorizationManagementClient(credentials, vnet_attachment["subscription_id"])
                 try:
