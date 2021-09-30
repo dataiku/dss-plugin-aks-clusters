@@ -34,7 +34,7 @@ def get_cluster_from_connection_info(config, plugin_config):
         subscription_id = connection_info.get('subscriptionId', None)
     else:
         connection_info_v2 = config.get("connectionInfoV2",{"identityType":"default"})
-        credentials = get_credentials_from_connection_infoV2(connection_info_v2)
+        credentials, _ = get_credentials_from_connection_infoV2(connection_info_v2)
         subscription_id = get_subscription_id(connection_info_v2)
     clusters_client = ContainerServiceClient(credentials, subscription_id)
     return clusters_client
