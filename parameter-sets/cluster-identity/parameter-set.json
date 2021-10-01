@@ -2,7 +2,7 @@
     "meta" : {
         "label" : "AKS Cluster identity",
         "pluralLabel": "AKS Clusters Identities",
-        "description" : "AKS Components identity management (control plane, kubelets)",
+        "description" : "Identities assumed by AKS control plane and Kubelets",
         "icon" : "icon-link"
     },
     

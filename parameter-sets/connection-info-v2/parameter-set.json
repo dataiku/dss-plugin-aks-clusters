@@ -1,8 +1,8 @@
 {
     "meta" : {
-        "label" : "AKS connections",
-        "pluralLabel": "AKS connections",
-        "description" : "AKS connection settings",
+        "label" : "Azure credentials",
+        "pluralLabel": "Azure credentials",
+        "description" : "Identity and credentials used by DSS to create and join AKS clusters",
         "icon" : "icon-link"
     },
     
