@@ -2,10 +2,11 @@ import os, json, logging, yaml, time, uuid
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
+from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.msi import ManagedServiceIdentityClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.core.pipeline.policies import UserAgentPolicy
-from azure.core.exceptions import ResourceNotFoundError
+from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
@@ -23,6 +24,7 @@ class MyCluster(Cluster):
         self.plugin_config = plugin_config
 
     def _get_credentials(self):
+        managed_identity_id = None
         connection_info = self.config.get("connectionInfo", None)
         connection_info_secret = self.plugin_config.get("connectionInfo", None)
         if not _is_none_or_blank(connection_info) or not _is_none_or_blank(connection_info_secret):
@@ -31,17 +33,18 @@ class MyCluster(Cluster):
             subscription_id = connection_info.get('subscriptionId', None)
         else:
             connection_info_v2 = self.config.get("connectionInfoV2",{"identityType":"default"})
-            credentials = get_credentials_from_connection_infoV2(connection_info_v2)
+            credentials, managed_identity_id = get_credentials_from_connection_infoV2(connection_info_v2)
             subscription_id = get_subscription_id(connection_info_v2)
-        return credentials, subscription_id
+        return credentials, subscription_id, managed_identity_id
 
     def start(self):
         """
         Build the create cluster request.
         """
-        credentials, subscription_id = self._get_credentials()
+        credentials, subscription_id, managed_identity_id = self._get_credentials()
 
         # Fetch metadata should we need them
+        metadata = None
         if self.config.get("useSameResourceGroupAsDSSHost",True) or self.config.get("useSameLocationAsDSSHost",True):
             metadata = get_instance_metadata()
 
@@ -122,19 +125,37 @@ class MyCluster(Cluster):
             cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
             cluster_identity_type = cluster_identity.get("identityType", "managed-identity")
             if cluster_identity_type == "managed-identity":
-                control_plane_mi = None if cluster_identity.get("useAKSManagedIdentity",True) else cluster_identity["controlPlaneUserAssignedIdentity"]
-                cluster_builder.with_managed_identity(control_plane_mi)
-                if control_plane_mi is None:
-                    logging.info("Configure cluster with system managed identity.")
+                if cluster_identity.get("inheritDSSIdentity",True):
+                    logging.info("Need to inspect Managed Identity infos from Azure")
+                    if metadata is None:
+                        metadata = get_instance_metadata()
+                    vm_resource_group = metadata["compute"]["resourceGroupName"]
+                    vm_name = metadata["compute"]["name"]
+                    compute_client = ComputeManagementClient(credentials, subscription_id)
+                    vm = compute_client.virtual_machines.get(vm_resource_group, vm_name)
+                    # No choice here but to use the first one
+                    if managed_identity_id is None:
+                        managed_identity_id = next(iter(vm.identity.user_assigned_identities.keys()))
+                    for managed_identity_resource_id, managed_identity_properties in vm.identity.user_assigned_identities.items():
+                        if managed_identity_id == managed_identity_resource_id or managed_identity_id == managed_identity_properties.client_id:
+                            break
+                    logging.info("Found managed identity id {}".format(managed_identity_resource_id))
+                    cluster_builder.with_managed_identity(managed_identity_resource_id)
+                    cluster_builder.with_kubelet_identity(managed_identity_resource_id, managed_identity_properties.client_id, managed_identity_properties.principal_id)     
                 else:
-                    logging.info("Configure cluster with user assigned identity: {}".format(control_plane_mi))
-                if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
-                    kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
-                    _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
-                    msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
-                    mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
-                    cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
-                    logging.info("Configure kubelet identity with user assigned identity resourceId=\"{}\", clientId=\"{}\", objectId=\"{}\"".format(kubelet_mi, mi.client_id, mi.principal_id))
+                    control_plane_mi = None if cluster_identity.get("useAKSManagedIdentity",True) else cluster_identity["controlPlaneUserAssignedIdentity"]
+                    cluster_builder.with_managed_identity(control_plane_mi)
+                    if control_plane_mi is None:
+                        logging.info("Configure cluster with system managed identity.")
+                    else:
+                        logging.info("Configure cluster with user assigned identity: {}".format(control_plane_mi))
+                    if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
+                        kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
+                        _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
+                        msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
+                        mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
+                        cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
+                        logging.info("Configure kubelet identity with user assigned identity resourceId=\"{}\", clientId=\"{}\", objectId=\"{}\"".format(kubelet_mi, mi.client_id, mi.principal_id))
             elif cluster_identity_type == "service-principal":
                 cluster_builder.with_cluster_sp(cluster_identity["clientId"], cluster_identity["password"])
                 logging.info("Configure cluster with service principal")
@@ -144,8 +165,9 @@ class MyCluster(Cluster):
 
         # Fail fast for non existing ACRs to avoid drama in case of failure AFTER cluster is created
         acr_role_id = None
+        authorization_client = None
         if cluster_identity_type is not None and cluster_identity is not None:
-            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
+            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True) and not cluster_identity.get("inheritDSSIdentity", True):
                 acr_name = cluster_identity.get("attachToACRName", None)
                 if not _is_none_or_blank(acr_name):
                     # build acr scope
@@ -164,11 +186,91 @@ class MyCluster(Cluster):
                     except ResourceNotFoundError as e:
                         raise Exception("ACR {} not found. Check it exists and you are Owner of it.".format(acr_scope))
                     if 0 == len(acr_roles):
-                        raise Exception("Exception could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope))
+                        raise Exception("Could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope))
                     else:
                         acr_role_id = acr_roles[0].id
                         logging.info("ACR pull role id: %s", acr_role_id)
-
+                        
+                    # Try to run a fake role assignment. Depending on the failure type we know if we are Owner or not
+                    try:
+                        fake_role_assignment = authorization_client.role_assignments.create(
+                            scope=acr_scope,
+                            role_assignment_name=str(uuid.uuid4()),
+                            parameters= {
+                                "properties": {
+                                    "role_definition_id": acr_role_id,
+                                    "principal_id": "00000000-0000-0000-0000-000000000000",
+                                },
+                            },
+                        )
+                    except HttpResponseError as e:
+                        if e.reason == "Forbidden" and "AuthorizationFailed" in str(e.error):
+                            raise Exception("Cannot create role assignments on ACR {}. Check that your are Owner of it or provide an existing Kubelet identity.".format(acr_scope))
+                        elif e.reason == "Bad Request" and "PrincipalNotFound" in str(e.error):
+                            logging.info("Fake role assignment on ACR looks ok. Identity should be allowed to assign roles in further steps.")
+                        else:
+                            raise(e)
+                    except Exception as e:
+                        raise(e)
+                        
+        # Sanity check for node pools
+        node_pool_vnets = set()
+        for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
+            node_pool_builder = cluster_builder.get_node_pool_builder()
+            nodepool_vnet = node_pool_conf.get("vnet", None)
+            nodepool_subnet = node_pool_conf.get("subnet", None)
+            vnet, _ = node_pool_builder.resolve_network(inherit_from_host=node_pool_conf.get("useSameNetworkAsDSSHost"),
+                                           cluster_vnet=nodepool_vnet,
+                                           cluster_subnet=nodepool_subnet,
+                                           connection_info=connection_info,
+                                           credentials=credentials,
+                                           resource_group=resource_group)
+            node_pool_vnets.add(vnet)
+            
+        if 1 < len(node_pool_vnets):
+            raise Exception("Node pools must all share the same vnet. Current node pools configuration yields vnets {}.".format(",".join(node_pool_vnets)))
+        elif 0 == len(node_pool_vnets):
+            raise Exception("You cannot deploy a cluster without any node pool.")
+        
+        # Check role assignments for vnet like on ACR for fail fast if not doable
+        vnet_id = node_pool_vnets.pop()
+        if not vnet_id.startswith("/"):
+            vnet_name = vnet_id
+            vnet_id = "/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.Network/virtualNetworks/{vnet_name}".format(**locals())
+        vnet_role_id = None
+        if cluster_identity_type is not None and cluster_identity is not None:
+            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedIdentity",True) and not cluster_identity.get("inheritDSSIdentity", True):
+                authorization_client = AuthorizationManagementClient(credentials, subscription_id)
+                try:
+                    vnet_roles = list(authorization_client.role_definitions.list(vnet_id,"roleName eq 'Contributor'"))
+                except ResourceNotFoundError as e:
+                    raise Exception("Vnet {} not found. Check it exists and you are Owner of it.".format(vnet_id))
+                if 0 == len(acr_roles):
+                    raise Exception("Could not find the Contributor role on the vnet {}. Check you are Owner of it.".format(vnet_id))
+                else:
+                    vnet_role_id = vnet_roles[0].id
+                    logging.info("Vnet contributor role id: %s", acr_role_id)              
+                    # Try to run a fake role assignment. Depending on the failure type we know if we are Owner or not
+                    try:
+                        fake_role_assignment = authorization_client.role_assignments.create(
+                            scope=vnet_id,
+                            role_assignment_name=str(uuid.uuid4()),
+                            parameters= {
+                                "properties": {
+                                    "role_definition_id": vnet_role_id,
+                                    "principal_id": "00000000-0000-0000-0000-000000000000",
+                                },
+                            },
+                        )
+                    except HttpResponseError as e:
+                        if e.reason == "Forbidden" and "AuthorizationFailed" in str(e.error):
+                            raise Exception("Cannot create role assignments on Vnet {}. Check that your are Owner of it or provide an existing Controle Plane identity.".format(vnet_id))
+                        elif e.reason == "Bad Request" and "PrincipalNotFound" in str(e.error):
+                            logging.info("Fake role assignment on Vnet looks ok. Identity should be allowed to assign roles in further steps.")
+                        else:
+                            raise(e)
+                    except Exception as e:
+                        raise(e)
 
         # Access level
         if self.config.get("privateAccess"):
@@ -222,7 +324,7 @@ class MyCluster(Cluster):
         # Attach to ACR
         acr_attachment = {}
         if cluster_identity_type is not None and cluster_identity is not None:
-            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True):
+            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedKubeletIdentity",True) and not cluster_identity.get("inheritDSSIdentity", True):
                 kubelet_mi_object_id = create_result.identity_profile.get("kubeletidentity").object_id
                 logging.info("Kubelet Managed Identity object id: %s", kubelet_mi_object_id)
                 if not _is_none_or_blank(acr_role_id):
@@ -244,6 +346,31 @@ class MyCluster(Cluster):
                         "resource_id": acr_scope,
                         "role_assignment": role_assignment.as_dict(),
                     })
+                    
+        # Attach to VNET to allow LoadBalancers creation
+        vnet_attachment = {}
+        if cluster_identity_type is not None and cluster_identity is not None:
+            if cluster_identity_type == "managed-identity" and cluster_identity.get("useAKSManagedIdentity",True) and not cluster_identity.get("inheritDSSIdentity", True):
+                # And here we are blocked because we cant get the principal id of a System Assigned Managed Id easily
+                control_plane_object_id = create_result.identity.principal_id
+                logging.info("Controle Plane Managed Identity object id: %s", control_plane_object_id)
+                if not _is_none_or_blank(vnet_role_id):
+                    logging.info("Assign Vnet contributolr role id %s to %s", vnet_role_id, control_plane_object_id)
+                    vnet_role_assignment = authorization_client.role_assignments.create(
+                        scope=vnet_id,
+                        role_assignment_name=str(uuid.uuid4()),
+                        parameters= {
+                            "properties": {
+                                "role_definition_id": vnet_role_id,
+                                "principal_id": control_plane_object_id,
+                            },
+                        },
+                    )
+                    vnet_attachment.update({
+                        "subscription_id": subscription_id,
+                        "resource_id": vnet_id,
+                        "role_assignment": vnet_role_assignment.as_dict(),
+                    })
 
         logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
         def do_fetch():
@@ -262,11 +389,11 @@ class MyCluster(Cluster):
                 acr_name = None if _is_none_or_blank(acr_attachment) else acr_attachment["name"],
         )
 
-        return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment}]
+        return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment, "vnet_attachment": vnet_attachment}]
 
 
     def stop(self, data):
-        credentials, _ = self._get_credentials()
+        credentials, _ , _ = self._get_credentials()
 
         # Do NOT use the conf but the actual values from the cluster here
         cluster_resource_id = data["cluster"]["id"]
@@ -290,7 +417,18 @@ class MyCluster(Cluster):
                         authorization_client.role_assignments.delete_by_id(acr_attachment["role_assignment"]["id"])
                     except ResourceNotFoundError as e:
                         logging.warn("It looks that the ACR role assignment doesnt exist. Ignore this step")
-
+        
+        # Detach Vnet like ACR
+        vnet_attachment = data.get("vnet_attachment", None)
+        if not _is_none_or_blank(vnet_attachment):
+            logging.info("Cluster has an Vnet attachment, check managed identity")
+            if "role_assignment" in vnet_attachment:
+                logging.info("Cluster has an AKS managed kubelet identity, try to detach")
+                authorization_client = AuthorizationManagementClient(credentials, vnet_attachment["subscription_id"])
+                try:
+                    authorization_client.role_assignments.delete_by_id(vnet_attachment["role_assignment"]["id"])
+                except ResourceNotFoundError as e:
+                    logging.warn("It looks that the Vnet role assignment doesnt exist. Ignore this step")
 
         def do_delete():
             future = clusters_client.managed_clusters.begin_delete(resource_group, cluster_name)

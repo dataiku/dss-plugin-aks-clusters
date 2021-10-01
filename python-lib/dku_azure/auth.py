@@ -22,12 +22,15 @@ def get_credentials_from_connection_infoV2(connection_infos):
     infos = connection_infos
     user_managed_identity = infos.get('userManagedIdentity', None)
     identity_type = infos.get('identityType','default')
+    managed_identity_id = None
     if identity_type == 'default':
         credentials = DefaultAzureCredential()
-    elif identity_type == 'user-assigned-client-id':
-        credentials = ManagedIdentityCredential(client_id=infos.get('userManagedIdentityClientId',None))
-    elif identity_type == 'user-assigned-resource-id':
-        credentials = ManagedIdentityCredential(identity_config={'msi_res_id': infos.get('userManagedIdentityResourceId',None)})
+    elif identity_type == 'user-assigned':
+        managed_identity_id = infos.get('userManagedIdentityId')
+        if managed_identity_id.startswith("/"):
+            credentials = ManagedIdentityCredential(identity_config={'msi_res_id': managed_identity_id})
+        else:
+            credentials = ManagedIdentityCredential(client_id=managed_identity_id)
     elif identity_type == 'service-principal':
         client_id = infos.get('clientId', None)
         password = infos.get('password', None)
@@ -36,7 +39,7 @@ def get_credentials_from_connection_infoV2(connection_infos):
     else:
         raise Exception("Identity type {} is unknown and cannot be used".format(identity_type))
 
-    return credentials
+    return credentials, managed_identity_id
 
 
 

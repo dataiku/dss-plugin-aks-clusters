@@ -1,8 +1,8 @@
 {
     "meta" : {
-        "label" : "AKS connections",
-        "pluralLabel": "AKS connections",
-        "description" : "AKS connection settings",
+        "label" : "Azure credentials",
+        "pluralLabel": "Azure credentials",
+        "description" : "Identity and credentials used by DSS to create and join AKS clusters",
         "icon" : "icon-link"
     },
     
@@ -19,28 +19,19 @@
             "description": "Select the type of identity",
             "type": "SELECT",
             "selectChoices": [
-                {"value": "default", "label": "Default credentials, from environment or System Assigned Managed Identity"},
-                {"value": "user-assigned-client-id", "label": "User Assigned Managed Identity - Client Id"},
-                {"value": "user-assigned-resource-id", "label": "User Assigned Managed Identity - Resource Id"},
+                {"value": "default", "label": "Default credentials, from environment or System/User Assigned Managed Identity"},
+                {"value": "user-assigned", "label": "User Assigned Managed Identity"},
                 {"value": "service-principal", "label": "App registration"}
             ],
             "defaultValue": "default"
         },
         {
-            "name": "userManagedIdentityClientId",
-            "label": "Client ID",
+            "name": "userManagedIdentityId",
+            "label": "User Assigned Managed Id",
             "type": "STRING",
             "mandatory" : false,
-            "description": "Client ID of User Assigned Managed Identity",
-            "visibilityCondition": "model.identityType=='user-assigned-client-id'"
-        },
-        {
-            "name": "userManagedIdentityResourceId",
-            "label": "Resource ID",
-            "type": "STRING",
-            "mandatory" : false,
-            "description": "Resource ID of User Assigned Managed Identity",
-            "visibilityCondition": "model.identityType=='user-assigned-resource-id'"
+            "description": "Client ID or Resource ID of User Assigned Managed Identity",
+            "visibilityCondition": "model.identityType=='user-assigned'"
         },
         {
             "name": "tenantId",

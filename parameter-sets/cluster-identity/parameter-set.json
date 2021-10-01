@@ -2,7 +2,7 @@
     "meta" : {
         "label" : "AKS Cluster identity",
         "pluralLabel": "AKS Clusters Identities",
-        "description" : "AKS Components identity management (control plane, kubelets)",
+        "description" : "Identities assumed by AKS control plane and Kubelets",
         "icon" : "icon-link"
     },
     
@@ -26,13 +26,22 @@
             "mandatory" : true
         },
         {
+            "name": "inheritDSSIdentity",
+            "label": "Inherit DSS identity (Recommended)",
+            "description": "Assign DSS identity to both Control Plane and Kubelets",
+            "type": "BOOLEAN",
+            "mandatory": false,
+            "defaultValue": true,
+            "visibilityCondition": "model.identityType=='managed-identity'"
+        },
+        {
             "name": "useAKSManagedIdentity",
             "label": "AKS managed identity",
             "description": "Control plane gets a System Assigned Managed Identity handled by AKS",
             "type": "BOOLEAN",
             "mandatory": true,
-            "defaultValue": true,
-            "visibilityCondition": "model.identityType=='managed-identity'"
+            "defaultValue": false,
+            "visibilityCondition": "model.identityType=='managed-identity' && !model.inheritDSSIdentity"
         },
         {
             "name": "controlPlaneUserAssignedIdentity",
@@ -40,7 +49,16 @@
             "type": "STRING",
             "mandatory" : false,
             "description": "Resource ID of User Assigned Managed Identity for the control plane",
-            "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedIdentity"
+            "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedIdentity && !model.inheritDSSIdentity"
+        },
+        {
+            "name": "attachToVnet",
+            "label": "Assign permissions for Vnet",
+            "type": "BOOLEAN",
+            "default": true,
+            "mandatory" : false,
+            "description": "Add the Contributor role onto the Vnet to allow creation of LBs by the Control Plane",
+            "visibilityCondition": "model.identityType=='managed-identity' && model.useAKSManagedIdentity && !model.inheritDSSIdentity"
         },
         {
             "name": "useAKSManagedKubeletIdentity",
@@ -48,8 +66,8 @@
             "description": "Kubelets get a User Assigned Managed Identity created and handled by AKS",
             "type": "BOOLEAN",
             "mandatory": true,
-            "defaultValue": true,
-            "visibilityCondition": "model.identityType=='managed-identity'"
+            "defaultValue": false,
+            "visibilityCondition": "model.identityType=='managed-identity' && !model.inheritDSSIdentity"
         },
         {
             "name": "kubeletUserAssignedIdentity",
@@ -57,15 +75,15 @@
             "type": "STRING",
             "mandatory" : false,
             "description": "User Assigned Managed Identity for the kubelets. Only available with Azure feature Microsoft.ContainerService/CustomKubeletIdentityPreview. See documentation.",
-            "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedKubeletIdentity"
+            "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedKubeletIdentity && !model.inheritDSSIdentity"
         },
         {
             "name": "attachToACRName",
-            "label": "Attach to ACR",
+            "label": "Assign permissions for ACR",
             "type": "STRING",
             "mandatory" : false,
             "description": "Name of the ACR to attach to. Syntax \"[RESOURCE_GROUP/]NAME\".  RESOURCE_GROUP defaults to the same as the cluster.",
-            "visibilityCondition": "model.identityType=='managed-identity' && model.useAKSManagedKubeletIdentity"
+            "visibilityCondition": "model.identityType=='managed-identity' && model.useAKSManagedKubeletIdentity && !model.inheritDSSIdentity"
         },
         {
             "name": "clientId",
