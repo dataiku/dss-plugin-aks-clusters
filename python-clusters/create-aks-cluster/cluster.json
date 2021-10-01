@@ -15,7 +15,7 @@
         },
         {
             "name": "connectionInfoV2",
-            "label": "Connection",
+            "label": "Credentials",
             "type": "PRESET",
             "parameterSetId": "connection-info-v2",
             "mandatory": true
