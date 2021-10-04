@@ -201,7 +201,7 @@ class NodePoolBuilder(object):
         return self
 
     def add_tags(self, tags):
-        if 0 < len(tags):
+        if tags is not None and 0 < len(tags):
             if self.tags is None:
                 self.tags = {}
             self.tags.update(tags)
