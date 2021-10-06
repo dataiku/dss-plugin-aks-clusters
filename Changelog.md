@@ -1,6 +1,6 @@
-# v2.0
+## v2.0
 
-# v2.0.0
+### v2.0.0
 
 This release brings a whole new system to manage identities and credentials
 
