@@ -7,13 +7,19 @@
     "architecture": "KUBERNETES",
     "params": [
         {
-            "name": "connectionInfo",
-            "label": "Connection",
+            "name": "s-warning-legacy-connection",
+            "type": "SEPARATOR",
+            "label": "Legacy disclaimer",
+            "description": "<div class=\"alert alert-warning\"><h4><b>WARNING</b>: Connection parameters overriden by existing legacy settings</h4><br/>Clear all legacy settings to fix it</div>",
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.useDistinctSPForCluster"
+        },
+        {
+            "name": "connectionInfoV2",
+            "label": "Credentials",
             "type": "PRESET",
-            "parameterSetId": "connection-info",
+            "parameterSetId": "connection-info-v2",
             "mandatory": true
         },
-        
         {
             "name": "clusterVersion",
             "label": "Kubernetes version",
@@ -22,38 +28,58 @@
         },
         {
             "name": "resourceGroup",
-            "label": "Resource group",
+            "label": "Custom resource group",
             "type": "STRING",
-            "mandatory": true
+            "description": "Leave blank to inherit DSS resource group",
+            "mandatory": false
         },
         {
             "name": "location",
-            "label": "Location",
-            "description": "Region in which to create the cluster, e.g. 'France Central'",
+            "label": "Custom location",
+            "description": "Leave blank to inherit DSS location",
             "type": "STRING",
-            "mandatory": true
+            "mandatory": false
         },
         {
-            "name": "useDistinctSPForCluster",
-            "label": "Use distinct credentials",
-            "description": "Associate cluster nodes with a specific Service Principal",
-            "type": "BOOLEAN",
-            "default": false,
-            "mandatory": true
+            "name": "s-warning-legacy-node-identity",
+            "type": "SEPARATOR",
+            "label": "Legacy disclaimer",
+            "description": "<div class=\"alert alert-warning\"><h4><b>WARNING</b>: Cluster identity parameters overriden by existing legacy settings</h4><br/>Clear all legacy settings to fix it</div>",
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE' || model.useDistinctSPForCluster"
         },
         {
-            "name": "clusterServicePrincipal",
-            "label": "Identity assumed by nodes",
-            "description": "Service principal used by the cluster's nodes (if different from the connection)",
+            "name": "clusterIdentity",
+            "label": "Identity assumed by cluster components",
             "type": "PRESET",
-            "parameterSetId": "connection-info",
-            "mandatory": false,
-            "visibilityCondition": "model.useDistinctSPForCluster"
+            "parameterSetId": "cluster-identity",
+            "mandatory": true
+        },
+        {
+            "name": "tags",
+            "label": "Tags",
+            "description": "Tags assigned to the resources created",
+            "type": "MAP",
+            "mandatory": false
         },
         {
             "name": "s-nodes",
             "type": "SEPARATOR",
             "label": "Cluster nodes"
+        },
+        {
+            "name": "useCustomNodeResourceGroup",
+            "label": "Custom node resource group",
+            "description": "Create node resources in a custom resource group",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": true
+        },
+        {
+            "name": "nodeResourceGroup",
+            "label": "Nodes resource group",
+            "description": "Name of the resource group where node resources will be created",
+            "type": "STRING",
+            "visibilityCondition": "model.useCustomNodeResourceGroup"
         },
         {
             "name": "nodePools",
@@ -84,7 +110,7 @@
                 {"value": "azure", "label": "Azure CNI"},
                 {"value": "kubenet", "label": "kubenet"}
             ],
-            "defaultValue": "kubenet"
+            "defaultValue": "azure"
         },
         {
             "name": "serviceCIDR",
@@ -128,7 +154,44 @@
             ],
             "mandatory": false,
             "defaultValue": "Basic"
+        },
+        {
+            "name": "s-legacy",
+            "type": "SEPARATOR",
+            "label": "Legacy options"
+        },
+        {
+            "name": "showLegacyOptions",
+            "label": "Show legacy options",
+            "description": "Display values migrated from previous versions of the plugin",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": false 
+        },
+        {
+            "name": "connectionInfo",
+            "label": "Connection (legacy)",
+            "type": "PRESET",
+            "parameterSetId": "connection-info",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
+        },
+        {
+            "name": "useDistinctSPForCluster",
+            "label": "Use distinct credentials (legacy)",
+            "type": "BOOLEAN",
+            "default": false,
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
+        },
+        {
+            "name": "clusterServicePrincipal",
+            "label": "Identity assumed by nodes",
+            "description": "Service principal used by the cluster's nodes (if different from the connection)",
+            "type": "PRESET",
+            "parameterSetId": "connection-info",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions && model.useDistinctSPForCluster"
         }
-
     ]
 }

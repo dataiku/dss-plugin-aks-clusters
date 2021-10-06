@@ -1,4 +1,4 @@
-PLUGIN_VERSION=1.0.6
+PLUGIN_VERSION=2.0.0
 PLUGIN_ID=aks-clusters
 
 plugin:

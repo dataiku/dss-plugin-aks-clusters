@@ -9,24 +9,53 @@
 
     "params": [
         {
-            "name": "connectionInfo",
-            "label" : "Connection",
-            "type": "PRESET",
-            "parameterSetId" : "connection-info",
-            "mandatory" : true
+            "name": "s-warning-legacy-connection",
+            "type": "SEPARATOR",
+            "label": "Legacy disclaimer",
+            "description": "<div class=\"alert alert-warning\"><h4><b>WARNING</b>: Connection parameters overriden by existing legacy settings</h4><br/>Clear all legacy settings to fix it</div>",
+            "visibilityCondition": "model.connectionInfo.mode != 'NONE'"
         },
         {
-            "name": "resourceGroup",
-            "label" : "Resource group",
-            "type": "STRING",
+            "name": "connectionInfoV2",
+            "label" : "Credentials",
+            "type": "PRESET",
+            "parameterSetId" : "connection-info-v2",
             "mandatory" : true
         },
         {
             "name": "cluster",
-            "label" : "AKS Cluster name",
-            "description" : "If different from the DSS cluster name",
+            "label" : "Custom AKS cluster name",
+            "description" : "Leave blank to inherit DSS cluster name",
             "type": "STRING",
-            "mandatory" : true
+            "mandatory" : false
+        },
+        {
+            "name": "resourceGroup",
+            "label" : "Custom resource group",
+            "description" : "Leave blank to inherit DSS resource group",
+            "type": "STRING",
+            "mandatory" : false
+        },
+        {
+            "name": "s-legacy",
+            "type": "SEPARATOR",
+            "label": "Legacy options"
+        },
+        {
+            "name": "showLegacyOptions",
+            "label": "Show legacy options",
+            "description": "Display values migrated from previous versions of the plugin",
+            "type": "BOOLEAN",
+            "mandatory": true,
+            "defaultValue": false 
+        },
+        {
+            "name": "connectionInfo",
+            "label": "Connection (legacy)",
+            "type": "PRESET",
+            "parameterSetId": "connection-info",
+            "mandatory": false,
+            "visibilityCondition": "model.showLegacyOptions"
         }
     ]
 }

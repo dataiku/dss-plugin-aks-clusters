@@ -23,11 +23,12 @@ class MyRunnable(Runnable):
         cluster_def = cluster_data.get("cluster", None)
         if cluster_def is None:
             raise Exception("No cluster definition (starting failed?)")
-        cluster_name = cluster_def["name"]
+        cluster_id = cluster_def["id"]
+        _,_,subscription_id,_,resource_group,_,_,_,cluster_name = cluster_id.split("/")
+        cluster = clusters.managed_clusters.get(resource_group, cluster_name)
         
-        resource_group_name = dss_cluster_config['config']['resourceGroup']
         # get the object for the cluster, AKS side
-        cluster = clusters.managed_clusters.get(resource_group_name, cluster_name)
+        cluster = clusters.managed_clusters.get(resource_group, cluster_name)
         
         node_pool_id = self.config.get('nodePoolId', None)
         node_pool = None
@@ -36,10 +37,6 @@ class MyRunnable(Runnable):
                 node_pool = profile
         if node_pool is None:
             raise Exception("Unable to find node pool '%s'" % (node_pool_id))
-        
-        # see aks_scale() in azure-cli code
-        cluster.service_principal_profile = None
-        cluster.aad_profile = None
 
         desired_count = self.config['numNodes']
         logging.info("Resize to %s" % desired_count)
@@ -50,7 +47,7 @@ class MyRunnable(Runnable):
             logging.info("Waiting for cluster resize")
 
         def do_update():
-            cluster_update_op = clusters.managed_clusters.create_or_update(resource_group_name, cluster_name, cluster)
+            cluster_update_op = clusters.managed_clusters.begin_create_or_update(resource_group, cluster_name, cluster)
             return cluster_update_op.result()
         update_result = run_and_process_cloud_error(do_update)
         logging.info("Cluster updated")

@@ -3,10 +3,11 @@ import json
 import logging
 
 from msrestazure.azure_exceptions import CloudError
-from azure.mgmt.compute import ComputeManagementClient
 from azure.mgmt.resource import ResourceManagementClient
+from dku_utils.access import _is_none_or_blank
 
 AZURE_METADATA_SERVICE="http://169.254.169.254"
+INSTANCE_API_VERSION = "2019-04-30"
 
 def run_and_process_cloud_error(fn):
     try:
@@ -17,15 +18,22 @@ def run_and_process_cloud_error(fn):
         raise e
         
 
-def get_instance_metadata(api_version="2019-04-30"):
+def get_instance_metadata(api_version=INSTANCE_API_VERSION):
     """
     Return VM metadata.
     """
     metadata_svc_endpoint = "{}/metadata/instance?api-version={}".format(AZURE_METADATA_SERVICE, api_version)
-    req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"})
-    resp = json.loads(req.text)
+    req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"}, proxies={"http":None, "http":None})
+    resp = req.json()
     return resp
 
+def get_subscription_id(connection_info):
+    identity_type = connection_info.get('identityType', None)
+    subscription_id = connection_info.get('subscriptionId', None)
+    if (identity_type == 'default' or identity_type == 'service-principal') and not _is_none_or_blank(subscription_id):
+        return subscription_id
+    else:
+        return get_instance_metadata()["compute"]["subscriptionId"]
 
 def get_vm_resource_id(subscription_id=None,
                        resource_group=None,
@@ -33,7 +41,6 @@ def get_vm_resource_id(subscription_id=None,
     """
     Return full resource ID given a VM's name.
     """
-    
     return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Compute/virtualMachines/{}".format(subscription_id, resource_group, vm_name)
 
 
@@ -41,16 +48,19 @@ def get_subnet_id(connection_info, resource_group, vnet, subnet):
     """
     """
     logging.info("Mapping subnet {} to its full resource ID...".format(subnet))
-    subscription_id = connection_info.get("subscriptionId", None)
-    subnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
-                                                                                                                       resource_group,
-                                                                                                                       vnet,
-                                                                                                                       subnet)
+
+    if vnet.startswith("/subscriptions/"):
+        logging.info("Vnet is specified by its full resource ID: {}".format(vnet))
+        subnet_id = "{}/subnets/{}".format(vnet, subnet)
+    else:
+        logging.info("Vnet is specified by its name: {}".format(vnet))
+        subscription_id = get_subscription_id(connection_info)
+        subnet_id = "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
+                                                                                                                           resource_group,
+                                                                                                                           vnet,
+                                                                                                                           subnet)
     logging.info("Subnet {} linked to the resource {}".format(subnet, subnet_id))
-    return "/subscriptions/{}/resourceGroups/{}/providers/Microsoft.Network/virtualNetworks/{}/subnets/{}".format(subscription_id,
-                                                                                                                  resource_group,
-                                                                                                                  vnet,
-                                                                                                                  subnet)
+    return subnet_id
 
 
 def get_host_network(credentials=None, resource_group=None, connection_info=None, api_version="2019-07-01"):
@@ -61,9 +71,9 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("Getting instance metadata...")
     vm_name = get_instance_metadata()["compute"]["name"]
     logging.info("DSS host is on VNET {}".format(vm_name))
-    subscription_id = connection_info.get("subscriptionId", None)
+    subscription_id = get_subscription_id(connection_info)
     vm_resource_id = get_vm_resource_id(subscription_id, resource_group, vm_name)
-    resource_mgmt_client = ResourceManagementClient(credentials=credentials, subscription_id=subscription_id, api_version=api_version)
+    resource_mgmt_client = ResourceManagementClient(credential=credentials, subscription_id=subscription_id, api_version=api_version)
     vm_properties = resource_mgmt_client.resources.get_by_id(vm_resource_id, api_version=api_version).properties
     vm_network_interfaces = vm_properties["networkProfile"]["networkInterfaces"]
     if len(vm_network_interfaces) > 1:
@@ -78,7 +88,3 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("VNET: {}".format(vnet))
     logging.info("SUBNET ID: {}".format(subnet_id))
     return vnet, subnet_id
-        
-
-    
-
