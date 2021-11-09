@@ -43,10 +43,8 @@ class MyCluster(Cluster):
         """
         credentials, subscription_id, managed_identity_id = self._get_credentials()
 
-        # Fetch metadata should we need them
-        metadata = None
-        if self.config.get("useSameResourceGroupAsDSSHost",True) or self.config.get("useSameLocationAsDSSHost",True):
-            metadata = get_instance_metadata()
+        # Fetch metadata about the instance
+        metadata = get_instance_metadata()
 
         # Resource group
         resource_group = self.config.get('resourceGroup', None)
