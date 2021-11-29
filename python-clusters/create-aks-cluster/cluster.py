@@ -43,15 +43,14 @@ class MyCluster(Cluster):
         """
         credentials, subscription_id, managed_identity_id = self._get_credentials()
 
-        # Fetch metadata should we need them
-        metadata = None
-        if self.config.get("useSameResourceGroupAsDSSHost",True) or self.config.get("useSameLocationAsDSSHost",True):
-            metadata = get_instance_metadata()
+        # Fetch metadata about the instance
+        metadata = get_instance_metadata()
 
         # Resource group
         resource_group = self.config.get('resourceGroup', None)
+        dss_host_resource_group = metadata["compute"]["resourceGroupName"]
         if _is_none_or_blank(resource_group):
-            resource_group = metadata["compute"]["resourceGroupName"]
+            resource_group = dss_host_resource_group
             logging.info("Using same resource group as DSS: {}".format(resource_group))
 
         # Location
@@ -224,7 +223,8 @@ class MyCluster(Cluster):
                                            cluster_subnet=nodepool_subnet,
                                            connection_info=connection_info,
                                            credentials=credentials,
-                                           resource_group=resource_group)
+                                           resource_group=resource_group,
+                                           dss_host_resource_group=dss_host_resource_group)
             node_pool_vnets.add(vnet)
             
         if 1 < len(node_pool_vnets):
@@ -290,7 +290,8 @@ class MyCluster(Cluster):
                                            cluster_subnet=subnet,
                                            connection_info=connection_info,
                                            credentials=credentials,
-                                           resource_group=resource_group)
+                                           resource_group=resource_group,
+                                           dss_host_resource_group=dss_host_resource_group)
 
             node_pool_builder.with_availability_zones(
                 use_availability_zones=node_pool_conf.get("useAvailabilityZones", True))

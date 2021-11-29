@@ -207,12 +207,12 @@ class NodePoolBuilder(object):
             self.tags.update(tags)
         return self
     
-    def resolve_network(self, inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group):
+    def resolve_network(self, inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group, dss_host_resource_group):
         vnet, subnet_id = None, None
         if inherit_from_host:
             logging.info("Inheriting VNET/subnet from DSS host")
             vnet, subnet_id = get_host_network(credentials=credentials,
-                                                         resource_group=resource_group,
+                                                         resource_group=dss_host_resource_group,
                                                          connection_info=connection_info)
         else:
             logging.info("Using custom VNET ({}) and subnet ({}) for cluster".format(cluster_vnet, cluster_subnet))
@@ -220,8 +220,8 @@ class NodePoolBuilder(object):
             subnet_id = get_subnet_id(resource_group=resource_group, connection_info=connection_info, vnet=cluster_vnet, subnet=cluster_subnet)
         return vnet, subnet_id
 
-    def with_network(self, inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group):
-        self.vnet, self.subnet_id = self.resolve_network(inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group)
+    def with_network(self, inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group, dss_host_resource_group):
+        self.vnet, self.subnet_id = self.resolve_network(inherit_from_host, cluster_vnet, cluster_subnet, connection_info, credentials, resource_group, dss_host_resource_group)
         return self
 
     def with_node_count(self, enable_autoscaling, num_nodes, min_num_nodes, max_num_nodes):
