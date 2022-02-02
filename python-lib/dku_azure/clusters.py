@@ -253,7 +253,7 @@ class NodePoolBuilder(object):
 
     def with_node_taints(self, taints):
         if taints:
-            self.taints.append(taints)
+            self.taints.extend(taints)
         return self
 
     def with_disk_size_gb(self, disk_size_gb):
