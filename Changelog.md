@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- Fix node taints in AKS nodepools
+
 ## Version 2.0.1 - Bugfix release
 
 - Fix resource group mixup when specifying custom resource group and reuse of host's network settings
