@@ -1,8 +1,8 @@
 # Changelog
 
-## Next
+## Version 2.0.2 - Bugfix release
 
-- Fix node taints in AKS nodepools
+- Fix node taints
 
 ## Version 2.0.1 - Bugfix release
 
