@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 2.0.3 - Bugfix release
+
+- Explicit dependency on `<0.7 mssrest`
+
 ## Version 2.0.2 - Bugfix release
 
 - Fix node taints
