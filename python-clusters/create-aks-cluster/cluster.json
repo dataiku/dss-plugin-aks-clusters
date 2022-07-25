@@ -101,6 +101,13 @@
             "type": "BOOLEAN",
             "defaultValue": false
         },
+	{
+	    "name": "gpuSupport",
+	    "label": "Enable GPU support",
+	    "description": "Create a daemonset on all node pools to enable use of GPUs",
+	    "type": "BOOLEAN",
+	    "defaultValue": false
+	},
         {
             "name": "networkPlugin",
             "label": "Kubernetes Network Plugin",
@@ -166,7 +173,7 @@
             "description": "Display values migrated from previous versions of the plugin",
             "type": "BOOLEAN",
             "mandatory": true,
-            "defaultValue": false 
+            "defaultValue": false
         },
         {
             "name": "connectionInfo",

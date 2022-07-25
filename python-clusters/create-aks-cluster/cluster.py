@@ -15,6 +15,7 @@ from dku_azure.auth import get_credentials_from_connection_info, get_credentials
 from dku_azure.clusters import ClusterBuilder
 from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata, get_subscription_id
 from dku_azure.auth import AzureIdentityCredentialAdapter
+from dku_kube.gpu_daemonset import CreateGpuDaemonset
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -121,7 +122,7 @@ class MyCluster(Cluster):
                 raise Exception("Legacy options are not complete enough to determine cluster identity settings")
             cluster_builder.with_cluster_sp_legacy(cluster_service_principal_connection_info=cluster_sp)
         else:
-            cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})  
+            cluster_identity = self.config.get("clusterIdentity",{"identityType":"managed-identity"})
             cluster_identity_type = cluster_identity.get("identityType", "managed-identity")
             if cluster_identity_type == "managed-identity":
                 if cluster_identity.get("inheritDSSIdentity",True):
@@ -140,7 +141,7 @@ class MyCluster(Cluster):
                             break
                     logging.info("Found managed identity id {}".format(managed_identity_resource_id))
                     cluster_builder.with_managed_identity(managed_identity_resource_id)
-                    cluster_builder.with_kubelet_identity(managed_identity_resource_id, managed_identity_properties.client_id, managed_identity_properties.principal_id)     
+                    cluster_builder.with_kubelet_identity(managed_identity_resource_id, managed_identity_properties.client_id, managed_identity_properties.principal_id)
                 else:
                     control_plane_mi = None if cluster_identity.get("useAKSManagedIdentity",True) else cluster_identity["controlPlaneUserAssignedIdentity"]
                     cluster_builder.with_managed_identity(control_plane_mi)
@@ -177,7 +178,7 @@ class MyCluster(Cluster):
                         _,_,acr_subscription_id,_,acr_resource_group,_,_,_,acr_name = acr_identifier_splitted
                     elif 2 == len(acr_identifier_splitted):
                         acr_resource_group, acr_name = acr_identifier_splitted
-                        
+
                     authorization_client = AuthorizationManagementClient(credentials, acr_subscription_id)
                     acr_scope = "/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}".format(**locals())
                     try:
@@ -189,7 +190,7 @@ class MyCluster(Cluster):
                     else:
                         acr_role_id = acr_roles[0].id
                         logging.info("ACR pull role id: %s", acr_role_id)
-                        
+
                     # Try to run a fake role assignment. Depending on the failure type we know if we are Owner or not
                     try:
                         fake_role_assignment = authorization_client.role_assignments.create(
@@ -211,7 +212,7 @@ class MyCluster(Cluster):
                             raise(e)
                     except Exception as e:
                         raise(e)
-                        
+
         # Sanity check for node pools
         node_pool_vnets = set()
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
@@ -226,12 +227,12 @@ class MyCluster(Cluster):
                                            resource_group=resource_group,
                                            dss_host_resource_group=dss_host_resource_group)
             node_pool_vnets.add(vnet)
-            
+
         if 1 < len(node_pool_vnets):
             raise Exception("Node pools must all share the same vnet. Current node pools configuration yields vnets {}.".format(",".join(node_pool_vnets)))
         elif 0 == len(node_pool_vnets):
             raise Exception("You cannot deploy a cluster without any node pool.")
-        
+
         # Check role assignments for vnet like on ACR for fail fast if not doable
         vnet_id = node_pool_vnets.pop()
         if not vnet_id.startswith("/"):
@@ -249,7 +250,7 @@ class MyCluster(Cluster):
                     raise Exception("Could not find the Contributor role on the vnet {}. Check you are Owner of it.".format(vnet_id))
                 else:
                     vnet_role_id = vnet_roles[0].id
-                    logging.info("Vnet contributor role id: %s", acr_role_id)              
+                    logging.info("Vnet contributor role id: %s", acr_role_id)
                     # Try to run a fake role assignment. Depending on the failure type we know if we are Owner or not
                     try:
                         fake_role_assignment = authorization_client.role_assignments.create(
@@ -321,7 +322,6 @@ class MyCluster(Cluster):
         create_result = run_and_process_cloud_error(do_creation)
         logging.info("Cluster creation finished")
 
-
         # Attach to ACR
         acr_attachment = {}
         if cluster_identity_type is not None and cluster_identity is not None:
@@ -347,7 +347,7 @@ class MyCluster(Cluster):
                         "resource_id": acr_scope,
                         "role_assignment": role_assignment.as_dict(),
                     })
-                    
+
         # Attach to VNET to allow LoadBalancers creation
         vnet_attachment = {}
         if cluster_identity_type is not None and cluster_identity is not None:
@@ -390,6 +390,9 @@ class MyCluster(Cluster):
                 acr_name = None if _is_none_or_blank(acr_attachment) else acr_attachment["name"],
         )
 
+        # Apply the GPU daemonset on the created cluster
+        CreateGpuDaemonset(kube_config_path=kube_config_path)()
+
         return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment, "vnet_attachment": vnet_attachment}]
 
 
@@ -418,7 +421,7 @@ class MyCluster(Cluster):
                         authorization_client.role_assignments.delete_by_id(acr_attachment["role_assignment"]["id"])
                     except ResourceNotFoundError as e:
                         logging.warn("It looks that the ACR role assignment doesnt exist. Ignore this step")
-        
+
         # Detach Vnet like ACR
         vnet_attachment = data.get("vnet_attachment", None)
         if not _is_none_or_blank(vnet_attachment):
