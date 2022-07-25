@@ -391,7 +391,7 @@ class MyCluster(Cluster):
         )
 
         # Apply the GPU daemonset on the created cluster
-        self.config.get("gpuSupport", False):
+        if self.config.get("gpuSupport", False):
             logging.info("Creating DaemonSet to provide GPU drivers...")
             CreateGpuDaemonset(kube_config_path=kube_config_path)()
 
