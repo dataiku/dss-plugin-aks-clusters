@@ -29,6 +29,7 @@ class CreateGpuDaemonset:
         if self.namespace not in namespaces:
             logging.info("Creating a new namespace - %s", self.namespace)
             cmd = ["kubectl", "create", "namespace", self.namespace]
+            out, err = run_with_timeout(cmd, env=self.env, timeout=5)
 
     def __call__(self):
         # Check to see if a daemonset with the same name exists
