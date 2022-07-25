@@ -16,17 +16,32 @@ class CreateGpuDaemonset:
         self.env["KUBECONFIG"] = kube_config_path
         self.kube_config_dir = os.path.split(kube_config_path)[0]
         self.daemonset_name = "nvidia-device-plugin-daemonset"
+        self.namespace = "gpu-daemonset"
+
+    def _create_namespace_if_not_exist(self):
+        cmd = ["kubectl", "get", "namespaces", "-o", "json"]
+        out, err = run_with_timeout(cmd, env=self.env, timeout=5)
+        output_json = json.loads(out)
+        namespaces = {
+            namespace_dict["metadata"]["name"]
+            for namespace_dict in output_json["items"]
+        }
+        if self.namespace not in namespaces:
+            logging.info("Creating a new namespace - %s", self.namespace)
+            cmd = ["kubectl", "create", "namespace", self.namespace]
 
     def __call__(self):
         # Check to see if a daemonset with the same name exists
         if self.get_daemonset_existence():
             raise Exception(f"The daemonset {self.daemonset_name} already exists")
 
+        self._create_namespace_if_not_exist()
+
         # create ds
         ds_yaml = {
             "apiVersion": "apps/v1",
             "kind": "DaemonSet",
-            "metadata": {"name": self.daemonset_name, "namespace": "gpu-daemonset"},
+            "metadata": {"name": self.daemonset_name, "namespace": self.namespace},
             "spec": {
                 "selector": {"matchLabels": {"name": "nvidia-device-plugin-ds"}},
                 "template": {
@@ -102,7 +117,7 @@ class CreateGpuDaemonset:
             "json",
             "--ignore-not-found",
         ]
-        logging.info("Poll pod state with : %s" % json.dumps(cmd))
+        logging.info("Poll namespace state with : %s" % json.dumps(cmd))
         out, err = run_with_timeout(cmd, env=self.env, timeout=5)
         # Check if the daemonset exists by seeing if anything got returned
         return bool(out)
