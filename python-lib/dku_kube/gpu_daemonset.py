@@ -26,7 +26,7 @@ class CreateGpuDaemonset:
         ds_yaml = {
             "apiVersion": "apps/v1",
             "kind": "DaemonSet",
-            "metadata": {"name": self.daemonset_name},
+            "metadata": {"name": self.daemonset_name, "namespace": "gpu-daemonset"},
             "spec": {
                 "selector": {"matchLabels": {"name": "nvidia-device-plugin-ds"}},
                 "template": {
