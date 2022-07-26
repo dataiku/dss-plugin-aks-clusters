@@ -87,7 +87,7 @@ class CreateGpuDaemonset:
             },
         }
 
-        ds_file_path = os.path.join(self.kube_config_dir, "gpu_daemonset.yaml")
+        ds_file_path = os.path.join(self.kube_config_dir, "gpu_daemonset")
         with open(ds_file_path, "w") as f:
             yaml.safe_dump(ds_yaml, f)
 
