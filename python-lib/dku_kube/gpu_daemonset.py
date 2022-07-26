@@ -10,7 +10,7 @@ import yaml
 from .kubectl_command import run_with_timeout
 
 
-class CreateGpuDaemonset:
+class CreateGpuDaemonset(object):
     def __init__(self, kube_config_path):
         self.env = os.environ.copy()
         self.env["KUBECONFIG"] = kube_config_path
@@ -34,7 +34,7 @@ class CreateGpuDaemonset:
     def __call__(self):
         # Check to see if a daemonset with the same name exists
         if self.get_daemonset_existence():
-            raise Exception(f"The daemonset {self.daemonset_name} already exists")
+            raise Exception("The daemonset %s already exists" % self.daemonset_name)
 
         self._create_namespace_if_not_exist()
 
@@ -103,7 +103,7 @@ class CreateGpuDaemonset:
 
         if not self.get_daemonset_existence():
             raise Exception(
-                f"Daemonset {self.daemonset_name} failed to appear within 10s"
+                "Daemonset %s failed to appear within 10s" % self.daemonset_name
             )
 
         return self
