@@ -114,6 +114,8 @@ class CreateGpuDaemonset:
             "get",
             "daemonset",
             self.daemonset_name,
+            "-n",
+            self.namespace,
             "-o",
             "json",
             "--ignore-not-found",
