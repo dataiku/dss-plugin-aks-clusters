@@ -16,7 +16,7 @@ class CreateGpuDaemonset(object):
         self.env["KUBECONFIG"] = kube_config_path
         self.kube_config_dir = os.path.split(kube_config_path)[0]
         self.daemonset_name = "nvidia-device-plugin-daemonset"
-        self.namespace = "gpu-daemonset"
+        self.namespace = "kube-system"
 
     def _create_namespace_if_not_exist(self):
         cmd = ["kubectl", "get", "namespaces", "-o", "json"]
@@ -32,10 +32,6 @@ class CreateGpuDaemonset(object):
             out, err = run_with_timeout(cmd, env=self.env, timeout=5)
 
     def __call__(self):
-        # Check to see if a daemonset with the same name exists
-        if self.get_daemonset_existence():
-            raise Exception("The daemonset %s already exists" % self.daemonset_name)
-
         self._create_namespace_if_not_exist()
 
         # create ds
@@ -91,7 +87,7 @@ class CreateGpuDaemonset(object):
         with open(ds_file_path, "w") as f:
             yaml.safe_dump(ds_yaml, f)
 
-        cmd = ["kubectl", "create", "-f", os.path.abspath(ds_file_path)]
+        cmd = ["kubectl", "apply", "-f", os.path.abspath(ds_file_path)]
         logging.info("Create daemonset with : %s" % json.dumps(cmd))
         run_with_timeout(cmd, env=self.env, timeout=5)
 
