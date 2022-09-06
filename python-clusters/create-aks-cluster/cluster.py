@@ -308,7 +308,7 @@ class MyCluster(Cluster):
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
-            node_pool_builder.with_gpu(node_pool_conf.get("enableGPU"), False)
+            node_pool_builder.with_gpu(node_pool_conf.get("enableGPU", False))
             node_pool_builder.add_tags(self.config.get("tags", None))
             node_pool_builder.add_tags(node_pool_conf.get("tags", None))
             node_pool_builder.build()

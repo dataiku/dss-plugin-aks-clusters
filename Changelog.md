@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 2.0.4 - Bugfix release
+## Next version
 
 - Support GPU out-of-the-box
 
