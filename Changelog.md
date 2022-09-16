@@ -1,5 +1,9 @@
 # Changelog
 
+## Next version
+
+- Support GPU out-of-the-box
+
 ## Version 2.0.3 - Bugfix release
 
 - Explicit dependency on `<0.7 mssrest`

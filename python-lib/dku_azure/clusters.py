@@ -193,11 +193,8 @@ class NodePoolBuilder(object):
         self.vm_size = vm_size
         return self
 
-    def with_gpu(self, vm_size):
-        if "Standard_N" in vm_size:
-            self.gpu = True
-        else:
-            self.gpu = False
+    def with_gpu(self, enable_gpu):
+        self.gpu = enable_gpu
         return self
 
     def add_tags(self, tags):

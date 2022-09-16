@@ -144,6 +144,13 @@
             "mandatory": false
         },
         {
+            "name": "enableGPU",
+            "label": "GPU",
+            "description": "Enable GPU workloads on the cluster",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
             "name": "tags",
             "label": "Node tags",
             "description": "Additional Azure tags assigned to the nodes",

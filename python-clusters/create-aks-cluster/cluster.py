@@ -11,6 +11,7 @@ from msrestazure.azure_exceptions import CloudError
 
 from dku_utils.access import _is_none_or_blank, _has_not_blank_property
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
+from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
 from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata, get_subscription_id
@@ -307,6 +308,7 @@ class MyCluster(Cluster):
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
+            node_pool_builder.with_gpu(node_pool_conf.get("enableGPU", False))
             node_pool_builder.add_tags(self.config.get("tags", None))
             node_pool_builder.add_tags(node_pool_conf.get("tags", None))
             node_pool_builder.build()
@@ -389,6 +391,8 @@ class MyCluster(Cluster):
                 kube_config_path,
                 acr_name = None if _is_none_or_blank(acr_attachment) else acr_attachment["name"],
         )
+        if node_pool_builder.gpu:
+            add_gpu_driver_if_needed(kube_config_path)
 
         return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment, "vnet_attachment": vnet_attachment}]
 
