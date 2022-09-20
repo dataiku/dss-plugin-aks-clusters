@@ -1,7 +1,7 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile, ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
-from dku_utils.access import _default_if_blank
+from dku_utils.access import _default_if_blank, _merge_objects
 
 import logging, copy, json
 
@@ -27,6 +27,7 @@ class ClusterBuilder(object):
         self.user_identity = None
         self.private_access = None
         self.node_resource_group = None
+        self.custom_config = None
 
     def with_name(self, name):
         self.name = name
@@ -124,7 +125,6 @@ class ClusterBuilder(object):
         nb_node_pools = len(self.node_pools)
         return NodePoolBuilder(self).with_name("node-pool-{}".format(nb_node_pools))
 
-
     def with_cluster_version(self, cluster_version):
         if cluster_version != "latest":
             self.cluster_version = cluster_version
@@ -132,6 +132,10 @@ class ClusterBuilder(object):
 
     def with_node_pool(self, node_pool):
         self.node_pools.append(node_pool)
+        return self
+
+    def with_custom_config(self, custom_config):
+        self.custom_config = _default_if_blank(custom_config, None)
         return self
 
     def build(self):
@@ -150,6 +154,10 @@ class ClusterBuilder(object):
 
         if self.private_access:
             cluster_params["api_server_access_profile"] = self.private_access
+
+        if self.custom_config:
+            custom_config_dict = json.loads(self.custom_config)
+            cluster_params = _merge_objects(cluster_params, custom_config_dict)
 
         self.cluster_config = ManagedCluster(**cluster_params)
 

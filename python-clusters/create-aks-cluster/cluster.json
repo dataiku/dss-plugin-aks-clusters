@@ -156,6 +156,13 @@
             "defaultValue": "Basic"
         },
         {
+            "name": "customConfig",
+            "label": "Custom creation settings",
+            "description": "Additional settings for the cluster creation call, as JSON",
+            "type": "TEXTAREA",
+            "mandatory": false
+        },
+        {
             "name": "s-legacy",
             "type": "SEPARATOR",
             "label": "Legacy options"

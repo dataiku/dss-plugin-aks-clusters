@@ -102,6 +102,7 @@ class MyCluster(Cluster):
                                          outbound_type=self.config.get("outboundType", None),
                                          network_plugin=self.config.get("networkPlugin"),
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
+        cluster_builder.with_custom_config(self.config.get("customConfig", None))
 
         if self.config.get("useCustomNodeResourceGroup", False):
             cluster_builder.with_node_resource_group(self.config.get("nodeResourceGroup"))
@@ -109,7 +110,7 @@ class MyCluster(Cluster):
         # Cluster identity
         connection_info = self.config.get("connectionInfo", None)
         cluster_idendity_legacy_use_distinct_sp = self.config.get("useDistinctSPForCluster", False)
-        cluster_idendity_legacy_sp = self.config.get("clusterServicePrincipal",None)
+        cluster_idendity_legacy_sp = self.config.get("clusterServicePrincipal", None)
         cluster_identity_type = None
         cluster_identity = None
         if not _is_none_or_blank(connection_info) or cluster_idendity_legacy_use_distinct_sp:
