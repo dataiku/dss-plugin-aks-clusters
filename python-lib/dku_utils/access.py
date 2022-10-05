@@ -54,8 +54,8 @@ def _merge_objects(a, b):
         fields = set(a.keys()).union(set(b.keys()))
         for field in fields:
             if field in b and field in a:
-                a[field] = _merge_objects(a[field], b[kfield]) # from now on, we are calling the merge on real dicts directly
-            elif k in b:
+                a[field] = _merge_objects(a[field], b[field]) # from now on, we are calling the merge on real dicts directly
+            elif field in b:
                 a[field] = b[field]
         return a_orig # careful : return the object, not the eventual dict we extracted from it
     elif isinstance(a, str) and isinstance(b, str):
