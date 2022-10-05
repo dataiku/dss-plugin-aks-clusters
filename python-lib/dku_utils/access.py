@@ -34,18 +34,32 @@ def _default_if_property_blank(d, k, v):
     x = d[k]
     return _default_if_blank(x, v)
 
+# Warning : introspection ahead.
+# We are trying to "merge" two objects, or an object with a dict whose keys are the name of the object's field
+# So, we need to mutate the object field's values (we chose to do it on the first object, "a")
+# this is done by accessing and mutating the internal __dict__
 def _merge_objects(a, b):
+    """
+    Warning : this function mutates its inputs...
+    """
+    a_orig = a
+    b_orig = b
+    # if a is an object, we will work on its fields via its internal __dict__.
+    # Iterables and struct have no __dict__ field, so won't be hacked, and will be handled by the elifs
+    if hasattr(a, '__dict__'):
+        a = a.__dict__
+    if hasattr(b, '__dict__'):
+        b = b.__dict__
     if isinstance(a, Mapping) and isinstance(b, Mapping):
-        r = {}
-        ks = set(a.keys()).union(set(b.keys()))
-        for k in ks:
-            if k in b and k in a:
-                r[k] = _merge_objects(a[k], b[k])
+        fields = set(a.keys()).union(set(b.keys()))
+        for field in fields:
+            if field in b and field in a:
+                a[field] = _merge_objects(a[field], b[kfield]) # from now on, we are calling the merge on real dicts directly
             elif k in b:
-                r[k] = b[k]
-            else:
-                r[k] = a[k]
-        return r
+                a[field] = b[field]
+        return a_orig # careful : return the object, not the eventual dict we extracted from it
+    elif isinstance(a, str) and isinstance(b, str):
+        return b
     elif isinstance(a, Iterable) and isinstance(b, Iterable):
         ret = []
         for x in a:
@@ -54,6 +68,6 @@ def _merge_objects(a, b):
             ret.append(x)       
         return ret
     elif b is not None:
-        return b
+        return b_orig
     else:
-        return a
+        return a_orig
