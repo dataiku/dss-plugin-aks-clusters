@@ -1,5 +1,11 @@
 from six import text_type
 from collections import Mapping, Iterable
+import sys
+
+if sys.version_info > (3,):
+    dku_basestring_type = str
+else:
+    dku_basestring_type = basestring
 
 def _get_in_object_or_array(o, chunk, d):
     if isinstance(chunk, int):
@@ -58,7 +64,7 @@ def _merge_objects(a, b):
             elif field in b:
                 a[field] = b[field]
         return a_orig # careful : return the object, not the eventual dict we extracted from it
-    elif isinstance(a, str) and isinstance(b, str):
+    elif isinstance(a, dku_basestring_type) and isinstance(b, dku_basestring_type):
         return b
     elif isinstance(a, Iterable) and isinstance(b, Iterable):
         ret = []
