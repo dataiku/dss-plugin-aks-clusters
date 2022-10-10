@@ -3,6 +3,7 @@
 ## Next version
 
 - Support GPU out-of-the-box
+- Add ability to manually set additional cluster settings
 
 ## Version 2.0.3 - Bugfix release
 
