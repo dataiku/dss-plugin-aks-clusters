@@ -1,6 +1,7 @@
 from six import text_type
 from collections import Mapping, Iterable
 import sys
+import json
 
 if sys.version_info > (3,):
     dku_basestring_type = str
@@ -77,3 +78,24 @@ def _merge_objects(a, b):
         return b_orig
     else:
         return a_orig
+
+def _object_to_json(o):
+    r = o
+    if hasattr(o, '__dict__'):
+        r = o.__dict__
+    if isinstance(r, dku_basestring_type):
+        return r
+    if isinstance(r, Iterable):
+        if hasattr(r, 'keys'):
+            for field in r.keys():
+                r[field] = _object_to_json(r[field])
+            return r
+        else:
+            arr = []
+            for entry in r:
+                arr.append(_object_to_json(entry))
+            return arr
+    return r
+
+def _print_as_json(o):
+    return json.dumps(_object_to_json(o))

@@ -1,7 +1,7 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile, ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
-from dku_utils.access import _default_if_blank, _merge_objects
+from dku_utils.access import _default_if_blank, _merge_objects, _print_as_json
 
 import logging, copy, json
 
@@ -160,6 +160,9 @@ class ClusterBuilder(object):
             cluster_params = _merge_objects(cluster_params, custom_config_dict)
 
         self.cluster_config = ManagedCluster(**cluster_params)
+
+        logging.info("Cluster configuration:")
+        logging.info(_print_as_json(self.cluster_config))
 
         future = self.clusters_client.managed_clusters.begin_create_or_update(self.resource_group, self.name, self.cluster_config)
         return future
