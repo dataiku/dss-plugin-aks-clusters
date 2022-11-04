@@ -9,7 +9,7 @@ from azure.core.pipeline.policies import UserAgentPolicy
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 from msrestazure.azure_exceptions import CloudError
 
-from dku_utils.access import _is_none_or_blank, _has_not_blank_property
+from dku_utils.access import _is_none_or_blank, _has_not_blank_property, _print_as_json
 from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
@@ -320,6 +320,8 @@ class MyCluster(Cluster):
         logging.info("Start creation of cluster")
         def do_creation():
             cluster_create_op = cluster_builder.build()
+            logging.info("Cluster creation results")
+            logging.info("Cluster creation results: %s", _print_as_json(cluster_create_op))
             return cluster_create_op.result()
         create_result = run_and_process_cloud_error(do_creation)
         logging.info("Cluster creation finished")
@@ -380,6 +382,8 @@ class MyCluster(Cluster):
         def do_fetch():
             return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, self.cluster_name)
         get_credentials_result = run_and_process_cloud_error(do_fetch)
+        logging.info("Kubeconfig retrieved for cluster")
+        logging.info("Kubeconfig retrieved for cluster %s in %s: %s", self.cluster_name, resource_group, _print_as_json(get_credentials_result))
         kube_config_content = get_credentials_result.kubeconfigs[0].value.decode("utf8")
         logging.info("Writing kubeconfig file...")
         kube_config_path = os.path.join(os.getcwd(), "kube_config")
@@ -440,6 +444,8 @@ class MyCluster(Cluster):
             future = clusters_client.managed_clusters.begin_delete(resource_group, cluster_name)
             return future.result()
         delete_result = run_and_process_cloud_error(do_delete)
+        logging.info("Cluster deletion results")
+        logging.info("Cluster deletion results: %s", _print_as_json(delete_result))
 
         # delete returns void, so we poll until the cluster is really gone
         gone = False
