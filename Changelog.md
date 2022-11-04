@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## Version 2.0.4 - Feature release
 
 - Support GPU out-of-the-box
 - Add ability to manually set additional cluster settings
