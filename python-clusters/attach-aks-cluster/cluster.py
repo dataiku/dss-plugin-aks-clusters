@@ -46,6 +46,12 @@ class MyCluster(Cluster):
 
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 
+        # Retrieve the cluster to check whether or not the Azure AD with Azure RBAC is activated
+        def do_get():
+            return clusters_client.managed_clusters.get(resource_group, cluster_name)
+        get_cluster_result = run_and_process_cloud_error(do_get)
+        patch_user_in_kubeconfig = get_cluster_result.aad_profile.managed and get_cluster_result.aad_profile.enable_azure_rbac
+
         # Get kubeconfig 
         logging.info("Fetching kubeconfig for cluster %s in %s", cluster_name, resource_group)
         def do_fetch():

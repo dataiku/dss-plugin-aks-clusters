@@ -88,3 +88,17 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("VNET: {}".format(vnet))
     logging.info("SUBNET ID: {}".format(subnet_id))
     return vnet, subnet_id
+
+def patch_kube_config_with_aad(kube_config_string, authentication_mode, identity_label):
+    # determine which is the authentication mode
+    # depending on the authentication mode, the derivation command kubelogin options will be different
+    # 
+    # SERVICE-PRINCIPAL
+    # kubelogin get-token -l msi --server-id 6dae42f8-4368-4678-94ff-3960e28e3630 --identity-resource-id /subscriptions/8c59bf15-b4a9-4398-a354-d2a4e7d60e2a/resourcegroups/jcasoli-fm/providers/Microsoft.ManagedIdentity/userAssignedIdentities/dss-id-jcasoli
+    # USER-ASSIGNED
+    # kubelogin get-token -l msi --server-id 6dae42f8-4368-4678-94ff-3960e28e3630 --client-id de4cab2c-359c-4970-8032-89bee12a7d31
+    # DEFAULT
+    # kubelogin get-token -l msi --server-id 6dae42f8-4368-4678-94ff-3960e28e3630
+    # 
+    pass
+
