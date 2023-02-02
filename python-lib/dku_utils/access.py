@@ -81,44 +81,26 @@ def _merge_objects(a, b):
         return a_orig
 
 def _object_to_json(o):
-    logging.error("===== Amandine, new field =====")
     r = o
-    logging.error("Amandine, object: %s", r)
-    if r is not None:
-        logging.error("Amandine, object type: %s", type(r))
     if hasattr(o, '__dict__'):
         r = o.__dict__
-        logging.error("Amandine, object has a dict: %s", r)
     if isinstance(r, dku_basestring_type):
-        logging.error("Amandine, object is a string")
-        logging.error("===== Amandine, end field =====")
         return r
     if isinstance(r, bytearray):
-        logging.error("Amandine, object is a bytearray")
-        logging.error("===== Amandine, end field =====")
         return r.decode("utf-8")
     if isinstance(r, Iterable):
-        logging.error("Amandine, object is iterable: %s", r)
         if hasattr(r, 'keys'):
             d = dict()
-            logging.error("Amandine, object has keys")
             for field in r.keys():
-                logging.error("Amandine, field: %s - contains: %s", field, r[field])
                 if not field.startswith('_'):
                     d[field] = _object_to_json(r[field])
-                else:
-                    logging.error("Amandine, field ignored: %s", field)
 
-            logging.error("===== Amandine, end field =====")
             return d
         else:
-            logging.error("Amandine, object is an array: %s", r)
             arr = []
             for entry in r:
                 arr.append(_object_to_json(entry))
-            logging.error("===== Amandine, end field =====")
             return arr
-    logging.error("===== Amandine, end field =====")
     return r
 
 def _print_as_json(o):
