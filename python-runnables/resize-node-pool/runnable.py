@@ -50,7 +50,6 @@ class MyRunnable(Runnable):
             cluster_update_op = clusters.managed_clusters.begin_create_or_update(resource_group, cluster_name, cluster)
             return cluster_update_op.result()
         update_result = run_and_process_cloud_error(do_update)
-        logging.info("Cluster update results")
         logging.info("Cluster update results: %s", _print_as_json(update_result))
         logging.info("Cluster updated")
         return '<pre class="debug">%s</pre>' % json.dumps(update_result.as_dict(), indent=2)

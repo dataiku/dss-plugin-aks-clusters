@@ -320,8 +320,7 @@ class MyCluster(Cluster):
         logging.info("Start creation of cluster")
         def do_creation():
             cluster_create_op = cluster_builder.build()
-            logging.info("Cluster creation results")
-            logging.info("Cluster creation results: %s", _print_as_json(cluster_create_op))
+            logging.info("Cluster creation results: %s", _print_as_json(cluster_create_op.__dict__))
             return cluster_create_op.result()
         create_result = run_and_process_cloud_error(do_creation)
         logging.info("Cluster creation finished")
@@ -382,7 +381,6 @@ class MyCluster(Cluster):
         def do_fetch():
             return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, self.cluster_name)
         get_credentials_result = run_and_process_cloud_error(do_fetch)
-        logging.info("Kubeconfig retrieved for cluster")
         logging.info("Kubeconfig retrieved for cluster %s in %s: %s", self.cluster_name, resource_group, _print_as_json(get_credentials_result))
         kube_config_content = get_credentials_result.kubeconfigs[0].value.decode("utf8")
         logging.info("Writing kubeconfig file...")

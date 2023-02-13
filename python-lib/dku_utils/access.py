@@ -2,7 +2,6 @@ from six import text_type
 from collections import Mapping, Iterable
 import sys
 import json
-import logging
 
 if sys.version_info > (3,):
     dku_basestring_type = str

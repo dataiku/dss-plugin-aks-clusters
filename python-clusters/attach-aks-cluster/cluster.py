@@ -50,7 +50,6 @@ class MyCluster(Cluster):
         def do_fetch():
             return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, cluster_name)
         get_credentials_result = run_and_process_cloud_error(do_fetch)
-        logging.info("Kubeconfig retrieved for cluster")
         logging.info("Kubeconfig retrieved for cluster %s in %s: %s", cluster_name, resource_group, _print_as_json(get_credentials_result))
         kube_config_content = get_credentials_result.kubeconfigs[0].value.decode('utf8')
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
@@ -63,7 +62,6 @@ class MyCluster(Cluster):
         def do_inspect():
             return clusters_client.managed_clusters.get(resource_group, cluster_name)
         get_cluster_result = run_and_process_cloud_error(do_inspect)
-        logging.info("Information retrieved for cluster")
         logging.info("Information retrieved for cluster %s in %s: %s", cluster_name, resource_group, _print_as_json(get_cluster_result))
 
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':get_cluster_result.as_dict()}]
