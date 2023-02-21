@@ -443,7 +443,6 @@ class MyCluster(Cluster):
             return future.result()
         delete_result = run_and_process_cloud_error(do_delete)
         logging.info("Cluster deletion results")
-        logging.info("Cluster deletion results: %s", _print_as_json(delete_result))
 
         # delete returns void, so we poll until the cluster is really gone
         gone = False
