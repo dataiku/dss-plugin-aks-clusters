@@ -2,10 +2,9 @@ import os, json, logging, yaml
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
-from dku_utils.access import _is_none_or_blank
+from dku_utils.access import _is_none_or_blank, _print_as_json
 from dku_utils.cluster import make_overrides, get_subscription_id
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
-from dku_azure.utils import run_and_process_cloud_error
 from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
 
 class MyCluster(Cluster):
@@ -51,6 +50,7 @@ class MyCluster(Cluster):
         def do_fetch():
             return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, cluster_name)
         get_credentials_result = run_and_process_cloud_error(do_fetch)
+        logging.info("Kubeconfig retrieved for cluster %s in %s: %s", cluster_name, resource_group, _print_as_json(get_credentials_result))
         kube_config_content = get_credentials_result.kubeconfigs[0].value.decode('utf8')
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         with open(kube_config_path, 'w') as f:
@@ -58,9 +58,11 @@ class MyCluster(Cluster):
         overrides = make_overrides(self.config, yaml.safe_load(kube_config_content), kube_config_path)
         
         # Get other cluster infos
+        logging.info("Retrieving cluster information for cluster %s in %s", cluster_name, resource_group)
         def do_inspect():
             return clusters_client.managed_clusters.get(resource_group, cluster_name)
         get_cluster_result = run_and_process_cloud_error(do_inspect)
+        logging.info("Information retrieved for cluster %s in %s: %s", cluster_name, resource_group, _print_as_json(get_cluster_result))
 
         return [overrides, {'kube_config_path':kube_config_path, 'cluster':get_cluster_result.as_dict()}]
 

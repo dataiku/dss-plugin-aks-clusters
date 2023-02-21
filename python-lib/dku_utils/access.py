@@ -85,11 +85,16 @@ def _object_to_json(o):
         r = o.__dict__
     if isinstance(r, dku_basestring_type):
         return r
+    if isinstance(r, bytearray):
+        return r.decode("utf-8")
     if isinstance(r, Iterable):
         if hasattr(r, 'keys'):
+            d = dict()
             for field in r.keys():
-                r[field] = _object_to_json(r[field])
-            return r
+                if not field.startswith('_'):
+                    d[field] = _object_to_json(r[field])
+
+            return d
         else:
             arr = []
             for entry in r:
