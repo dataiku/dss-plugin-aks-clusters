@@ -1,6 +1,6 @@
 from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile, ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
+from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterAADProfile
 from dku_utils.access import _default_if_blank, _merge_objects, _print_as_json
 
 import logging, copy, json
@@ -147,6 +147,7 @@ class ClusterBuilder(object):
         cluster_params["node_resource_group"] = self.node_resource_group
         cluster_params["service_principal_profile"] = self.cluster_sp
         cluster_params["identity"] = self.identity
+        cluster_params["aad_profile"] = ManagedClusterAADProfile(managed=True, enable_azure_rbac=True)
         cluster_params["identity_profile"] = self.identity_profile
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools

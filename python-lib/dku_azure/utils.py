@@ -1,5 +1,5 @@
 import requests
-import json
+import yaml
 import logging
 
 from msrestazure.azure_exceptions import CloudError
@@ -88,3 +88,45 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("VNET: {}".format(vnet))
     logging.info("SUBNET ID: {}".format(subnet_id))
     return vnet, subnet_id
+
+def patch_kube_config_with_aad(kube_config_string, authentication_mode, identity_label):
+    kube_config = yaml.safe_load(kube_config_string)
+
+    kubelogin_command_options = ['get-token', '--login', 'msi', '--server-id', '6dae42f8-4368-4678-94ff-3960e28e3630']
+
+    additional_options = []
+    if authentication_mode == 'service-principal':
+        additional_options = ['--identity-resource-id', identity_label]
+    elif authentication_mode == 'user-assigned':
+        if identity_label.startswith("/"):
+            additional_options = ['--identity-resource-id', identity_label]
+        else:
+            additional_options = ['--client-id', identity_label]
+    
+    kubelogin_command_options = kubelogin_command_options + additional_options
+
+    kube_config_user = {
+        'name': kube_config['contexts'][0]['context']['user'],
+        'user': {
+            'exec': {
+                'apiVersion': 'client.authentication.k8s.io/v1beta1',
+                'command': 'kubelogin',
+                'args': kubelogin_command_options
+            }
+        }
+    }
+    
+    kube_config['users'] = [kube_config_user]
+
+    return kube_config
+
+    # determine which is the authentication mode
+    # depending on the authentication mode, the derivation command kubelogin options will be different
+    # 
+    # SERVICE-PRINCIPAL
+    # kubelogin get-token -l msi --server-id 6dae42f8-4368-4678-94ff-3960e28e3630 --identity-resource-id /subscriptions/8c59bf15-b4a9-4398-a354-d2a4e7d60e2a/resourcegroups/jcasoli-fm/providers/Microsoft.ManagedIdentity/userAssignedIdentities/dss-id-jcasoli
+    # USER-ASSIGNED
+    # kubelogin get-token -l msi --server-id 6dae42f8-4368-4678-94ff-3960e28e3630 --client-id de4cab2c-359c-4970-8032-89bee12a7d31
+    # DEFAULT
+    # kubelogin get-token -l msi --server-id 6dae42f8-4368-4678-94ff-3960e28e3630
+

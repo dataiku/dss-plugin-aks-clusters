@@ -14,7 +14,7 @@ from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
-from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata, get_subscription_id
+from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata, get_subscription_id, patch_kube_config_with_aad
 from dku_azure.auth import AzureIdentityCredentialAdapter
 
 class MyCluster(Cluster):
@@ -43,6 +43,13 @@ class MyCluster(Cluster):
         Build the create cluster request.
         """
         credentials, subscription_id, managed_identity_id = self._get_credentials()
+        connection_info = self.config.get("connectionInfoV2",{"identityType":"default"})
+        identity_type = connection_info.get("identityType", "default")
+        identity_label = None
+        if identity_type == 'user-assigned':
+            identity_label = connection_info.get("userManagedIdentityId", "")
+        elif identity_type == 'service-principal':
+            identity_label = connection_info.get("clientId", "")
 
         # Fetch metadata about the instance
         metadata = get_instance_metadata()
@@ -385,12 +392,13 @@ class MyCluster(Cluster):
         kube_config_content = get_credentials_result.kubeconfigs[0].value.decode("utf8")
         logging.info("Writing kubeconfig file...")
         kube_config_path = os.path.join(os.getcwd(), "kube_config")
+        kube_config_yaml = patch_kube_config_with_aad(kube_config_content, identity_type, identity_label)
         with open(kube_config_path, 'w') as f:
-            f.write(kube_config_content)
+            yaml.dump(kube_config_yaml, f)
 
         overrides = make_overrides(
                 self.config,
-                yaml.safe_load(kube_config_content),
+                kube_config_yaml,
                 kube_config_path,
                 acr_name = None if _is_none_or_blank(acr_attachment) else acr_attachment["name"],
         )
