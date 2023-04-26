@@ -74,7 +74,7 @@
             "label": "Kubelet user identity",
             "type": "STRING",
             "mandatory" : false,
-            "description": "User Assigned Managed Identity for the kubelets. Only available with Azure feature Microsoft.ContainerService/CustomKubeletIdentityPreview. See documentation.",
+            "description": "User Assigned Managed Identity for the kubelets.",
             "visibilityCondition": "model.identityType=='managed-identity' && !model.useAKSManagedKubeletIdentity && !model.inheritDSSIdentity"
         },
         {

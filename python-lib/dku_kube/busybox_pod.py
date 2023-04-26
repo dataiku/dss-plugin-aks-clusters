@@ -1,4 +1,4 @@
-import os, sys, json, yaml, logging, random, time
+import os, json, yaml, logging, random, time
 from .kubectl_command import run_with_timeout
 
 class BusyboxPod(object):

@@ -1,5 +1,8 @@
 from six import text_type
-from collections import Mapping, Iterable
+try:
+    from collections.abc import Mapping, Iterable # py3
+except ImportError:
+    from collections import Mapping, Iterable # py2
 import sys
 import json
 
@@ -36,7 +39,7 @@ def _default_if_blank(x, d):
         return x
     
 def _default_if_property_blank(d, k, v):
-    if not k in d:
+    if k not in d:
         return v
     x = d[k]
     return _default_if_blank(x, v)

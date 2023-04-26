@@ -1,8 +1,6 @@
 import requests
-import json
 import logging
 
-from msrestazure.azure_exceptions import CloudError
 from azure.mgmt.resource import ResourceManagementClient
 from dku_utils.access import _is_none_or_blank
 
@@ -12,8 +10,6 @@ INSTANCE_API_VERSION = "2019-04-30"
 def run_and_process_cloud_error(fn):
     try:
         return fn()
-    except CloudError as e:
-        raise Exception('%s : %s' % (str(e), e.response.content))
     except Exception as e:
         raise e
         
@@ -23,7 +19,7 @@ def get_instance_metadata(api_version=INSTANCE_API_VERSION):
     Return VM metadata.
     """
     metadata_svc_endpoint = "{}/metadata/instance?api-version={}".format(AZURE_METADATA_SERVICE, api_version)
-    req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"}, proxies={"http":None, "http":None})
+    req = requests.get(metadata_svc_endpoint, headers={"metadata": "true"}, proxies={"http":None})
     resp = req.json()
     return resp
 

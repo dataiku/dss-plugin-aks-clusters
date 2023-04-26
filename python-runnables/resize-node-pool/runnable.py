@@ -1,5 +1,4 @@
 from dataiku.runnables import Runnable
-import dataiku
 import json, logging
 from dku_utils.cluster import get_cluster_from_dss_cluster
 from dku_utils.access import _is_none_or_blank

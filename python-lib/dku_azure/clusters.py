@@ -1,9 +1,9 @@
-from dku_azure.utils import get_instance_metadata, get_vm_resource_id, get_host_network, get_subnet_id
+from dku_azure.utils import get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile, ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster, ManagedClusterIdentity
+from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster
 from dku_utils.access import _default_if_blank, _merge_objects, _print_as_json
 
-import logging, copy, json
+import logging, json
 
 
 class ClusterBuilder(object):
