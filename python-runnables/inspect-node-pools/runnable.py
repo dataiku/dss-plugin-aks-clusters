@@ -1,9 +1,6 @@
 from dataiku.runnables import Runnable
-import dataiku
-import json, logging
+import json
 from dku_utils.cluster import get_cluster_from_dss_cluster
-from dku_utils.access import _is_none_or_blank
-from dku_azure.utils import run_and_process_cloud_error
 
 class MyRunnable(Runnable):
     def __init__(self, project_key, config, plugin_config):

@@ -1,5 +1,5 @@
-import os, sys, json, yaml, logging
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
+import os, json, yaml, logging
+from dku_utils.access import _has_not_blank_property
 
 def get_first_kube_config(kube_config_path=None):
     if kube_config_path is None:

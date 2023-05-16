@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 2.2.0 - Feature release
+
+ - Add more supported Python versions. This plugin can now use 2.7 (deprecated), 3.6, 3.7, 3.8, 3.9
+ - Fix vnet auto-attach managed identity when let AKS provision the control plane identity
+
 ## Version 2.1.0 - Feature release
 
 - Support GPU out-of-the-box

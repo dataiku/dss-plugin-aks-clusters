@@ -1,4 +1,4 @@
-import os, json, logging, yaml, time, uuid
+import os, logging, yaml, time, uuid
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
@@ -7,15 +7,13 @@ from azure.mgmt.msi import ManagedServiceIdentityClient
 from azure.mgmt.authorization import AuthorizationManagementClient
 from azure.core.pipeline.policies import UserAgentPolicy
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
-from msrestazure.azure_exceptions import CloudError
 
-from dku_utils.access import _is_none_or_blank, _has_not_blank_property
-from dku_utils.cluster import make_overrides, get_cluster_from_connection_info
+from dku_utils.access import _is_none_or_blank
+from dku_utils.cluster import make_overrides
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
-from dku_azure.utils import run_and_process_cloud_error, get_subnet_id, get_instance_metadata, get_subscription_id
-from dku_azure.auth import AzureIdentityCredentialAdapter
+from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -84,9 +82,7 @@ class MyCluster(Cluster):
             existing = clusters_client.managed_clusters.get(resource_group, self.cluster_name)
             if existing is not None:
                 raise Exception("A cluster with name %s in resource group %s already exists" % (self.cluster_name, resource_group))
-        except CloudError as e:
-            logging.info("Cluster doesn't seem to exist yet")
-        except ResourceNotFoundError as e:
+        except ResourceNotFoundError:
             logging.info("Cluster doesn't seem to exist yet")
 
         cluster_builder = ClusterBuilder(clusters_client)
@@ -153,7 +149,7 @@ class MyCluster(Cluster):
                     if not cluster_identity.get("useAKSManagedKubeletIdentity",True):
                         kubelet_mi = cluster_identity["kubeletUserAssignedIdentity"]
                         _,_,mi_subscription_id,_,mi_resource_group,_,_,_,mi_name = kubelet_mi.split("/")
-                        msiclient = ManagedServiceIdentityClient(AzureIdentityCredentialAdapter(credentials), mi_subscription_id)
+                        msiclient = ManagedServiceIdentityClient(credentials, mi_subscription_id)
                         mi = msiclient.user_assigned_identities.get(mi_resource_group, mi_name)
                         cluster_builder.with_kubelet_identity(kubelet_mi, mi.client_id, mi.principal_id)
                         logging.info("Configure kubelet identity with user assigned identity resourceId=\"{}\", clientId=\"{}\", objectId=\"{}\"".format(kubelet_mi, mi.client_id, mi.principal_id))
@@ -184,7 +180,7 @@ class MyCluster(Cluster):
                     acr_scope = "/subscriptions/{acr_subscription_id}/resourceGroups/{acr_resource_group}/providers/Microsoft.ContainerRegistry/registries/{acr_name}".format(**locals())
                     try:
                         acr_roles = list(authorization_client.role_definitions.list(acr_scope,"roleName eq 'AcrPull'"))
-                    except ResourceNotFoundError as e:
+                    except ResourceNotFoundError:
                         raise Exception("ACR {} not found. Check it exists and you are Owner of it.".format(acr_scope))
                     if 0 == len(acr_roles):
                         raise Exception("Could not find the AcrPull role on the ACR {}. Check you are Owner of it.".format(acr_scope))
@@ -245,9 +241,9 @@ class MyCluster(Cluster):
                 authorization_client = AuthorizationManagementClient(credentials, subscription_id)
                 try:
                     vnet_roles = list(authorization_client.role_definitions.list(vnet_id,"roleName eq 'Contributor'"))
-                except ResourceNotFoundError as e:
+                except ResourceNotFoundError:
                     raise Exception("Vnet {} not found. Check it exists and you are Owner of it.".format(vnet_id))
-                if 0 == len(acr_roles):
+                if 0 == len(vnet_roles):
                     raise Exception("Could not find the Contributor role on the vnet {}. Check you are Owner of it.".format(vnet_id))
                 else:
                     vnet_role_id = vnet_roles[0].id
@@ -424,7 +420,7 @@ class MyCluster(Cluster):
                     authorization_client = AuthorizationManagementClient(credentials, acr_attachment["subscription_id"])
                     try:
                         authorization_client.role_assignments.delete_by_id(acr_attachment["role_assignment"]["id"])
-                    except ResourceNotFoundError as e:
+                    except ResourceNotFoundError:
                         logging.warn("It looks that the ACR role assignment doesnt exist. Ignore this step")
         
         # Detach Vnet like ACR
@@ -436,13 +432,13 @@ class MyCluster(Cluster):
                 authorization_client = AuthorizationManagementClient(credentials, vnet_attachment["subscription_id"])
                 try:
                     authorization_client.role_assignments.delete_by_id(vnet_attachment["role_assignment"]["id"])
-                except ResourceNotFoundError as e:
+                except ResourceNotFoundError:
                     logging.warn("It looks that the Vnet role assignment doesnt exist. Ignore this step")
 
         def do_delete():
             future = clusters_client.managed_clusters.begin_delete(resource_group, cluster_name)
             return future.result()
-        delete_result = run_and_process_cloud_error(do_delete)
+        run_and_process_cloud_error(do_delete)
 
         # delete returns void, so we poll until the cluster is really gone
         gone = False
@@ -453,6 +449,6 @@ class MyCluster(Cluster):
                 if cluster.provisioning_state.lower() != 'deleting':
                     logging.info("Cluster is not deleting anymore, must be deleted now (state = %s)" % cluster.provisioning_state)
             # other exceptions should not be ignored
-            except ResourceNotFoundError as e:
+            except ResourceNotFoundError:
                 logging.info("Cluster doesn't seem to exist anymore, considering it deleted")
                 gone = True

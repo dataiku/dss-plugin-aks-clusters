@@ -1,6 +1,6 @@
-import os, sys, json, yaml, subprocess, logging
+import os, subprocess, logging
 from dku_google.gcloud import get_account
-from dku_utils.access import _has_not_blank_property, _is_none_or_blank
+from dku_utils.access import _is_none_or_blank
 
 def create_admin_binding(user_name=None, kube_config_path=None):
     if _is_none_or_blank(user_name):

@@ -1,11 +1,10 @@
-import os, json, logging, yaml
+import os, logging, yaml
 from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
 from dku_utils.access import _is_none_or_blank
-from dku_utils.cluster import make_overrides, get_subscription_id
+from dku_utils.cluster import make_overrides
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
-from dku_azure.utils import run_and_process_cloud_error
 from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
 
 class MyCluster(Cluster):

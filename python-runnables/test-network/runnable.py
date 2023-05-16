@@ -1,5 +1,5 @@
 from dataiku.runnables import Runnable
-import os, sys, json, yaml, random, subprocess, socket, re, traceback, ipaddress
+import os, json, socket, re, traceback, ipaddress
 from dku_kube.busybox_pod import BusyboxPod
 from dku_kube.kubectl_command import KubeCommandException
 from dku_utils.cluster import get_cluster_from_dss_cluster
