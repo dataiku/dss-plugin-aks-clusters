@@ -119,7 +119,7 @@ class MyRunnable(Runnable):
         logging.info("Cluster updated")
         
         if node_pool_builder.gpu:
-            kube_config_path = json.loads(cluster_data)["kube_config_path"]
+            kube_config_path = cluster_data["kube_config_path"]
             add_gpu_driver_if_needed(kube_config_path)
 
         return '<pre class="debug">%s</pre>' % json.dumps(create_result.as_dict(), indent=2)
