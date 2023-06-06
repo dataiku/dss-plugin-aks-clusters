@@ -36,7 +36,7 @@ def get_instance_metadata(api_version=INSTANCE_API_VERSION):
 def get_subscription_id(connection_info):
     identity_type = connection_info.get('identityType', None)
     subscription_id = connection_info.get('subscriptionId', None)
-    if (identity_type == 'default' or identity_type == 'service-principal') and not _is_none_or_blank(subscription_id):
+    if not _is_none_or_blank(subscription_id):
         return subscription_id
     else:
         return get_instance_metadata()["compute"]["subscriptionId"]
