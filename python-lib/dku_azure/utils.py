@@ -1,5 +1,6 @@
 import requests
 import logging
+import traceback
 
 from azure.mgmt.resource import ResourceManagementClient
 from dku_utils.access import _is_none_or_blank
@@ -11,7 +12,16 @@ def run_and_process_cloud_error(fn):
     try:
         return fn()
     except Exception as e:
-        raise e
+        try:
+            str_e = str(e)
+        except:
+            logging.warn("Can't inspect error")
+            str_e = ''
+        if 'Availability zone is not supported in region' in str_e:
+            traceback.print_exc()
+            raise Exception("The cluster is created in a region without availability zones, uncheck 'availability zones' on the node pools")
+        else:
+            raise e
         
 
 def get_instance_metadata(api_version=INSTANCE_API_VERSION):
