@@ -1,6 +1,7 @@
 from dku_azure.utils import get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile, ManagedClusterServicePrincipalProfile
 from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster
+from azure.mgmt.containerservice.models import AgentPool
 from dku_utils.access import _default_if_blank, _merge_objects, _print_as_json
 
 import logging, json
@@ -303,4 +304,5 @@ class NodePoolBuilder(object):
         logging.info("Adding agent pool profile: %s" % agent_pool_profile_params)
 
         self.agent_pool_profile = ManagedClusterAgentPoolProfile(**agent_pool_profile_params)
+        self.agent_pool = AgentPool(**agent_pool_profile_params)
         return self

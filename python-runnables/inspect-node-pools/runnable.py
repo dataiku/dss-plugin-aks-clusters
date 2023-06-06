@@ -12,7 +12,7 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        cluster_data, clusters, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
+        cluster_data, clusters, dss_cluster_settings, dss_cluster_config, _, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
         # retrieve the actual name in the cluster's data
         if cluster_data is None:
             raise Exception("No cluster data (not started?)")

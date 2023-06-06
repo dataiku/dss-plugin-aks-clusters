@@ -1,0 +1,45 @@
+{
+    "meta": {
+        "label": "Add node pool",
+        "description": "Create a new node pool in the cluster",
+        "icon": "icon-plus-sign"
+    },
+
+    "impersonate": false,
+
+    "permissions": [],
+
+    "resultType": "HTML",
+
+    "resultLabel": "pools",
+    "extension": "html",
+    "mimeType": "text/html",
+
+    "macroRoles": [
+        { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
+    ],
+    
+    "params": [
+        {
+            "name": "clusterId",
+            "label": "Cluster",
+            "type": "CLUSTER",
+            "description": "Cluster (in DSS)",
+            "mandatory": true
+        },
+        {
+            "name": "nodePoolId",
+            "label": "Node pool ID",
+            "description": "Id of node pool to create, if not default",
+            "type": "STRING",
+            "mandatory": false
+        },
+        {
+            "name": "nodePoolConfig",
+            "label": "Node pool config",
+            "type": "PRESET",
+            "parameterSetId" : "node-pool-request",
+            "mandatory" : true
+        }
+    ]
+}
