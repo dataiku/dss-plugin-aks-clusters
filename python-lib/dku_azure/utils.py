@@ -17,7 +17,7 @@ def run_and_process_cloud_error(fn):
         except:
             logging.warn("Can't inspect error")
             str_e = ''
-        if 'Availability zone is not supported in region' in str_e:
+        if 'Availability zone is not supported in region' in str_e or 'does not support availability zones at location' in str_e:
             traceback.print_exc()
             raise Exception("The cluster is created in a region without availability zones, uncheck 'availability zones' on the node pools")
         else:

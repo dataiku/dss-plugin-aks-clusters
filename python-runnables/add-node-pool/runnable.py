@@ -30,7 +30,6 @@ class MyRunnable(Runnable):
             raise Exception("No cluster definition (starting failed?)")
         cluster_id = cluster_def["id"]
         _,_,subscription_id,_,resource_group,_,_,_,cluster_name = cluster_id.split("/") # resource_group here will be the same as in the cluster.py
-        cluster = clusters.managed_clusters.get(resource_group, cluster_name)
         
         # get the object for the cluster, AKS side
         cluster = clusters.managed_clusters.get(resource_group, cluster_name)
