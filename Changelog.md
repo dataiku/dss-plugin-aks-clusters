@@ -1,5 +1,12 @@
 # Changelog
 
+## Next version
+
+ - Feature: new action to add a node pool to a cluster
+ - Allow forcing a different subscription when using user assigned managed identities for credentials
+ - Improve error display for cluster starts in regions without availability zones
+ - Fix deleting of node pools by resizing them to 0 node
+
 ## Version 2.2.0 - Feature release
 
  - Add more supported Python versions. This plugin can now use 2.7 (deprecated), 3.6, 3.7, 3.8, 3.9
