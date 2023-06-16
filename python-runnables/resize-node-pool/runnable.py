@@ -39,10 +39,14 @@ class MyRunnable(Runnable):
                 node_pool = profile
         if node_pool is None:
             raise Exception("Unable to find node pool '%s'" % (node_pool_id))
+        node_pool_id = node_pool.name
+        logging.info("Node pool selected is %s " % node_pool_id)
 
         desired_count = self.config['numNodes']
         logging.info("Resize to %s" % desired_count)
         if desired_count == 0:
+            if len(node_pools) == 1:
+                raise Exception("Can't delete node pool, a cluster needs at least one running node pool")
             def do_delete():
                 cluster_update_op = clusters.agent_pools.begin_delete(resource_group, cluster_name, node_pool_id)
                 return cluster_update_op.result()
