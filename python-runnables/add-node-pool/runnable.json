@@ -30,7 +30,7 @@
         {
             "name": "nodePoolId",
             "label": "Node pool ID",
-            "description": "Id of node pool to create, if not default",
+            "description": "Id of node pool to create. Leave empty for default.",
             "type": "STRING",
             "mandatory": false
         },

@@ -36,7 +36,7 @@
         {
             "name": "nodePoolId",
             "label": "Node pool",
-            "description": "Id of node pool to resize, if not default",
+            "description": "Id of node pool to resize. Optional if the cluster has only 1 node pool.",
             "type": "STRING",
             "mandatory": false
         }
