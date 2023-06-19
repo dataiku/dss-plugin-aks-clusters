@@ -5,7 +5,7 @@
  - Feature: new action to add a node pool to a cluster
  - Allow forcing a different subscription when using user assigned managed identities for credentials
  - Improve error display for cluster starts in regions without availability zones
- - Fix deleting of node pools by resizing them to 0 node
+ - Fix deleting of node pools by resizing them to 0 nodes
 
 ## Version 2.2.0 - Feature release
 

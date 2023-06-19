@@ -33,7 +33,7 @@ class MyRunnable(Runnable):
         node_pool = None
         node_pools = [node_pool for node_pool in clusters.agent_pools.list(resource_group, cluster_name)]
         if _is_none_or_blank(node_pool_id) and len(node_pools) > 1:
-            raise Exception("Cluster has %s node pools, you need to specify the node pool id'" % len(node_pools))
+            raise Exception("Cluster has %s node pools, you need to specify the node pool id" % len(node_pools))
         for profile in node_pools:
             if profile.name == node_pool_id or (_is_none_or_blank(node_pool_id) and len(node_pools) == 1):
                 node_pool = profile
