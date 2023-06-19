@@ -14,7 +14,7 @@ class MyRunnable(Runnable):
         return None
 
     def run(self, progress_callback):
-        cluster_data, clusters, dss_cluster_settings, dss_cluster_config = get_cluster_from_dss_cluster(self.config['clusterId'])
+        cluster_data, clusters, dss_cluster_settings, dss_cluster_config, _, _ = get_cluster_from_dss_cluster(self.config['clusterId'])
 
         # retrieve the actual name in the cluster's data
         if cluster_data is None:
@@ -31,22 +31,34 @@ class MyRunnable(Runnable):
         
         node_pool_id = self.config.get('nodePoolId', None)
         node_pool = None
-        for profile in cluster.agent_pool_profiles:
-            if profile.name == node_pool_id or (_is_none_or_blank(node_pool_id) and len(cluster.agent_pool_profiles) == 1):
+        node_pools = [node_pool for node_pool in clusters.agent_pools.list(resource_group, cluster_name)]
+        if _is_none_or_blank(node_pool_id) and len(node_pools) > 1:
+            raise Exception("Cluster has %s node pools, you need to specify the node pool id" % len(node_pools))
+        for profile in node_pools:
+            if profile.name == node_pool_id or (_is_none_or_blank(node_pool_id) and len(node_pools) == 1):
                 node_pool = profile
         if node_pool is None:
             raise Exception("Unable to find node pool '%s'" % (node_pool_id))
+        node_pool_id = node_pool.name
+        logging.info("Node pool selected is %s " % node_pool_id)
 
         desired_count = self.config['numNodes']
         logging.info("Resize to %s" % desired_count)
         if desired_count == 0:
-            raise Exception("Can't delete node pool '%s'" % (node_pool_id))
+            if len(node_pools) == 1:
+                raise Exception("Can't delete node pool, a cluster needs at least one running node pool")
+            def do_delete():
+                cluster_update_op = clusters.agent_pools.begin_delete(resource_group, cluster_name, node_pool_id)
+                return cluster_update_op.result()
+            delete_result = run_and_process_cloud_error(do_delete)
+            logging.info("Cluster updated")
+            return '<pre class="debug">Node pool %s deleted</pre>' % node_pool_id
         else:
             node_pool.count = desired_count
             logging.info("Waiting for cluster resize")
 
         def do_update():
-            cluster_update_op = clusters.managed_clusters.begin_create_or_update(resource_group, cluster_name, cluster)
+            cluster_update_op = clusters.agent_pools.begin_create_or_update(resource_group, cluster_name, node_pool_id, node_pool)
             return cluster_update_op.result()
         update_result = run_and_process_cloud_error(do_update)
         logging.info("Cluster updated")

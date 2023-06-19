@@ -1,8 +1,8 @@
 {
     "meta": {
-        "label": "Resize cluster",
-        "description": "Resize node pool in cluster",
-        "icon": "icon-resize-full"
+        "label": "Add node pool",
+        "description": "Create a new node pool in the cluster",
+        "icon": "icon-plus-sign"
     },
 
     "impersonate": false,
@@ -28,17 +28,18 @@
             "mandatory": true
         },
         {
-            "name": "numNodes",
-            "label": "Number of nodes",
-            "type": "INT",
-            "mandatory": true
-        },
-        {
             "name": "nodePoolId",
-            "label": "Node pool",
-            "description": "Id of node pool to resize. Optional if the cluster has only 1 node pool.",
+            "label": "Node pool ID",
+            "description": "Id of node pool to create. Leave empty for default.",
             "type": "STRING",
             "mandatory": false
+        },
+        {
+            "name": "nodePoolConfig",
+            "label": "Node pool config",
+            "type": "PRESET",
+            "parameterSetId" : "node-pool-request",
+            "mandatory" : true
         }
     ]
 }

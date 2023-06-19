@@ -35,7 +35,7 @@ def get_cluster_from_connection_info(config, plugin_config):
         credentials, _ = get_credentials_from_connection_infoV2(connection_info_v2)
         subscription_id = get_subscription_id(connection_info_v2)
     clusters_client = ContainerServiceClient(credentials, subscription_id)
-    return clusters_client
+    return clusters_client, connection_info, credentials
 
 def get_cluster_from_dss_cluster(dss_cluster_id):
     # get the public API client
@@ -57,9 +57,9 @@ def get_cluster_from_dss_cluster(dss_cluster_id):
     dss_cluster_config = backend_json_call('plugins/get-resolved-settings', data={'elementConfig':json.dumps(dss_cluster_config), 'elementType':dss_cluster_settings.get_raw()['type']})
     logging.info("Resolved cluster config : %s" % json.dumps(dss_cluster_config))
     # build the helper class from the cluster settings (the macro doesn't have the params)
-    clusters = get_cluster_from_connection_info(dss_cluster_config.get("config"), dss_cluster_config.get("pluginConfig"))
+    clusters, connection_info, credentials = get_cluster_from_connection_info(dss_cluster_config.get("config"), dss_cluster_config.get("pluginConfig"))
 
     cluster_data = dss_cluster_settings.get_plugin_data()
 
-    return cluster_data, clusters, dss_cluster_settings, dss_cluster_config
+    return cluster_data, clusters, dss_cluster_settings, dss_cluster_config, connection_info, credentials
     

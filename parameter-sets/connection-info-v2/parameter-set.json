@@ -59,8 +59,7 @@
             "label": "Azure subscription ID (Optional)",
             "type": "STRING",
             "mandatory" : false,
-            "description": "Only required if not running on Azure",
-            "visibilityCondition": "model.identityType=='service-principal' || model.identityType=='default'"
+            "description": "Only required if not running on Azure"
         }
     ]
 }
