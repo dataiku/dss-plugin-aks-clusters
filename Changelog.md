@@ -1,6 +1,6 @@
 # Changelog
 
-## Next version
+## Version 2.2.1 - Feature release
 
  - Feature: new action to add a node pool to a cluster
  - Allow forcing a different subscription when using user assigned managed identities for credentials
