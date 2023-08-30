@@ -156,6 +156,35 @@
             "defaultValue": "Standard"
         },
         {
+            "name": "upgradeChannel",
+            "label": "Cluster upgrades",
+            "description": "Determines whether and when the cluster is automatically upgraded based on new K8S or AKS releases",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value":"none", "label":"No automatic upgrade"},
+                {"value":"rapid", "label":"Latest patch release on latest minor"},
+                {"value":"stable", "label":"Latest patch release on next to latest minor"},
+                {"value":"patch", "label":"Latest patch version on currently used minor"},
+                {"value":"node-image", "label":"Latest node image version"}
+            ],
+            "mandatory": true,
+            "defaultValue": "none"
+        },
+        {
+            "name": "nodeOSUpgradeChannel",
+            "label": "Node OS upgrades",
+            "description": "Determines whether and when the OS in the cluster nodes is upgraded",
+            "type": "SELECT",
+            "selectChoices": [
+                {"value":"None", "label":"No automatic upgrade"},
+                {"value":"Unmanaged", "label":"Upgrades handled by the OS"},
+                {"value":"NodeImage", "label":"Weekly upgrades handled by AKS"},
+                {"value":"SecurityPatch", "label":"Weekly upgrades handled by AKS - security patches only"}
+            ],
+            "mandatory": true,
+            "defaultValue": "Unmanaged"
+        },
+        {
             "name": "customConfig",
             "label": "Custom creation settings",
             "description": "Additional settings for the cluster creation call, as JSON",
