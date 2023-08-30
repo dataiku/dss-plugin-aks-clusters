@@ -98,6 +98,7 @@ class MyCluster(Cluster):
                                          outbound_type=self.config.get("outboundType", None),
                                          network_plugin=self.config.get("networkPlugin"),
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
+        cluster_builder.with_auto_upgrade_profile(self.config.get('upgradeChannel'), self.config.get('nodeOSUpgradeChannel'))
         cluster_builder.with_custom_config(self.config.get("customConfig", None))
 
         if self.config.get("useCustomNodeResourceGroup", False):
