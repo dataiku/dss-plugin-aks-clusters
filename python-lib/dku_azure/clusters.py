@@ -60,6 +60,10 @@ class ClusterBuilder(object):
         return self
 
     def with_auto_upgrade_profile(self, upgrade_channel='none', node_os_upgrade_channel='Unmanaged'):
+        if upgrade_channel == 'node-image':
+            # at the moment, Azure docs say that node image on the cluster upgrades implies
+            # node image on the node os upgrades
+            node_os_upgrade_channel = 'NodeImage'
         self.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=upgrade_channel, node_os_upgrade_channel=node_os_upgrade_channel)
         return self
 
