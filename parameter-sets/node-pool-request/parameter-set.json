@@ -19,7 +19,7 @@
             "description": "Azure VM size for the nodes. See Azure documentation for available VM sizes.",
             "type": "STRING",
             "mandatory": true,
-            "defaultValue": "Standard_B8ms"
+            "defaultValue": "Standard_D8s_v5"
         },
         {
             "name": "osDiskSizeGb",
