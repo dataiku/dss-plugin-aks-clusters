@@ -1,5 +1,8 @@
 # Changelog
 
+## Next
+ - The default node type is no longer a burstable one but a D8s_v5 (32 GB RAM, 8vCPU) 
+
 ## Version 2.2.1 - Feature release
 
  - Feature: new action to add a node pool to a cluster
