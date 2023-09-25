@@ -75,6 +75,8 @@ class MyCluster(Cluster):
             policy = UserAgentPolicy()
             policy.add_user_agent('pid-fd3813c7-273c-5eec-9221-77323f62a148')
             clusters_client = ContainerServiceClient(credentials, subscription_id, user_agent_policy=policy)
+            
+        rest_api_version = clusters_client._get_api_version(clusters_client.managed_clusters)
 
         # check that the cluster doesn't exist yet, otherwise azure will try to update it
         # and will almost always fail
@@ -98,7 +100,23 @@ class MyCluster(Cluster):
                                          outbound_type=self.config.get("outboundType", None),
                                          network_plugin=self.config.get("networkPlugin"),
                                          docker_bridge_cidr=self.config.get("dockerBridgeCidr"))
-        cluster_builder.with_auto_upgrade_profile(self.config.get('upgradeChannel'), self.config.get('nodeOSUpgradeChannel'))
+        
+        can_auto_upgrade_channel = rest_api_version >= '2020-11-01'
+        can_auto_node_os_upgrade_channel = rest_api_version >= '2023-06-01'
+        upgrade_channel = self.config.get('upgradeChannel', 'none')
+        # see https://learn.microsoft.com/en-us/azure/aks/auto-upgrade-node-image#limitations
+        default_node_os_upgrade_channel = 'NodeImage' if rest_api_version >= '2022-06-01' else 'None'
+        node_os_upgrade_channel = self.config.get('nodeOSUpgradeChannel', default_node_os_upgrade_channel)
+        if not can_auto_upgrade_channel:
+            if upgrade_channel != 'none':
+                raise Exception("Python SDK is too old to pass upgrade channel setting. Create a new plugin code env")
+        elif not can_auto_node_os_upgrade_channel:
+            if node_os_upgrade_channel != default_node_os_upgrade_channel:
+                raise Exception("Python SDK is too old to pass node OS upgrade channel setting. Create a new plugin code env")
+            cluster_builder.with_auto_upgrade_profile(upgrade_channel)
+        else:
+            cluster_builder.with_auto_upgrade_profile(upgrade_channel, node_os_upgrade_channel)
+        
         cluster_builder.with_custom_config(self.config.get("customConfig", None))
 
         if self.config.get("useCustomNodeResourceGroup", False):
