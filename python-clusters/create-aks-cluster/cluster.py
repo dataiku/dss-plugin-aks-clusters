@@ -109,10 +109,10 @@ class MyCluster(Cluster):
         node_os_upgrade_channel = self.config.get('nodeOSUpgradeChannel', default_node_os_upgrade_channel)
         if not can_auto_upgrade_channel:
             if upgrade_channel != 'none':
-                raise Exception("Python SDK is too old to pass upgrade channel setting. Create a new plugin code env")
+                raise Exception("Python SDK is too old to pass upgrade channel setting. Create a new plugin code env with python >=3.7")
         elif not can_auto_node_os_upgrade_channel:
             if node_os_upgrade_channel != default_node_os_upgrade_channel:
-                raise Exception("Python SDK is too old to pass node OS upgrade channel setting. Create a new plugin code env")
+                raise Exception("Python SDK is too old to pass node OS upgrade channel setting. Create a new plugin code env with python >=3.7")
             cluster_builder.with_auto_upgrade_profile(upgrade_channel)
         else:
             cluster_builder.with_auto_upgrade_profile(upgrade_channel, node_os_upgrade_channel)
