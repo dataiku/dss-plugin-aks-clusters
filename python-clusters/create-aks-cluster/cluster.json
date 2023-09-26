@@ -162,9 +162,9 @@
             "type": "SELECT",
             "selectChoices": [
                 {"value":"none", "label":"No automatic upgrade"},
-                {"value":"rapid", "label":"Latest patch release on latest minor"},
-                {"value":"stable", "label":"Latest patch release on next to latest minor"},
                 {"value":"patch", "label":"Latest patch version on currently used minor"},
+                {"value":"stable", "label":"Latest patch release on next to latest minor"},
+                {"value":"rapid", "label":"Latest patch release on latest minor"},
                 {"value":"node-image", "label":"Latest node image version"}
             ],
             "mandatory": true,
@@ -178,8 +178,8 @@
             "selectChoices": [
                 {"value":"None", "label":"No automatic upgrade"},
                 {"value":"Unmanaged", "label":"Upgrades handled by the OS"},
-                {"value":"NodeImage", "label":"Weekly upgrades of the node image"},
-                {"value":"SecurityPatch", "label":"Weekly upgrades handled by AKS - security patches only"}
+                {"value":"SecurityPatch", "label":"Weekly upgrades handled by AKS - security patches only"},
+                {"value":"NodeImage", "label":"Weekly upgrades of the node image"}
             ],
             "mandatory": true,
             "defaultValue": "Unmanaged",
