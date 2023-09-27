@@ -178,7 +178,7 @@
             "selectChoices": [
                 {"value":"None", "label":"No automatic upgrade"},
                 {"value":"Unmanaged", "label":"Upgrades handled by the OS"},
-                {"value":"SecurityPatch", "label":"Weekly upgrades handled by AKS - security patches only"},
+                {"value":"SecurityPatch", "label":"Weekly upgrades handled by AKS - security patches only (preview)"},
                 {"value":"NodeImage", "label":"Weekly upgrades of the node image"}
             ],
             "mandatory": true,
