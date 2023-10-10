@@ -28,10 +28,10 @@
             "mandatory": true
         },
         {
-            "name": "nodesAutoscaling",
-            "label": "Enable Autoscaling",
+            "name": "autoScaling",
+            "label": "Enable auto scaling",
             "type": "BOOLEAN",
-            "description": "Whether the cluster's number of nodes should be autoscaling",
+            "description": "Whether the cluster's number of nodes should be automatically scaling",
             "mandatory": true,
             "defaultValue": false
         },
@@ -41,7 +41,7 @@
             "type": "INT",
             "mandatory": true,
             "defaultValue": 1,
-            "visibilityCondition": "model.nodesAutoscaling"
+            "visibilityCondition": "model.autoScaling"
         },
         {
             "name": "maxNumNodes",
@@ -49,14 +49,14 @@
             "type": "INT",
             "mandatory": true,
             "defaultValue": 5,
-            "visibilityCondition": "model.nodesAutoscaling"
+            "visibilityCondition": "model.autoScaling"
         },
         {
             "name": "numNodes",
             "label": "Number of nodes",
             "type": "INT",
             "mandatory": true,
-            "visibilityCondition": "!model.nodesAutoscaling"
+            "visibilityCondition": "!model.autoScaling"
         },
         {
             "name": "nodePoolId",
