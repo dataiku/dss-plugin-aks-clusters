@@ -29,9 +29,9 @@
         },
         {
             "name": "autoScaling",
-            "label": "Enable auto scaling",
+            "label": "Enable nodes auto scaling",
             "type": "BOOLEAN",
-            "description": "Whether the cluster's number of nodes should be automatically scaling",
+            "description": "Whether the cluster's number of nodes should automatically scale with the workload.",
             "mandatory": true,
             "defaultValue": false
         },
@@ -40,7 +40,6 @@
             "label": "Minimum number of nodes",
             "type": "INT",
             "mandatory": true,
-            "minI": 0,
             "defaultValue": 1,
             "visibilityCondition": "model.autoScaling"
         },
@@ -49,7 +48,6 @@
             "label": "Maximum number of nodes",
             "type": "INT",
             "mandatory": true,
-            "minI": 0,
             "defaultValue": 5,
             "visibilityCondition": "model.autoScaling"
         },
