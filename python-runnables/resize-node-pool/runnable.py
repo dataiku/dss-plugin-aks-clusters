@@ -56,9 +56,9 @@ class MyRunnable(Runnable):
             else:
                 logging.info("Resizing cluster to auto scale with %s min nodes and %s max nodes"
                              % (min_nodes, max_nodes))
-                node_pool.autoScaling = auto_scaling_enabled
-                node_pool.minNumNodes = min_nodes
-                node_pool.maxNumNodes = max_nodes
+                node_pool.enable_cluster_autoscaler = auto_scaling_enabled
+                node_pool.min_count = min_nodes
+                node_pool.max_count = max_nodes
         else:
             desired_count = self.config['numNodes']
             logging.info("Resize to %s" % desired_count)
