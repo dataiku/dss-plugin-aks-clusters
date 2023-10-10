@@ -1,6 +1,6 @@
 from dku_azure.utils import get_host_network, get_subnet_id
 from azure.mgmt.containerservice.models import ManagedClusterAgentPoolProfile, ManagedClusterAPIServerAccessProfile, ManagedClusterServicePrincipalProfile
-from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedCluster
+from azure.mgmt.containerservice.models import ContainerServiceNetworkProfile, ManagedClusterAutoUpgradeProfile, ManagedCluster
 from azure.mgmt.containerservice.models import AgentPool
 from dku_utils.access import _default_if_blank, _merge_objects, _print_as_json
 
@@ -29,6 +29,7 @@ class ClusterBuilder(object):
         self.private_access = None
         self.node_resource_group = None
         self.custom_config = None
+        self.auto_upgrade_profile = None
 
     def with_name(self, name):
         self.name = name
@@ -56,6 +57,14 @@ class ClusterBuilder(object):
 
     def with_linux_profile(self, linux_profile=None):
         self.linux_profile = linux_profile
+        return self
+
+    def with_auto_upgrade_profile(self, upgrade_channel='none', node_os_upgrade_channel='Unmanaged'):
+        if upgrade_channel == 'node-image':
+            # at the moment, Azure docs say that node image on the cluster upgrades implies
+            # node image on the node os upgrades
+            node_os_upgrade_channel = 'NodeImage'
+        self.auto_upgrade_profile = ManagedClusterAutoUpgradeProfile(upgrade_channel=upgrade_channel, node_os_upgrade_channel=node_os_upgrade_channel)
         return self
 
     def with_network_profile(self, service_cidr, dns_service_ip, load_balancer_sku, outbound_type, network_plugin, docker_bridge_cidr):
@@ -152,6 +161,7 @@ class ClusterBuilder(object):
         cluster_params["kubernetes_version"] = self.cluster_version
         cluster_params["agent_pool_profiles"] = self.node_pools
         cluster_params["tags"] = self.tags
+        cluster_params["auto_upgrade_profile"] = self.auto_upgrade_profile
 
         if self.private_access:
             cluster_params["api_server_access_profile"] = self.private_access

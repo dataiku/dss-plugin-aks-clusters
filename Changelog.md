@@ -2,6 +2,7 @@
 
 ## Next
  - The default node type is no longer a burstable one but a D8s_v5 (32 GB RAM, 8vCPU) 
+ - Add support of cluster and node OS upgrade policy at cluster creation (Supported only with python 37+ codeenv)
 
 ## Version 2.2.1 - Feature release
 
