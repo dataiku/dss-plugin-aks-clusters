@@ -40,6 +40,7 @@
             "label": "Minimum number of nodes",
             "type": "INT",
             "mandatory": true,
+            "minI": 0,
             "defaultValue": 1,
             "visibilityCondition": "model.autoScaling"
         },
@@ -48,6 +49,7 @@
             "label": "Maximum number of nodes",
             "type": "INT",
             "mandatory": true,
+            "minI": 1,
             "defaultValue": 5,
             "visibilityCondition": "model.autoScaling"
         },
