@@ -57,8 +57,8 @@ class MyRunnable(Runnable):
                 raise Exception("Cannot make auto scalable cluster with a maximum number of nodes less than its "
                                 "minimum number of nodes.")
             else:
-                logging.info("Resizing cluster to auto scale with %s min nodes and %s max nodes"
-                             % (min_nodes, max_nodes))
+                logging.info("Resizing cluster to auto scale with %s min nodes and %s max nodes and an initial node count of %s"
+                             % (min_nodes, max_nodes, initial_node_count))
                 node_pool.enable_auto_scaling = autoscaling_enabled
                 node_pool.min_count = min_nodes
                 node_pool.count = initial_node_count
