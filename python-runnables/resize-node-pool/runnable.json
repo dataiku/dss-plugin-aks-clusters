@@ -45,6 +45,13 @@
             "visibilityCondition": "model.autoScaling"
         },
         {
+            "name": "numNodes",
+            "label": "Number of nodes",
+            "type": "INT",
+            "minI": 0,
+            "mandatory": true
+        },
+        {
             "name": "maxNumNodes",
             "label": "Maximum number of nodes",
             "type": "INT",
@@ -52,13 +59,6 @@
             "minI": 1,
             "defaultValue": 5,
             "visibilityCondition": "model.autoScaling"
-        },
-        {
-            "name": "numNodes",
-            "label": "Number of nodes",
-            "type": "INT",
-            "mandatory": true,
-            "visibilityCondition": "!model.autoScaling"
         },
         {
             "name": "nodePoolId",

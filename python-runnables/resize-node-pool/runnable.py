@@ -46,10 +46,13 @@ class MyRunnable(Runnable):
         if autoscaling_enabled:
             min_nodes = self.config['minNumNodes']
             max_nodes = self.config['maxNumNodes']
+            initial_node_count = self.config['numNodes']
             if min_nodes is None:
                 raise Exception("Cannot make auto scalable cluster with no minimum number of nodes.")
             elif max_nodes is None:
                 raise Exception("Cannot make auto scalable cluster with no maximum number of nodes.")
+            elif initial_node_count is None or initial_node_count < min_nodes or initial_node_count > max_nodes:
+                initial_node_count = min_nodes
             elif min_nodes > max_nodes:
                 raise Exception("Cannot make auto scalable cluster with a maximum number of nodes less than its "
                                 "minimum number of nodes.")
@@ -58,7 +61,10 @@ class MyRunnable(Runnable):
                              % (min_nodes, max_nodes))
                 node_pool.enable_auto_scaling = autoscaling_enabled
                 node_pool.min_count = min_nodes
+                node_pool.count = initial_node_count
                 node_pool.max_count = max_nodes
+                # This is used in the autoscaling node pool allocation, is it necessary?
+                node_pool.type_properties_type = "VirtualMachineScaleSets"
         else:
             desired_count = self.config['numNodes']
             logging.info("Resize to %s" % desired_count)
