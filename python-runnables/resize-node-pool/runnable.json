@@ -29,7 +29,7 @@
         },
         {
             "name": "autoScaling",
-            "label": "Enable nodes auto scaling",
+            "label": "Enable nodes autoscaling",
             "type": "BOOLEAN",
             "description": "Whether the cluster's number of nodes should automatically scale with the workload.",
             "mandatory": true,
