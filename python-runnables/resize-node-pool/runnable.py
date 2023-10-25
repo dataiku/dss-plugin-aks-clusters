@@ -47,25 +47,14 @@ class MyRunnable(Runnable):
         if autoscaling_enabled:
             min_nodes = self.config['minNumNodes']
             max_nodes = self.config['maxNumNodes']
-            initial_node_count = self.config['numNodes']
-            if min_nodes is None:
-                raise Exception("Cannot make autoscalable cluster with no minimum number of nodes.")
-            elif max_nodes is None:
-                raise Exception("Cannot make autoscalable cluster with no maximum number of nodes.")
-            elif initial_node_count is None or initial_node_count < min_nodes or initial_node_count > max_nodes:
-                raise Exception("The initial number of nodes must be set and between the min and max number of nodes bounds ([%s %s])."
-                                % (min_nodes, max_nodes))
-            elif min_nodes > max_nodes:
-                raise Exception("Cannot make autoscalable cluster with a max number of nodes (%s) less than its min number of nodes (%s)."
+            if min_nodes > max_nodes:
+                raise Exception("Cannot resize autoscalable cluster with a max number of nodes (%s) less than its min number of nodes (%s)."
                                 % (max_nodes, min_nodes))
             else:
-                logging.info("Resizing cluster to autoscale with %s min nodes and %s max nodes and an initial node count of %s."
-                             % (min_nodes, max_nodes, initial_node_count))
+                logging.info("Resizing cluster to autoscale with %s min nodes and %s max nodes."
+                             % (min_nodes, max_nodes))
                 node_pool.min_count = min_nodes
-                node_pool.count = initial_node_count
                 node_pool.max_count = max_nodes
-                # This is used in the autoscaling node pool allocation, is it necessary?
-                node_pool.type_properties_type = "VirtualMachineScaleSets"
         else:
             desired_count = self.config['numNodes']
             logging.info("Resize to %s" % desired_count)
