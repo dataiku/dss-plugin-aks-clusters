@@ -69,6 +69,8 @@ class MyRunnable(Runnable):
                 return '<pre class="debug">Node pool %s deleted</pre>' % node_pool_id
             else:
                 node_pool.count = desired_count
+                node_pool.min_count = None
+                node_pool.max_count = None
                 logging.info("Waiting for cluster resize")
 
         def do_update():
