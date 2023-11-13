@@ -18,7 +18,7 @@
     "macroRoles": [
         { "type":"CLUSTER", "targetParamsKey":"clusterId", "limitToSamePlugin":true }
     ],
-    
+
     "params": [
         {
             "name": "clusterId",
@@ -28,10 +28,38 @@
             "mandatory": true
         },
         {
+            "name": "autoScaling",
+            "label": "Enable nodes autoscaling",
+            "type": "BOOLEAN",
+            "description": "Whether the cluster's number of nodes should automatically scale with the workload.",
+            "mandatory": true,
+            "defaultValue": false
+        },
+        {
+            "name": "minNumNodes",
+            "label": "Minimum number of nodes",
+            "type": "INT",
+            "mandatory": true,
+            "minI": 0,
+            "defaultValue": 1,
+            "visibilityCondition": "model.autoScaling"
+        },
+        {
+            "name": "maxNumNodes",
+            "label": "Maximum number of nodes",
+            "type": "INT",
+            "mandatory": true,
+            "minI": 1,
+            "defaultValue": 5,
+            "visibilityCondition": "model.autoScaling"
+        },
+        {
             "name": "numNodes",
             "label": "Number of nodes",
             "type": "INT",
-            "mandatory": true
+            "mandatory": true,
+            "minI": 0,
+            "visibilityCondition": "!model.autoScaling"
         },
         {
             "name": "nodePoolId",
