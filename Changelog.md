@@ -1,8 +1,9 @@
 # Changelog
 
-## Version 2.3.1 - Feature release
+## Version 3.0.0 - Feature release
 
  - Add more supported Python versions. This plugin can now 3.10 and 3.11
+ - Drop of support for python 2.7
 
 ## Version 2.3.0 - Feature release
 
