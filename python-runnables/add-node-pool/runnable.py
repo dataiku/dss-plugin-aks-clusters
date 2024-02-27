@@ -55,18 +55,21 @@ class MyRunnable(Runnable):
         # Sanity check for node pools
         node_pool_vnets = set()
         for node_pool in node_pools:
-            nodepool_vnet = node_pool.vnet_subnet_id.split("/")[-3]
+            # Extract the full resource id of the vnet from the subnet id
+            nodepool_vnet = '/'.join(node_pool.vnet_subnet_id.split('/')[:-2])
             node_pool_vnets.add(nodepool_vnet)
         if len(node_pool_vnets) > 0:
             node_pool_vnet = node_pool_config.get("vnet", None)
             node_pool_subnet = node_pool_config.get("subnet", None)
-            node_pool_vnet, _ = node_pool_builder.resolve_network(inherit_from_host=node_pool_config.get("useSameNetworkAsDSSHost"),
+            _, node_pool_subnet = node_pool_builder.resolve_network(inherit_from_host=node_pool_config.get("useSameNetworkAsDSSHost"),
                                            cluster_vnet=node_pool_vnet,
                                            cluster_subnet=node_pool_subnet,
                                            connection_info=connection_info,
                                            credentials=credentials,
                                            resource_group=resource_group,
                                            dss_host_resource_group=dss_host_resource_group)
+            # Extract the full resource id of the vnet from the subnet id
+            node_pool_vnet = '/'.join(node_pool_subnet.split('/')[:-2])
             if not node_pool_vnet in node_pool_vnets:
                 node_pool_vnets.add(node_pool_vnet)
                 raise Exception("Node pools must all share the same vnet. Current node pools configuration yields vnets {}.".format(",".join(node_pool_vnets)))
