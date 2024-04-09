@@ -5,6 +5,11 @@
  - Add more supported Python versions. This plugin can now 3.10 and 3.11
  - Drop of support for python 2.7
 
+## Version 2.4.0 - Feature and bugfix release
+
+- Update Nvidia driver to the latest version
+- Fix adding new node pools with explicit virtual network full resource id
+
 ## Version 2.3.0 - Feature release
 
  - The default node type is no longer a burstable one but a D8s_v5 (32 GB RAM, 8vCPU) 
