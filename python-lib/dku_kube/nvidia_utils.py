@@ -12,7 +12,7 @@ def has_gpu_driver(kube_config_path):
 
 def add_gpu_driver_if_needed(kube_config_path):
     if not has_gpu_driver(kube_config_path):
-        cmd = ['kubectl', 'apply', '-f', "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/nvidia-device-plugin.yml"]
+        cmd = ['kubectl', 'apply', '-f', "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml"]
 
         logging.info("Install NVIDIA GPU drivers with : %s" % json.dumps(cmd))
         env = os.environ.copy()
