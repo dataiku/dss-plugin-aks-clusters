@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 2.4.1 - Bugfix release
+- Update Nvidia driver location
+
 ## Version 2.4.0 - Feature and bugfix release
 - Update Nvidia driver to the latest version
 - Fix adding new node pools with explicit virtual network full resource id
