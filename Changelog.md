@@ -1,12 +1,6 @@
 # Changelog
 
-## Version 3.0.0 - Feature release
-
- - Add more supported Python versions. This plugin can now 3.10 and 3.11
- - Drop of support for python 2.7
-
 ## Version 2.4.0 - Feature and bugfix release
-
 - Update Nvidia driver to the latest version
 - Fix adding new node pools with explicit virtual network full resource id
 
