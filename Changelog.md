@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 2.1.1 - Bugfix release
+- Update Nvidia driver location
+
 ## Version 2.1.0 - Feature release
 
 - Support GPU out-of-the-box
