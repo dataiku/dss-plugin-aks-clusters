@@ -5,6 +5,10 @@
  - Add more supported Python versions. This plugin can now 3.10 and 3.11
  - Drop of support for python 2.7
 
+## Version 2.4.1 - Bugfix release
+- Update Nvidia driver location
+
+
 ## Version 2.4.0 - Feature and bugfix release
 
 - Update Nvidia driver to the latest version
