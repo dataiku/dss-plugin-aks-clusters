@@ -3,7 +3,7 @@ from dku_utils.access import _is_none_or_blank
 
 class Taint(dict):
     def __init__(self, taint):
-        logging.debug("Creating taint from %s" % json.dumps(taint))
+        logging.debug("Creating taint from '%s'" % json.dumps(taint))
         if isinstance(taint, str):
             logging.debug("Taint is a raw string, it requires parsing.")
             try:
@@ -18,10 +18,10 @@ class Taint(dict):
                 self["effect"] = effect
             except ValueError as e:
                 raise ValueError(
-                    f"Invalid taint format: {taint}. Expected format <key>[=<value>]:<effect>"
+                    f"Invalid taint format: '{taint}'. Expected format '<key>[=<value>]:<effect>'"
                 ) from e
         else:
-            logging.debug("Taint is an object, it requires extrracting.")
+            logging.debug("Taint is an object, it requires extracting.")
             if not _is_none_or_blank(taint.get("key", None)):
                 self["key"] = taint.get("key", "")
 
