@@ -126,7 +126,7 @@ class MyRunnable(Runnable):
         
         if node_pool_builder.gpu:
             kube_config_path = cluster_data["kube_config_path"]
-            add_gpu_driver_if_needed(kube_config_path, cluster_id, gpu_node_pools_taints)
+            add_gpu_driver_if_needed(kube_config_path, cluster_name, gpu_node_pools_taints)
 
         return '<pre class="debug">%s</pre>' % json.dumps(create_result.as_dict(), indent=2)
         

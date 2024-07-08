@@ -1,21 +1,35 @@
-import json
+import json, logging
+from dku_utils.access import _is_none_or_blank
 
 class Taint(dict):
     def __init__(self, taint):
-        try:
-            key_value, effect = taint.split(':')
-            if '=' in key_value:
-                key, value = key_value.split('=')
-            else:
-                key = key_value
-                value = None  # Set value to None if it's not provided
-            self["key"] = key
-            self["value"] = value
-            self["effect"] = effect
-        except ValueError as e:
-            raise ValueError(
-                f"Invalid taint format: {taint}. Expected format <key>[=<value>]:<effect>"
-            ) from e
+        logging.debug("Creating taint from %s" % json.dumps(taint))
+        if isinstance(taint, str):
+            logging.debug("Taint is a raw string, it requires parsing.")
+            try:
+                key_value, effect = taint.split(':')
+                if '=' in key_value:
+                    key, value = key_value.split('=')
+                else:
+                    key = key_value
+                    value = None  # Set value to None if it's not provided
+                self["key"] = key
+                self["value"] = value
+                self["effect"] = effect
+            except ValueError as e:
+                raise ValueError(
+                    f"Invalid taint format: {taint}. Expected format <key>[=<value>]:<effect>"
+                ) from e
+        else:
+            logging.debug("Taint is an object, it requires extrracting.")
+            if not _is_none_or_blank(taint.get("key", None)):
+                self["key"] = taint.get("key", "")
+
+            if not _is_none_or_blank(taint.get("value", None)):
+                self["value"] = taint.get("value", "")
+
+            if not _is_none_or_blank(taint.get("effect", None)):
+                self["effect"] = taint.get("effect", "")
 
     def __eq__(self, other):
         return (
