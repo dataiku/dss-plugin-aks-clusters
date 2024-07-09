@@ -1,5 +1,8 @@
 # Changelog
 
+## Next release
+- Fixing support for taints for GPU enabled node pools
+
 ## Version 3.0.0 - Feature release
 
  - Add more supported Python versions. This plugin can now 3.10 and 3.11
