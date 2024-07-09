@@ -27,7 +27,7 @@ def add_gpu_driver_if_needed(kube_config_path, cluster_id, taints):
 
     # Get any tolerations from the plugin configuration
     if nvidia_config.get("spec", {}) and nvidia_config["spec"].get("template", {}) and nvidia_config["spec"]["template"].get("spec", {}):
-        tolerations.update(Toleration.from_dict(nvidia_config["spec"]["template"]["spec"]["tolerations"]))
+        tolerations.update(Toleration.from_dict(nvidia_config["spec"]["template"]["spec"].get("tolerations", {}))
 
     # Retrieve the tolerations on the daemonset currently deployed to the cluster.
     if has_gpu_driver(kube_config_path):
