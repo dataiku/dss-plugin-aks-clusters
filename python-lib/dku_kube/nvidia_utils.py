@@ -26,8 +26,13 @@ def add_gpu_driver_if_needed(kube_config_path, cluster_id, taints):
     tolerations = set()
 
     # Get any tolerations from the plugin configuration
-    if nvidia_config.get("spec", {}) and nvidia_config["spec"].get("template", {}) and nvidia_config["spec"]["template"].get("spec", {}):
-        tolerations.update(Toleration.from_dict(nvidia_config["spec"]["template"]["spec"].get("tolerations", {}))
+    if (
+        nvidia_config.get("spec", {})
+        and nvidia_config["spec"].get("template", {})
+        and nvidia_config["spec"]["template"].get("spec", {})
+        and nvidia_config["spec"]["template"]["spec"].get("tolerations", [])
+    ):
+        tolerations.update(Toleration.from_dict(nvidia_config["spec"]["template"]["spec"]["tolerations"]))
 
     # Retrieve the tolerations on the daemonset currently deployed to the cluster.
     if has_gpu_driver(kube_config_path):
@@ -52,6 +57,12 @@ def add_gpu_driver_if_needed(kube_config_path, cluster_id, taints):
 
     # Patch the Nvidia driver configuration with the tolerations derived from node group(s) taints,
     # initial Nvidia driver configuration tolerations and Nvidia daemonset tolerations (when applicable)
+    if not nvidia_config.get("spec", None):
+        nvidia_config["spec"] = {}
+    if not nvidia_config["spec"].get("template", None):
+        nvidia_config["spec"]["template"] = {}
+    if not nvidia_config["spec"]["template"].get("spec", None):
+        nvidia_config["spec"]["template"]["spec"] = {}
     nvidia_config["spec"]["template"]["spec"]["tolerations"] = Toleration.to_list(tolerations)
 
     # Write the configuration locally
