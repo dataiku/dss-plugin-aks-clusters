@@ -1,6 +1,10 @@
 import os, json, logging
+import requests
+import yaml
 
 from .kubectl_command import run_with_timeout
+from dku_utils.access import _is_none_or_blank
+from dku_utils.taints import Toleration
 
 def has_gpu_driver(kube_config_path):
     env = os.environ.copy()
@@ -10,11 +14,70 @@ def has_gpu_driver(kube_config_path):
     out, err = run_with_timeout(cmd, env=env, timeout=5)
     return len(out.strip()) > 0
 
-def add_gpu_driver_if_needed(kube_config_path):
-    if not has_gpu_driver(kube_config_path):
-        cmd = ['kubectl', 'apply', '-f', "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml"]
+def add_gpu_driver_if_needed(kube_config_path, cluster_id, taints):
+    env = os.environ.copy()
+    env['KUBECONFIG'] = kube_config_path
 
-        logging.info("Install NVIDIA GPU drivers with : %s" % json.dumps(cmd))
-        env = os.environ.copy()
-        env['KUBECONFIG'] = kube_config_path
-        run_with_timeout(cmd, env=env, timeout=5)
+    # Get the Nvidia driver plugin configuration from the repository
+    nvidia_config_raw = requests.get(
+        "https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/main/deployments/static/nvidia-device-plugin.yml"
+    ).text
+    nvidia_config = yaml.safe_load(nvidia_config_raw)
+    tolerations = set()
+
+    # Get any tolerations from the plugin configuration
+    if (
+        "spec" in nvidia_config
+        and "template" in nvidia_config["spec"]
+        and "spec" in nvidia_config["spec"]["template"]
+        and "tolerations" in nvidia_config["spec"]["template"]["spec"]
+    ):
+        tolerations.update(Toleration.from_dict(nvidia_config["spec"]["template"]["spec"]["tolerations"]))
+
+    # Retrieve the tolerations on the daemonset currently deployed to the cluster.
+    if has_gpu_driver(kube_config_path):
+        cmd = [
+            "kubectl",
+            "get",
+            "daemonset",
+            "nvidia-device-plugin-daemonset",
+            "-n",
+            "kube-system",
+            "-o",
+            'jsonpath="{.spec.template.spec.tolerations}"',
+        ]
+        cmd_result, err = run_with_timeout(cmd, env=env, timeout=5)
+        tolerations_json = cmd_result[1:-1]
+        if not _is_none_or_blank(tolerations_json):
+            tolerations.update(Toleration.from_json(tolerations_json))
+
+    # If there are any taints to patch the daemonset with in the node group(s) to create,
+    # we add them to the GPU plugin configuration before updating with another `kubectl apply`
+    tolerations.update(Toleration.from_dict(taints))
+
+    # Patch the Nvidia driver configuration with the tolerations derived from node group(s) taints,
+    # initial Nvidia driver configuration tolerations and Nvidia daemonset tolerations (when applicable)
+    if "spec" not in nvidia_config:
+        nvidia_config["spec"] = {}
+    if "template" not in nvidia_config["spec"]:
+        nvidia_config["spec"]["template"] = {}
+    if "spec" not in nvidia_config["spec"]["template"]:
+        nvidia_config["spec"]["template"]["spec"] = {}
+    nvidia_config["spec"]["template"]["spec"]["tolerations"] = Toleration.to_list(tolerations)
+
+    # Write the configuration locally
+    local_nvidia_plugin_config = os.path.join(
+        os.environ["DIP_HOME"], "clusters", cluster_id, "nvidia-device-plugin.yml"
+    )
+    with open(local_nvidia_plugin_config, "w") as f:
+        yaml.safe_dump(nvidia_config, f)
+
+    # Apply the patched Nvidia driver configuration to the cluster
+    cmd = ["kubectl", "apply", "-f", local_nvidia_plugin_config]
+    logging.info("Running command to install Nvidia drivers: %s", " ".join(cmd))
+    logging.info(
+        "NVIDIA GPU driver config: %s"
+        % yaml.safe_dump(nvidia_config, default_flow_style=False)
+    )
+
+    run_with_timeout(cmd, env=env, timeout=5)

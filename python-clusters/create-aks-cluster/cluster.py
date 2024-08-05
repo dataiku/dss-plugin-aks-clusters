@@ -10,6 +10,7 @@ from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from dku_utils.access import _is_none_or_blank
 from dku_utils.cluster import make_overrides
+from dku_utils.taints import Toleration
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
@@ -298,6 +299,7 @@ class MyCluster(Cluster):
 
         # Node pools
         install_gpu_driver = False
+        gpu_node_pools_taints = set()
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)
@@ -327,6 +329,10 @@ class MyCluster(Cluster):
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
             node_pool_builder.with_node_taints(node_pool_conf.get("taints", None))
             node_pool_builder.with_gpu(node_pool_conf.get("enableGPU", False))
+            if node_pool_conf.get("enableGPU", False) and node_pool_conf.get("taints", None):
+                gpu_node_pools_taints.update(
+                    Toleration.from_taints_config(node_pool_conf.get("taints", None))
+                )
             install_gpu_driver |= node_pool_builder.gpu
             node_pool_builder.add_tags(self.config.get("tags", None))
             node_pool_builder.add_tags(node_pool_conf.get("tags", None))
@@ -412,7 +418,7 @@ class MyCluster(Cluster):
         )
         
         if install_gpu_driver:
-            add_gpu_driver_if_needed(kube_config_path)
+            add_gpu_driver_if_needed(kube_config_path, self.cluster_id, gpu_node_pools_taints)
 
         return [overrides, {"kube_config_path": kube_config_path, "cluster": create_result.as_dict(), "acr_attachment": acr_attachment, "vnet_attachment": vnet_attachment}]
 

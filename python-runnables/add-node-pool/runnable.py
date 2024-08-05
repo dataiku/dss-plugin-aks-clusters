@@ -1,7 +1,7 @@
 from dataiku.runnables import Runnable
 import json, logging
 from dku_utils.cluster import get_cluster_from_dss_cluster
-from dku_utils.access import _is_none_or_blank
+from dku_utils.taints import Toleration
 from dku_azure.clusters import NodePoolBuilder
 from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
@@ -51,6 +51,7 @@ class MyRunnable(Runnable):
         node_pool_config = self.config.get("nodePoolConfig", {})
         
         node_pool_builder = NodePoolBuilder(None)
+        gpu_node_pools_taints = set()
 
         # Sanity check for node pools
         node_pool_vnets = set()
@@ -103,7 +104,10 @@ class MyRunnable(Runnable):
         node_pool_builder.with_node_labels(node_pool_config.get("labels", None))
         node_pool_builder.with_node_taints(node_pool_config.get("taints", None))
         node_pool_builder.with_gpu(node_pool_config.get("enableGPU", False))
-
+        if node_pool_config.get("enableGPU", False) and node_pool_config.get("taints", None):
+            gpu_node_pools_taints.update(
+                Toleration.from_taints_config(node_pool_config.get("taints", None))
+            )
         node_pool_builder.add_tags(dss_cluster_config.get("tags", None))
         node_pool_builder.add_tags(node_pool_config.get("tags", None))
         node_pool_builder.build()
@@ -122,7 +126,7 @@ class MyRunnable(Runnable):
         
         if node_pool_builder.gpu:
             kube_config_path = cluster_data["kube_config_path"]
-            add_gpu_driver_if_needed(kube_config_path)
+            add_gpu_driver_if_needed(kube_config_path, cluster_name, gpu_node_pools_taints)
 
         return '<pre class="debug">%s</pre>' % json.dumps(create_result.as_dict(), indent=2)
         
