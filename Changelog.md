@@ -1,6 +1,6 @@
 # Changelog
 
-## Next release
+## Version 3.0.1 - Bugfix release
 - Fixing support for taints for GPU enabled node pools
 
 ## Version 3.0.0 - Feature release
@@ -10,7 +10,6 @@
 
 ## Version 2.4.1 - Bugfix release
 - Update Nvidia driver location
-
 
 ## Version 2.4.0 - Feature and bugfix release
 
