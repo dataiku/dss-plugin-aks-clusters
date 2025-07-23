@@ -1,6 +1,6 @@
 {
     "id": "aks-clusters",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "meta": {
         "label": "AKS clusters",
         "description": "Interact with or create Microsoft Azure Kubernetes Service clusters",

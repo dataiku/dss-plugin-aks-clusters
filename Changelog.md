@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 3.0.2 - Bugfix release
+- Fixing resolution of Azure API version
+
 ## Version 3.0.1 - Bugfix release
 - Fixing support for taints for GPU enabled node pools
 
