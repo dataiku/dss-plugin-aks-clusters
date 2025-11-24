@@ -297,6 +297,12 @@ class MyCluster(Cluster):
 
         cluster_builder.with_cluster_version(self.config.get("clusterVersion", None))
 
+        # Secu/identity stuff
+        if self.config.get("oidcIssuer"):
+            cluster_builder.with_oidc_issuer(self.config.get("oidcIssuer"))
+        if self.config.get("workloadIdentity"):
+            cluster_builder.with_workload_identity(self.config.get("workloadIdentity"))
+
         # Node pools
         install_gpu_driver = False
         gpu_node_pools_taints = set()
