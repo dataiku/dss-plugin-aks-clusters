@@ -30,6 +30,8 @@ class ClusterBuilder(object):
         self.node_resource_group = None
         self.custom_config = None
         self.auto_upgrade_profile = None
+        self.oidc_issuer = None
+        self.workload_identity = None
 
     def with_name(self, name):
         self.name = name
@@ -45,6 +47,13 @@ class ClusterBuilder(object):
 
     def with_location(self, location):
         self.location = _default_if_blank(location, None)
+
+    def with_oidc_issuer(self, oidc_issuer):
+        self.oidc_issuer = oidc_issuer
+        return self
+
+    def with_workload_identity(self, workload_identity):
+        self.workload_identity = workload_identity
         return self
 
     def add_tags(self, tags):
@@ -165,6 +174,12 @@ class ClusterBuilder(object):
 
         if self.private_access:
             cluster_params["api_server_access_profile"] = self.private_access
+            
+        if self.oidc_issuer:
+            cluster_params["oidc_issuer_profile"] = {"enabled":True}
+
+        if self.workload_identity:
+            cluster_params["security_profile"] = {"workload_identity" : {"enabled":True}}
 
         if self.custom_config:
             custom_config_dict = json.loads(self.custom_config)

@@ -186,6 +186,18 @@
             "visibilityCondition": "model.upgradeChannel != 'node-image'"
         },
         {
+            "name": "workloadIdentity",
+            "label": "Workload identity federation",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
+            "name": "oidcIssuer",
+            "label": "OIDC issuer",
+            "type": "BOOLEAN",
+            "defaultValue": false
+        },
+        {
             "name": "customConfig",
             "label": "Custom creation settings",
             "description": "Additional settings for the cluster creation call, as JSON",

@@ -1,5 +1,8 @@
 # Changelog
 
+## Version next
+- Expose flags to activate OIDC issuer and Workload Identity
+
 ## Version 3.0.2 - Bugfix release
 - Fixing resolution of Azure API version
 
