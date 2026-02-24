@@ -1,6 +1,6 @@
 # Changelog
 
-## Version next
+## Version 3.1.0
 - Expose flags to activate OIDC issuer and Workload Identity
 
 ## Version 3.0.2 - Bugfix release
