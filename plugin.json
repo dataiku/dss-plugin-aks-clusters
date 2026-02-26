@@ -8,7 +8,7 @@
         "icon": "icon-azure-kubernetes-services icon-cloud",
         "licenseInfo" : "Apache Software License",
         "url": "https://github.com/dataiku/dss-plugin-aks-clusters",
-        "tags": ["Cloud", "Microsoft Azure"],
+        "tags": ["Infra", "Azure", "Microsoft"],
         "supportLevel": "TIER2_SUPPORT"
     }
 }
