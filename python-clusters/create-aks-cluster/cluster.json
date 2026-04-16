@@ -4,6 +4,7 @@
         "description": "Create AKS clusters",
         "icon": "icon-puzzle-piece"
     },
+    "paramsPythonSetup": "aks_access_modes.py",
     "architecture": "KUBERNETES",
     "params": [
         {
@@ -203,6 +204,16 @@
             "description": "Additional settings for the cluster creation call, as JSON",
             "type": "TEXTAREA",
             "mandatory": false
+        },
+        {
+            "name": "aksAccessMode",
+            "label": "AKS access mode",
+            "description": "Choose how DSS should access this AKS cluster. Depending on the mode, DSS will request the corresponding AKS access configuration.",
+            "type": "SELECT",
+            "getChoicesFromPython": true,
+            "disableAutoReload": true,
+            "mandatory": true,
+            "defaultValue": "admin"
         },
         {
             "name": "s-legacy",

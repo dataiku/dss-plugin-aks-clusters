@@ -9,7 +9,7 @@ from azure.core.pipeline.policies import UserAgentPolicy
 from azure.core.exceptions import ResourceNotFoundError, HttpResponseError
 
 from dku_utils.access import _is_none_or_blank
-from dku_utils.cluster import make_overrides
+from dku_utils.cluster import make_overrides, fetch_cluster_kubeconfig, get_aks_access_mode
 from dku_utils.taints import Toleration
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
@@ -406,11 +406,9 @@ class MyCluster(Cluster):
                         "role_assignment": vnet_role_assignment.as_dict(),
                     })
 
-        logging.info("Fetching kubeconfig for cluster {} in {}...".format(self.cluster_name, resource_group))
-        def do_fetch():
-            return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, self.cluster_name)
-        get_credentials_result = run_and_process_cloud_error(do_fetch)
-        kube_config_content = get_credentials_result.kubeconfigs[0].value.decode("utf8")
+        aks_access_mode = get_aks_access_mode(self.config)
+        kube_config_content = fetch_cluster_kubeconfig(clusters_client, resource_group, self.cluster_name, aks_access_mode)
+
         logging.info("Writing kubeconfig file...")
         kube_config_path = os.path.join(os.getcwd(), "kube_config")
         with open(kube_config_path, 'w') as f:

@@ -4,7 +4,7 @@
         "description" : "Attach to a running AKS cluster",
         "icon" : "icon-puzzle-piece"
     },
-    
+    "paramsPythonSetup": "aks_access_modes.py",
     "architecture" : "KUBERNETES",
 
     "params": [
@@ -21,6 +21,16 @@
             "type": "PRESET",
             "parameterSetId" : "connection-info-v2",
             "mandatory" : true
+        },
+        {
+            "name": "aksAccessMode",
+            "label": "AKS access mode",
+            "description": "Choose how DSS should access this AKS cluster. Depending on the mode, DSS will request the corresponding AKS access configuration.",
+            "type": "SELECT",
+            "getChoicesFromPython": true,
+            "disableAutoReload": true,
+            "mandatory": true,
+            "defaultValue": "admin"
         },
         {
             "name": "cluster",
