@@ -303,7 +303,7 @@ class NodePoolBuilder(object):
 
     def build(self):
         agent_pool_profile_params = {}
-        if self.mode == "Automatic" and self.idx == 0:
+        if self.mode == "Automatic":
             agent_pool_profile_params["mode"] = "System"
         else:
             agent_pool_profile_params["mode"] = self.mode
