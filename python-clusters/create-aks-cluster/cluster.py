@@ -14,7 +14,7 @@ from dku_utils.taints import Toleration
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
-from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
+from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id, determine_node_pool_mode
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -306,6 +306,7 @@ class MyCluster(Cluster):
         # Node pools
         install_gpu_driver = False
         gpu_node_pools_taints = set()
+        is_there_system_node_pool = False
         for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)
@@ -328,8 +329,14 @@ class MyCluster(Cluster):
                                               min_num_nodes=node_pool_conf.get("minNumNodes", None),
                                               max_num_nodes=node_pool_conf.get("maxNumNodes", None))
 
-            node_pool_builder.with_mode(mode=node_pool_conf.get("mode", "Automatic"),
-                                        system_pods_only=node_pool_conf.get("systemPodsOnly", True))
+            input_node_pool_mode = node_pool_conf.get("mode", "Automatic")
+            applied_system_pods_only = False
+            applied_node_pool_mode = determine_node_pool_mode(node_pool_conf.get("mode", "Automatic"), is_there_system_node_pool)
+            if applied_node_pool_mode == "System":
+                is_there_system_node_pool = True
+                applied_system_pods_only = node_pool_conf.get("systemPodsOnly", True)
+            node_pool_builder.with_mode(mode=applied_node_pool_mode,
+                                        system_pods_only=applied_system_pods_only)
 
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
