@@ -95,12 +95,6 @@ def get_host_network(credentials=None, resource_group=None, connection_info=None
     logging.info("SUBNET ID: {}".format(subnet_id))
     return vnet, subnet_id
 
-def is_existing_system_node_pool(existing_node_pool_modes):
-    is_existing_system_node_pool = False
-    for node_pool_mode in existing_node_pool_modes:
-        is_existing_system_node_pool = is_existing_system_node_pool or node_pool_mode == "System"
-    return is_existing_system_node_pool
-
 def determine_node_pool_mode(input_node_pool_mode, is_existing_system_node_pool):
     if input_node_pool_mode != "Automatic":
         return input_node_pool_mode
