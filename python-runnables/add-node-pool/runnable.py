@@ -97,7 +97,9 @@ class MyRunnable(Runnable):
                                           min_num_nodes=node_pool_config.get("minNumNodes", None),
                                           max_num_nodes=node_pool_config.get("maxNumNodes", None))
 
-        node_pool_builder.with_mode(mode=determine_node_pool_mode(node_pool_config.get("mode", "Automatic"), is_existing_system_node_pool([node_pool.mode for node_pool in node_pools])),
+        input_node_pool_mode = node_pool_config.get("mode", "Automatic")
+        applied_node_pool_mode = "User" if input_node_pool_mode == "Automatic" else input_node_pool_mode
+        node_pool_builder.with_mode(mode=applied_node_pool_mode,
                                     system_pods_only=node_pool_config.get("systemPodsOnly", True))
 
         node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_config.get("osDiskSizeGb", 0))
