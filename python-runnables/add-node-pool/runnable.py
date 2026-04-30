@@ -3,7 +3,7 @@ import json, logging
 from dku_utils.cluster import get_cluster_from_dss_cluster
 from dku_utils.taints import Toleration
 from dku_azure.clusters import NodePoolBuilder
-from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id, is_existing_system_node_pool, determine_node_pool_mode
+from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 
 class MyRunnable(Runnable):
@@ -98,6 +98,9 @@ class MyRunnable(Runnable):
                                           max_num_nodes=node_pool_config.get("maxNumNodes", None))
 
         input_node_pool_mode = node_pool_config.get("mode", "Automatic")
+        # The cluster cannot be created without a System node pool (error raised),
+        # deleting the last System node pool is not possible (error raised),
+        # so adding an Automatic node pool will always result in adding a User node pool
         applied_node_pool_mode = "User" if input_node_pool_mode == "Automatic" else input_node_pool_mode
         node_pool_builder.with_mode(mode=applied_node_pool_mode,
                                     system_pods_only=node_pool_config.get("systemPodsOnly", True))
