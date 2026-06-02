@@ -102,3 +102,9 @@ def determine_node_pool_mode(input_node_pool_mode, is_existing_system_node_pool)
         return "User"
     else:
         return "System"
+
+def is_explicit_system_node_pool(node_pool_modes):
+    for node_pool_mode in node_pool_modes:
+        if node_pool_mode == "System":
+            return True
+    return False

@@ -14,7 +14,7 @@ from dku_utils.taints import Toleration
 from dku_kube.nvidia_utils import add_gpu_driver_if_needed
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.clusters import ClusterBuilder
-from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id, determine_node_pool_mode
+from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id, determine_node_pool_mode, is_explicit_system_node_pool
 
 class MyCluster(Cluster):
     def __init__(self, cluster_id, cluster_name, config, plugin_config):
@@ -306,8 +306,9 @@ class MyCluster(Cluster):
         # Node pools
         install_gpu_driver = False
         gpu_node_pools_taints = set()
-        is_there_system_node_pool = False
-        for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
+        node_pool_confs = [node_pool[1].get("mode", "Automatic") for node_pool in enumerate(self.config.get("nodePools", []))]
+        is_there_system_node_pool = is_explicit_system_node_pool(node_pool_confs)
+        for idx, node_pool_conf in node_pool_confs:
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
