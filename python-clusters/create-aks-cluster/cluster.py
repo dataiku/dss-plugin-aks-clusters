@@ -306,10 +306,9 @@ class MyCluster(Cluster):
         # Node pools
         install_gpu_driver = False
         gpu_node_pools_taints = set()
-        node_pool_confs = enumerate(self.config.get("nodePools", []))
-        node_pool_modes = [node_pool[1].get("mode", "Automatic") for node_pool in node_pool_confs]
+        node_pool_modes = [node_pool[1].get("mode", "Automatic") for node_pool in enumerate(self.config.get("nodePools", []))]
         is_there_system_node_pool = is_explicit_system_node_pool(node_pool_modes)
-        for idx, node_pool_conf in node_pool_confs:
+        for idx, node_pool_conf in enumerate(self.config.get("nodePools", [])):
             node_pool_builder = cluster_builder.get_node_pool_builder()
             node_pool_builder.with_idx(idx)
             node_pool_builder.with_vm_size(node_pool_conf.get("vmSize", None))
