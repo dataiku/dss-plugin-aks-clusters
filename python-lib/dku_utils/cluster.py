@@ -28,8 +28,7 @@ def make_overrides(config, kube_config, kube_config_path, acr_name=None):
 def get_aks_access_mode(config):
     access_mode = config.get("aksAccessMode", DEFAULT_AKS_ACCESS_MODE)
     if access_mode not in AKS_ACCESS_MODES:
-        logging.warning("Unknown AKS access mode %s, defaulting to %s", access_mode, DEFAULT_AKS_ACCESS_MODE)
-        return DEFAULT_AKS_ACCESS_MODE
+        raise ValueError("Unknown AKS access mode %s, expected one of %s" % (access_mode, AKS_ACCESS_MODES))
     return access_mode
 
 
