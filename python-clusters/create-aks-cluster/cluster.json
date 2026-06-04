@@ -213,7 +213,7 @@
             "getChoicesFromPython": true,
             "disableAutoReload": true,
             "mandatory": true,
-            "defaultValue": "admin"
+            "defaultValue": "cluster-admin"
         },
         {
             "name": "s-legacy",
