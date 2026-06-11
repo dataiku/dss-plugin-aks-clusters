@@ -3,7 +3,12 @@ import dataiku
 from azure.mgmt.containerservice import ContainerServiceClient
 from dataiku.core.intercom import backend_json_call
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
-from dku_azure.utils import get_subscription_id
+from dku_azure.utils import get_subscription_id, run_and_process_cloud_error
+from dku_utils.aks_access import (
+    AKS_ACCESS_MODE_CLUSTER_USER,
+    DEFAULT_AKS_ACCESS_MODE,
+    AKS_ACCESS_MODES,
+)
 from dku_utils.access import _is_none_or_blank
 
 
@@ -18,6 +23,27 @@ def make_overrides(config, kube_config, kube_config_path, acr_name=None):
     if acr_name is not None:
         container_settings['executionConfigsGenericOverrides']['repositoryURL'] = "{}.azurecr.io".format(acr_name)
     return {'container':container_settings}
+
+
+def get_aks_access_mode(config):
+    access_mode = config.get("aksAccessMode", DEFAULT_AKS_ACCESS_MODE)
+    if access_mode not in AKS_ACCESS_MODES:
+        raise ValueError("Unknown AKS access mode %s, expected one of %s" % (access_mode, AKS_ACCESS_MODES))
+    return access_mode
+
+
+def fetch_cluster_kubeconfig(clusters_client, resource_group, cluster_name, aks_access_mode):
+    logging.info("Fetching kubeconfig for cluster %s in %s using AKS access mode %s", cluster_name, resource_group, aks_access_mode)
+
+    def do_fetch():
+        if aks_access_mode == AKS_ACCESS_MODE_CLUSTER_USER:
+            return clusters_client.managed_clusters.list_cluster_user_credentials(resource_group, cluster_name)
+        return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, cluster_name)
+
+    get_credentials_result = run_and_process_cloud_error(do_fetch)
+    if len(get_credentials_result.kubeconfigs) == 0:
+        raise Exception("Azure did not return any kubeconfig for cluster %s in %s" % (cluster_name, resource_group))
+    return get_credentials_result.kubeconfigs[0].value.decode("utf8")
 
 
 def get_cluster_from_connection_info(config, plugin_config):

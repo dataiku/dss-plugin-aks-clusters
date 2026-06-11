@@ -3,7 +3,7 @@ from dataiku.cluster import Cluster
 
 from azure.mgmt.containerservice import ContainerServiceClient
 from dku_utils.access import _is_none_or_blank
-from dku_utils.cluster import make_overrides
+from dku_utils.cluster import make_overrides, fetch_cluster_kubeconfig, get_aks_access_mode
 from dku_azure.auth import get_credentials_from_connection_info, get_credentials_from_connection_infoV2
 from dku_azure.utils import run_and_process_cloud_error, get_instance_metadata, get_subscription_id
 
@@ -45,12 +45,9 @@ class MyCluster(Cluster):
 
         clusters_client = ContainerServiceClient(credentials, subscription_id)
 
-        # Get kubeconfig 
-        logging.info("Fetching kubeconfig for cluster %s in %s", cluster_name, resource_group)
-        def do_fetch():
-            return clusters_client.managed_clusters.list_cluster_admin_credentials(resource_group, cluster_name)
-        get_credentials_result = run_and_process_cloud_error(do_fetch)
-        kube_config_content = get_credentials_result.kubeconfigs[0].value.decode('utf8')
+        # Get kubeconfig
+        aks_access_mode = get_aks_access_mode(self.config)
+        kube_config_content = fetch_cluster_kubeconfig(clusters_client, resource_group, cluster_name, aks_access_mode)
         kube_config_path = os.path.join(os.getcwd(), 'kube_config')
         with open(kube_config_path, 'w') as f:
             f.write(kube_config_content)
@@ -65,4 +62,3 @@ class MyCluster(Cluster):
 
     def stop(self, data):
         pass
-
