@@ -97,7 +97,12 @@ class MyRunnable(Runnable):
                                           min_num_nodes=node_pool_config.get("minNumNodes", None),
                                           max_num_nodes=node_pool_config.get("maxNumNodes", None))
 
-        node_pool_builder.with_mode(mode=node_pool_config.get("mode", "Automatic"),
+        input_node_pool_mode = node_pool_config.get("mode", "Automatic")
+        # The cluster cannot be created without a System node pool (error raised),
+        # deleting the last System node pool is not possible (error raised),
+        # so adding an Automatic node pool will always result in adding a User node pool
+        applied_node_pool_mode = "User" if input_node_pool_mode == "Automatic" else input_node_pool_mode
+        node_pool_builder.with_mode(mode=applied_node_pool_mode,
                                     system_pods_only=node_pool_config.get("systemPodsOnly", True))
 
         node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_config.get("osDiskSizeGb", 0))
