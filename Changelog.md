@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 3.1.1 - Feature and bugfix release
+- Fix node pool mode resolution when Automatic is selected
+- Add user access mode support for kubeconfig retrieval
+
 ## Version 3.1.0
 - Expose flags to activate OIDC issuer and Workload Identity
 
