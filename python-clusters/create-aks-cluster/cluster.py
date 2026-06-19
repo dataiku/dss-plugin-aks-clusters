@@ -331,11 +331,12 @@ class MyCluster(Cluster):
                                               max_num_nodes=node_pool_conf.get("maxNumNodes", None))
 
             input_node_pool_mode = node_pool_conf.get("mode", "Automatic")
-            applied_node_pool_mode = determine_node_pool_mode(node_pool_conf.get("mode", "Automatic"), is_there_system_node_pool)
+            applied_node_pool_mode = determine_node_pool_mode(input_node_pool_mode, is_there_system_node_pool)
             if applied_node_pool_mode == "System":
                 is_there_system_node_pool = True
+            system_pods_only = input_node_pool_mode == "System" and node_pool_conf.get("systemPodsOnly", True)
             node_pool_builder.with_mode(mode=applied_node_pool_mode,
-                                        system_pods_only=node_pool_conf.get("systemPodsOnly", True))
+                                        system_pods_only=system_pods_only)
 
             node_pool_builder.with_disk_size_gb(disk_size_gb=node_pool_conf.get("osDiskSizeGb", 0))
             node_pool_builder.with_node_labels(node_pool_conf.get("labels", None))
