@@ -1,14 +1,18 @@
 {
-    "id": "aks-clusters",
-    "version": "3.1.1",
-    "meta": {
-        "label": "AKS clusters",
-        "description": "Interact with or create Microsoft Azure Kubernetes Service clusters",
-        "author": "Dataiku",
-        "icon": "icon-azure-kubernetes-services icon-cloud",
-        "licenseInfo" : "Apache Software License",
-        "url": "https://github.com/dataiku/dss-plugin-aks-clusters",
-        "tags": ["Infra", "Azure", "Microsoft"],
-        "supportLevel": "TIER2_SUPPORT"
-    }
+  "id": "aks-clusters",
+  "version": "3.2.0",
+  "meta": {
+    "label": "AKS clusters",
+    "description": "Interact with or create Microsoft Azure Kubernetes Service clusters",
+    "author": "Dataiku",
+    "icon": "icon-azure-kubernetes-services icon-cloud",
+    "licenseInfo": "Apache Software License",
+    "url": "https://github.com/dataiku/dss-plugin-aks-clusters",
+    "tags": [
+      "Infra",
+      "Azure",
+      "Microsoft"
+    ],
+    "supportLevel": "TIER2_SUPPORT"
+  }
 }
