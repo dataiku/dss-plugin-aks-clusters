@@ -1,5 +1,10 @@
 # Changelog
 
+## Version 3.2.0 - Enhancement release - 2026-10-12
+
+- Added supported Python versions: 3.12, 3.13, 3.14
+- Makefile cleanup: release_info.json lines removed
+
 ## Version 3.1.1 - Feature and bugfix release
 - Fix node pool mode resolution when Automatic is selected
 - Add user access mode support for kubeconfig retrieval
